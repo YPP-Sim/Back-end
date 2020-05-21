@@ -10,7 +10,14 @@ app.get("/", (req, res) => {
 
 io.on("connection", (socket) => {
   console.log("Someone connected");
-  io.emit("test", "Helllo!!!");
+  const shipData = {
+    shipId: "art",
+    boardX: 2,
+    boardY: 2,
+    type: "warFrig",
+    orientation: "SOUTH",
+  };
+  io.emit("addShip", JSON.stringify(shipData));
   socket.send("Sent from socket ");
 });
 
