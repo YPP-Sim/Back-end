@@ -10,9 +10,10 @@ app.get("/", (req, res) => {
 });
 
 io.on("connection", (socket) => {
-  console.log("Someone connected");
+  console.log("A connection has been established...");
+
   socket.on("clientCommand", (command, args) => {
-    console.log("Client command: " + command, "Args: " + args);
+    console.log("Client command: " + command, ", Args: " + args);
     onCommand(command, args, socket, io);
   });
 
