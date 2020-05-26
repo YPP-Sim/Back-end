@@ -56,6 +56,7 @@ class Game {
     this.attackerScore = 0;
 
     this.timeLeft = 0;
+    this.turnTime = 20; // in seconds
 
     this.gameStatus = GameStatus.LOBBY;
   }
@@ -76,6 +77,22 @@ class Game {
     this.defenderScore += amount;
   }
 
+  isDefender(playerId) {
+    for (let p in this.defenders) if (p === playerId) return true;
+    return false;
+  }
+
+  isAttacker(playerId) {
+    for (let p in this.attackers) if (p === playerId) return true;
+    return false;
+  }
+
+  onGameTurn() {
+    // TODO - Get all of the clients moves
+    // TODO - Play out moves and calculate the damage taken to any ships and set new board based off ship moves.
+    // TODO - Send out data to clients for them to visually show moves
+  }
+
   /**
    *  Set's the quality of the jobbers
    * @param {JobberQuality} jobberQuality
@@ -84,7 +101,21 @@ class Game {
     this.jobberQuality = jobberQuality;
   }
 
-  start() {}
+  start() {
+    // TODO - Set ships locations to their respective sides (attacking/defending)
+
+    // TODO - Tell client the game has started, send out starting data to client.
+    this.gameStatus = GameStatus.INGAME;
+
+    this.gameIntervalId = setInterval(() => {
+      this.onGameTurn();
+    }, this.turnTime);
+  }
+
+  stop() {
+    clearInterval(this.gameIntervalId);
+    this.gameStatus = GameStatus.ENDED;
+  }
 }
 
 module.exports = Game;
