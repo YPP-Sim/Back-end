@@ -13,12 +13,43 @@ const defaultMap = [
   [15, 0, 0, 0, 4, 4, 4, 4, 4, 4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0],
 ];
 
+// function isRock(cell_id) {
+//   switch (cell_id) {
+//     case 13:
+//     case 14:
+//     case 15:
+//     case 16:
+//       return true;
+//     default:
+//       return false;
+//   }
+// }
+
+function getFreshMapGrid(map) {
+  const rows = map.length;
+  const columns = map[0].length;
+
+  const detailedMap = map;
+
+  for (let row = 0; row < rows; row++) {
+    for (let column = 0; column < columns; column++) {
+      const cellData = {
+        cell_id: map[row][column],
+        occupiedBy: null,
+      };
+      detailedMap[row][column] = cellData;
+    }
+  }
+  return detailedMap;
+}
+
 class Game {
   constructor(map = defaultMap, jobberQuality = JobberQuality.ELITE) {
-    this.players = [];
-    this.map = map;
-    this.playerMap = [];
+    this.players = {};
+    this.attackers = {};
+    this.defenders = {};
 
+    this.map = getFreshMapGrid(map);
     this.jobberQuality = jobberQuality;
 
     this.defenderScore = 0;
