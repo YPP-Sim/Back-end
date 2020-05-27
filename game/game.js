@@ -1,5 +1,6 @@
 const JobberQuality = require("./JobberQuality");
 const GameStatus = require("./GameStatus");
+const PlayerMoves = require("./moves/PlayerMoves");
 
 const defaultMap = [
   [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -90,7 +91,21 @@ class Game {
   onGameTurn() {
     // TODO - Get all of the clients moves
     // TODO - Play out moves and calculate the damage taken to any ships and set new board based off ship moves.
+    this.calculateTurns();
     // TODO - Send out data to clients for them to visually show moves
+  }
+
+  /**
+   *  Will take an array of objects where each object contains the id of the player ship,
+   *  and the moves that it will be performing. If there is no object of data for a player on the board,
+   * that player will not move.
+   * @param {Array.<PlayerMoves>} playerMoves
+   */
+  calculateTurns(playerMoves) {
+    // Calculate first turn movement.
+    for (let moveData of playerMoves) {
+      const shipId = moveData.shipId;
+    }
   }
 
   /**
