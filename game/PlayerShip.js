@@ -25,8 +25,8 @@ class PlayerShip {
    *
    * @param {Orientation} orientation
    */
-  setOrientation(orientation) {
-    this.orientation = orientation;
+  setOrientation(orient) {
+    this.orientation = orient;
   }
 }
 

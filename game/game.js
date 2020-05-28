@@ -3,6 +3,7 @@ const GameStatus = require("./GameStatus");
 const Direction = require("./Direction");
 const PlayerMoves = require("./moves/PlayerMoves");
 const PlayerShip = require("./PlayerShip");
+const Orientation = require("./Orientation");
 
 const defaultMap = [
   [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -25,6 +26,47 @@ function isRock(cell_id) {
       return true;
     default:
       return false;
+  }
+}
+
+/**
+ *
+ * @param {Orientation} startingOrientation
+ * @param {Direction} direction
+ * @returns {Orientation} the new orientation from the direction taken
+ */
+function getToOrientation(startingOrientation, direction) {
+  switch (direction) {
+    case Direction.LEFT:
+      switch (startingOrientation) {
+        case Orientation.NORTH:
+          return Orientation.WEST;
+        case Orientation.SOUTH:
+          return Orientation.EAST;
+        case Orientation.EAST:
+          return Orientation.NORTH;
+        case Orientation.WEST:
+          return Orientation.SOUTH;
+      }
+
+      break;
+
+    case Direction.RIGHT:
+      switch (startingOrientation) {
+        case Orientation.NORTH:
+          return Orientation.EAST;
+        case Orientation.SOUTH:
+          return Orientation.WEST;
+        case Orientation.EAST:
+          return Orientation.SOUTH;
+        case Orientation.WEST:
+          return Orientation.NORTH;
+      }
+
+      break;
+
+    default:
+      return startingOrientation;
   }
 }
 
@@ -64,6 +106,21 @@ class Game {
     this.gameStatus = GameStatus.LOBBY;
   }
 
+  addShip(id, shipType, x, y, teamType) {
+    const playerShip = new PlayerShip(id, shipType);
+    const cell = this.map[y][x];
+    cell.occupiedBy = id;
+    playerShip.boardX = x;
+    playerShip.boardY = y;
+    this.players[id] = playerShip;
+
+    if (teamType === "ATTACKER") {
+      this.attackers[id] = playerShip;
+    } else if (teamType === "DEFENDER") {
+      this.defenders[id] = playerShip;
+    }
+  }
+
   /**
    *
    * @param {number} amount
@@ -97,11 +154,15 @@ class Game {
   moveShip(id, direction) {
     const ship = this.getShipById(id);
 
-    const frontX = ship.boardX + ship.getOrientation.xDir;
-    const frontY = ship.boardY + ship.getOrientation.yDir;
+    const frontX = ship.boardX + ship.getOrientation().xDir;
+    const frontY = ship.boardY + ship.getOrientation().yDir;
+
+    // console.log("Ship.boardX: " + ship.boardX);
+    // console.log("shipOrient: " + ship.getOrientation);
 
     const prevCell = this.getCell(ship.boardX, ship.boardY);
 
+    // console.log("frontX: ", frontY, "frontY: ", frontY);
     switch (direction) {
       case Direction.FORWARD:
         // If we're going out of bounds, contain and do ram damage.
@@ -131,6 +192,13 @@ class Game {
           return;
         }
 
+        // Free passing
+        prevCell.occupiedBy = null;
+        this.getCell(frontX, frontY).occupiedBy = id;
+
+        ship.boardX = frontX;
+        ship.boardY = frontY;
+
         break;
       case Direction.LEFT:
         this._moveTurn("left", ship, frontX, frontY, prevCell);
@@ -142,10 +210,17 @@ class Game {
   }
 
   _moveTurn(dir, ship, frontX, frontY, prevCell) {
-    const turnX = frontX + ship.getOrientation[dir].x;
-    const turnY = frontY + ship.getOrientation[dir].y;
+    const turnX = frontX + ship.getOrientation()[dir].x;
+    const turnY = frontY + ship.getOrientation()[dir].y;
 
-    ship.setOrientation(ship.getOrientation[dir].toOrientation);
+    // ship.setOrientation(ship.getOrientation()[dir].toOrientation);
+
+    const toOrientation = getToOrientation(
+      ship.getOrientation(),
+      dir.toUpperCase()
+    );
+
+    ship.setOrientation(toOrientation);
 
     // Detect frontal collisions
     if (this._collisionDetect(frontX, frontY)) {
@@ -159,7 +234,7 @@ class Game {
 
       // Move forward.
       prevCell.occupiedBy = null;
-      this.getCell(frontX, frontY).occupiedBy = id;
+      this.getCell(frontX, frontY).occupiedBy = ship.shipId;
 
       ship.boardX = frontX;
       ship.boardY = frontY;
@@ -168,7 +243,7 @@ class Game {
 
     // Free passing
     prevCell.occupiedBy = null;
-    this.getCell(turnX, turnY).occupiedBy = id;
+    this.getCell(turnX, turnY).occupiedBy = ship.shipId;
 
     ship.boardX = turnX;
     ship.boardY = turnY;
@@ -186,7 +261,7 @@ class Game {
   /**
    *
    * @param {String} id
-   * @returns {PlayerShip}
+   * @returns {PlayerShip} the ship that was retrieved through the id.
    */
   getShipById(id) {
     return this.players[id];
