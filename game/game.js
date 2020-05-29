@@ -4,6 +4,7 @@ const Direction = require("./Direction");
 const PlayerMoves = require("./moves/PlayerMoves");
 const PlayerShip = require("./PlayerShip");
 const Orientation = require("./Orientation");
+const { getFreshMapGrid, isRock } = require("./util");
 
 const defaultMap = [
   [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -16,18 +17,6 @@ const defaultMap = [
   [15, 6, 5, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [15, 0, 0, 0, 4, 4, 4, 4, 4, 4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0],
 ];
-
-function isRock(cell_id) {
-  switch (cell_id) {
-    case 13:
-    case 14:
-    case 15:
-    case 16:
-      return true;
-    default:
-      return false;
-  }
-}
 
 /**
  *
@@ -68,24 +57,6 @@ function getToOrientation(startingOrientation, direction) {
     default:
       return startingOrientation;
   }
-}
-
-function getFreshMapGrid(map) {
-  const rows = map.length;
-  const columns = map[0].length;
-
-  const detailedMap = map;
-
-  for (let row = 0; row < rows; row++) {
-    for (let column = 0; column < columns; column++) {
-      const cellData = {
-        cell_id: map[row][column],
-        occupiedBy: null,
-      };
-      detailedMap[row][column] = cellData;
-    }
-  }
-  return detailedMap;
 }
 
 class Game {
@@ -173,7 +144,6 @@ class Game {
 
         const cell = this.getCell(frontX, frontY);
 
-        // Check if the next cell in front is a rock//ship, collide and do damage.
         if (isRock(cell.cell_id)) {
           // TODO - Damage ship by ram damage.
           return;
