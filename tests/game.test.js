@@ -66,17 +66,22 @@ describe("Game functions", () => {
 
   // -----------------SHIP MOVEMENT - WITH ROCK COLLISION ----------------
   describe("Ship movement - frontal rock collision", () => {
+    let tShip;
+    let prevDamage;
+
     beforeEach(() => {
       testGame = new Game(testMap);
       testGame.addShip("testShip", ShipType.WAR_FRIG, 1, 3, "DEFENDER");
       testGame.getShipById("testShip").setOrientation(Orientation.SOUTH);
+      tShip = testGame.getShipById("testShip");
+      prevDamage = tShip.damage;
     });
 
     it("forward move", () => {
       testGame.moveShip("testShip", Direction.FORWARD);
       expect(testGame.getCell(1, 3).occupiedBy).toEqual("testShip");
 
-      // TODO expect ram damage
+      expect(tShip.damage).toBe(prevDamage + tShip.shipType.rockDamage);
     });
 
     it("left move", () => {
@@ -87,7 +92,7 @@ describe("Game functions", () => {
       expect(ship.boardY).toBe(3);
       expect(ship.getOrientation()).toEqual(Orientation.EAST);
 
-      // TODO expect ram damage
+      expect(tShip.damage).toBe(prevDamage + tShip.shipType.rockDamage);
     });
 
     it("right move", () => {
@@ -98,7 +103,7 @@ describe("Game functions", () => {
       expect(ship.boardY).toBe(3);
       expect(ship.getOrientation()).toEqual(Orientation.WEST);
 
-      // TODO expect ram damage
+      expect(tShip.damage).toBe(prevDamage + tShip.shipType.rockDamage);
     });
   });
 });

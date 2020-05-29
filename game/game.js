@@ -128,24 +128,20 @@ class Game {
     const frontX = ship.boardX + ship.getOrientation().xDir;
     const frontY = ship.boardY + ship.getOrientation().yDir;
 
-    // console.log("Ship.boardX: " + ship.boardX);
-    // console.log("shipOrient: " + ship.getOrientation);
-
     const prevCell = this.getCell(ship.boardX, ship.boardY);
 
-    // console.log("frontX: ", frontY, "frontY: ", frontY);
     switch (direction) {
       case Direction.FORWARD:
         // If we're going out of bounds, contain and do ram damage.
         if (frontX < 0 || frontY < 0) {
-          // TODO - Damage ship by ram damage.
+          ship.ramRocks();
           return;
         }
 
         const cell = this.getCell(frontX, frontY);
 
         if (isRock(cell.cell_id)) {
-          // TODO - Damage ship by ram damage.
+          ship.ramRocks();
           return;
         }
 
@@ -179,6 +175,14 @@ class Game {
     }
   }
 
+  /**
+   *
+   * @param {*} dir
+   * @param {PlayerShip} ship
+   * @param {number} frontX
+   * @param {number} frontY
+   * @param {*} prevCell
+   */
   _moveTurn(dir, ship, frontX, frontY, prevCell) {
     const turnX = frontX + ship.getOrientation()[dir].x;
     const turnY = frontY + ship.getOrientation()[dir].y;
@@ -192,16 +196,15 @@ class Game {
 
     ship.setOrientation(toOrientation);
 
-    // Detect frontal collisions
-    if (this._collisionDetect(frontX, frontY)) {
-      // TODO - Do ram damage ( Don't forget other ship ram as well)
+    // Detect frontal rock collision
+    if (this._rockCollisionDetect(frontX, frontY)) {
+      ship.ramRocks();
       return;
     }
 
-    // Detect turn collisions
-    if (this._collisionDetect(turnX, turnY)) {
-      // TODO - Do ram damage (Don't forget other ship ram as well)
-
+    // Detect turn rock collisions
+    if (this._rockCollisionDetect(turnX, turnY)) {
+      ship.ramRocks();
       // Move forward.
       prevCell.occupiedBy = null;
       this.getCell(frontX, frontY).occupiedBy = ship.shipId;
@@ -219,13 +222,8 @@ class Game {
     ship.boardY = turnY;
   }
 
-  _collisionDetect(x, y) {
-    return (
-      x < 0 ||
-      y < 0 ||
-      isRock(this.getCell(x, y).cell_id) ||
-      this.getCell(x, y).occupiedBy
-    );
+  _rockCollisionDetect(x, y) {
+    return x < 0 || y < 0 || isRock(this.getCell(x, y).cell_id);
   }
 
   /**
