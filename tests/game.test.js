@@ -5,7 +5,7 @@ const Orientation = require("../game/Orientation");
 
 const testMap = [
   [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 1, 0, 0, 0, 0, 0, 0, 15, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [15, 15, 15, 0, 11, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -102,6 +102,41 @@ describe("Game functions", () => {
       expect(ship.boardX).toBe(1);
       expect(ship.boardY).toBe(3);
       expect(ship.getOrientation()).toEqual(Orientation.WEST);
+
+      expect(tShip.damage).toBe(prevDamage + tShip.shipType.rockDamage);
+    });
+  });
+
+  describe("Ship movement - turnal rock collision", () => {
+    let tShip;
+    let prevDamage;
+
+    beforeEach(() => {
+      testGame = new Game(testMap);
+      testGame.addShip("testShip", ShipType.WAR_FRIG, 10, 2, "DEFENDER");
+      testGame.getShipById("testShip").setOrientation(Orientation.NORTH);
+      tShip = testGame.getShipById("testShip");
+      prevDamage = tShip.damage;
+    });
+
+    it("left move", () => {
+      testGame.moveShip("testShip", Direction.LEFT);
+      expect(testGame.getCell(10, 1).occupiedBy).toEqual("testShip");
+      const ship = testGame.getShipById("testShip");
+      expect(ship.boardX).toBe(10);
+      expect(ship.boardY).toBe(1);
+      expect(ship.getOrientation()).toEqual(Orientation.WEST);
+
+      expect(tShip.damage).toBe(prevDamage + tShip.shipType.rockDamage);
+    });
+
+    it("right move", () => {
+      testGame.moveShip("testShip", Direction.RIGHT);
+      expect(testGame.getCell(10, 1).occupiedBy).toEqual("testShip");
+      const ship = testGame.getShipById("testShip");
+      expect(ship.boardX).toBe(10);
+      expect(ship.boardY).toBe(1);
+      expect(ship.getOrientation()).toEqual(Orientation.EAST);
 
       expect(tShip.damage).toBe(prevDamage + tShip.shipType.rockDamage);
     });
