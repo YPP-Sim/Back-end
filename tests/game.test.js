@@ -65,7 +65,7 @@ describe("Game functions", () => {
   });
 
   // -----------------SHIP MOVEMENT - WITH ROCK COLLISION ----------------
-  describe("Ship movement - rock collision", () => {
+  describe("Ship movement - frontal rock collision", () => {
     beforeEach(() => {
       testGame = new Game(testMap);
       testGame.addShip("testShip", ShipType.WAR_FRIG, 1, 3, "DEFENDER");
@@ -74,22 +74,31 @@ describe("Game functions", () => {
 
     it("forward move", () => {
       testGame.moveShip("testShip", Direction.FORWARD);
-      const cell = testGame.getCell(1, 3);
       expect(testGame.getCell(1, 3).occupiedBy).toEqual("testShip");
+
+      // TODO expect ram damage
     });
 
-    // it("moves ships left", () => {
-    //   testGame.moveShip("testShip", Direction.LEFT);
-    //   expect(testGame.getCell(2, 3).occupiedBy).toEqual("testShip");
-    //   const ship = testGame.getShipById("testShip");
-    //   expect(ship.getOrientation()).toEqual(Orientation.EAST);
-    // });
+    it("left move", () => {
+      testGame.moveShip("testShip", Direction.LEFT);
+      expect(testGame.getCell(1, 3).occupiedBy).toEqual("testShip");
+      const ship = testGame.getShipById("testShip");
+      expect(ship.boardX).toBe(1);
+      expect(ship.boardY).toBe(3);
+      expect(ship.getOrientation()).toEqual(Orientation.EAST);
 
-    // it("moves ships right", () => {
-    //   testGame.moveShip("testShip", Direction.RIGHT);
-    //   expect(testGame.getCell(0, 3).occupiedBy).toEqual("testShip");
-    //   const ship = testGame.getShipById("testShip");
-    //   expect(ship.getOrientation()).toEqual(Orientation.WEST);
-    // });
+      // TODO expect ram damage
+    });
+
+    it("right move", () => {
+      testGame.moveShip("testShip", Direction.RIGHT);
+      expect(testGame.getCell(1, 3).occupiedBy).toEqual("testShip");
+      const ship = testGame.getShipById("testShip");
+      expect(ship.boardX).toBe(1);
+      expect(ship.boardY).toBe(3);
+      expect(ship.getOrientation()).toEqual(Orientation.WEST);
+
+      // TODO expect ram damage
+    });
   });
 });

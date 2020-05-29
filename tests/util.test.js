@@ -1,4 +1,4 @@
-const { getFreshMapGrid } = require("../game/util");
+const { getFreshMapGrid, isRock } = require("../game/util");
 
 const testMap = [
   [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -19,5 +19,10 @@ describe("util functions", () => {
     expect(gameMap[0][0].occupiedBy).toEqual(null);
 
     expect(gameMap[4][0].cell_id).toBe(15);
+  });
+
+  it("isRock", () => {
+    expect(isRock(0)).toBe(false);
+    expect(isRock(15)).toBe(true);
   });
 });
