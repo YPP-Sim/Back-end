@@ -3,11 +3,12 @@ const ShipType = require("../game/ShipType");
 const Direction = require("../game/Direction");
 const Orientation = require("../game/Orientation");
 const Move = require("../game/moves/Move");
+const PlayerMoves = require("../game/moves/PlayerMoves");
 
 const testMap = [
-  [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0],
   [0, 0, 1, 0, 0, 0, 0, 0, 0, 15, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [15, 15, 15, 0, 11, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [15, 0, 14, 0, 10, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -40,7 +41,7 @@ describe("Game functions", () => {
     testGame.getShipById("testShip").setOrientation(Orientation.SOUTH);
 
     const move = new Move(Direction.FORWARD, "testShip");
-    testGame.moveClaim("testShip", Direction.FORWARD, move);
+    testGame.moveClaim(move);
 
     expect(testGame.getCell(1, 3).claiming).toEqual([
       { id: "testShip", claimedPriority: 1 },
@@ -52,7 +53,7 @@ describe("Game functions", () => {
     testGame.getShipById("testShip").setOrientation(Orientation.SOUTH);
 
     const move = new Move(Direction.LEFT, "testShip");
-    testGame.moveClaim("testShip", Direction.LEFT, move);
+    testGame.moveClaim(move);
 
     expect(testGame.getCell(1, 3).claiming).toEqual([
       { id: "testShip", claimedPriority: 1 },
@@ -67,7 +68,7 @@ describe("Game functions", () => {
     testGame.getShipById("testShip").setOrientation(Orientation.SOUTH);
 
     const move = new Move(Direction.RIGHT, "testShip");
-    testGame.moveClaim("testShip", Direction.RIGHT, move);
+    testGame.moveClaim(move);
 
     expect(testGame.getCell(1, 3).claiming).toEqual([
       { id: "testShip", claimedPriority: 1 },
@@ -81,6 +82,42 @@ describe("Game functions", () => {
     testGame.rammedShipsPerTurn.push(["testShip1", "testShip2"]);
     expect(testGame._rammedThisTurn("testShip1", "testShip2")).toBe(true);
     expect(testGame._rammedThisTurn("testShip1", "testShip3")).toBe(false);
+  });
+
+  it("_handleClaims - forward movements", () => {
+    const ship1 = testGame.addShip(
+      "ship1",
+      ShipType.WAR_FRIG,
+      15,
+      0,
+      "DEFENDER"
+    );
+    const ship2 = testGame.addShip(
+      "ship2",
+      ShipType.WAR_FRIG,
+      15,
+      2,
+      "DEFENDER"
+    );
+
+    ship1.setOrientation(Orientation.SOUTH);
+    ship2.setOrientation(Orientation.NORTH);
+
+    const ship1Moves = new PlayerMoves("ship1");
+    ship1Moves.firstMove = new Move(Direction.FORWARD, "ship1");
+
+    const ship2Moves = new PlayerMoves("ship2");
+    ship2Moves.firstMove = new Move(Direction.FORWARD, "ship2");
+
+    //Claim cells from moves.
+    testGame.moveClaim(ship1Moves.firstMove);
+    testGame.moveClaim(ship2Moves.firstMove);
+    //Handle claim conflicts
+    testGame._handleClaims([ship1Moves, ship2Moves]);
+
+    //Expect ram damage to be taken
+    expect(ship1.damage).toBe(ship2.shipType.ramDamage);
+    expect(ship2.damage).toBe(ship1.shipType.ramDamage);
   });
 
   // ------------ SHIP MOVEMENT - NO COLLISION -----------------

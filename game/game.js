@@ -83,6 +83,15 @@ class Game {
     this.rammedShipsPerTurn = [];
   }
 
+  /**
+   *
+   * @param {string} id
+   * @param {shipType} shipType
+   * @param {number} x
+   * @param {number} y
+   * @param {string} teamType
+   * @returns {PlayerShip} the ship that we're adding
+   */
   addShip(id, shipType, x, y, teamType) {
     const playerShip = new PlayerShip(id, shipType);
     const cell = this.map[y][x];
@@ -96,6 +105,8 @@ class Game {
     } else if (teamType === "DEFENDER") {
       this.defenders[id] = playerShip;
     }
+
+    return playerShip;
   }
 
   /**
@@ -186,15 +197,16 @@ class Game {
 
   firstPassClaimMoves() {}
 
-  moveClaim(id, direction, moveObj) {
-    const ship = this.getShipById(id);
+  moveClaim(moveObj) {
+    const { direction, moveOwner } = moveObj;
+    const ship = this.getShipById(moveOwner);
 
     const frontX = ship.boardX + ship.getOrientation().xDir;
     const frontY = ship.boardY + ship.getOrientation().yDir;
 
     const frontCell = this.getCell(frontX, frontY);
 
-    frontCell.claiming.push({ id, claimedPriority: 1 });
+    frontCell.claiming.push({ id: moveOwner, claimedPriority: 1 });
     this.claimedToClear.push(frontCell);
     moveObj.claimedCells.push({ cell: frontCell, claimedPriority: 1 });
 
@@ -224,43 +236,52 @@ class Game {
    */
   _handleClaims(playerMoves) {
     // Handle first turn
-    for (let pMoves of playerMoves) {
-      const firstMove = pMoves.firstMove;
 
-      if (firstMove) {
-        if (!firstMove.direction) continue;
+    const handleTurn = (turn) => {
+      for (let pMoves of playerMoves) {
+        const move = pMoves[turn];
+        this._handleClaimPerMove(move);
+      }
+    };
+    handleTurn("firstMove");
+    // handleTurn("secondMove");
+    // handleTurn("thirdMove");
+    // handleTurn("fourthMove");
+  }
 
-        let firstCell;
-        let secondCell;
-        firstCell = firstMove.claimedCells[0];
+  _handleClaimPerMove(move) {
+    if (move) {
+      if (!move.direction) return;
 
-        if (firstMove.claimedCells.length > 1) {
-          secondCell = firstMove.claimedCells[1];
+      let firstCell;
+      let secondCell;
+      firstCell = move.claimedCells[0].cell;
+
+      if (move.claimedCells.length > 1) {
+        secondCell = move.claimedCells[1].cell;
+      }
+
+      this._handleCellClaimWithPrio(firstCell, 1, move, false);
+
+      if (!move.cancelledMovement && secondCell)
+        this._handleCellClaimWithPrio(secondCell, 2, move, true);
+    }
+  }
+
+  _handleCellClaimWithPrio(cell, priority, move, turnal) {
+    const { moveOwner } = move;
+    for (let claimObj of cell.claiming) {
+      const { id, claimedPriority } = claimObj;
+      if (id == moveOwner) continue;
+      if (claimedPriority >= priority) {
+        if (!this._rammedThisTurn(id, moveOwner)) {
+          this.getShipById(id).ramShip(this.getShipById(moveOwner));
+          this.rammedShipsPerTurn.push([id, moveOwner]);
         }
-
-        for (let claimObj of firstCell.claiming) {
-          const { id, claimedPriority } = claimObj;
-          if (id == firstMove.moveOwner) continue;
-
-          switch (firstMove.direction) {
-            case Direction.FORWARD:
-              if (claimedPriority == 1) {
-                // Someone is contesting and in same spot as this move.
-                // Ram ships, don't move ships,
-
-                if (!this._rammedThisTurn(id, firstMove.moveOwner)) {
-                  this.getShipById(id).ramShip(
-                    this.getShipById(firstMove.moveOwner)
-                  );
-                  this.rammedShipsPerTurn.push([id, firstMove.moveOwner]);
-                } else {
-                  console.log("Already rammed this turn");
-                }
-              }
-              break;
-            default:
-              break;
-          }
+        if (turnal) {
+          move.cancelledTurnal = true;
+        } else {
+          move.cancelledMovement = true;
         }
       }
     }
@@ -271,18 +292,6 @@ class Game {
       if (ramPair.includes(shipId) && ramPair.includes(otherId)) return true;
 
     return false;
-  }
-
-  /**
-   *
-   * @param {Move} move
-   */
-  isMovePrioritized(move) {
-    let ourPriority;
-
-    for (let claiming of move.claimedCell.claiming) {
-      const { id, claimedPriority } = claiming;
-    }
   }
 
   /**

@@ -12,6 +12,9 @@ class Move {
 
     this.claimedCells = [];
     this.moveOwner = shipId;
+
+    this.cancelledMovement = false;
+    this.cancelledTurnal = false;
   }
 
   /**
