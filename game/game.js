@@ -4,6 +4,7 @@ const Direction = require("./Direction");
 const PlayerMoves = require("./moves/PlayerMoves");
 const PlayerShip = require("./PlayerShip");
 const Orientation = require("./Orientation");
+const Move = require("./moves/Move");
 const { getFreshMapGrid, isRock } = require("./util");
 
 const defaultMap = [
@@ -75,6 +76,9 @@ class Game {
     this.turnTime = 20; // in seconds
 
     this.gameStatus = GameStatus.LOBBY;
+
+    this.currentGameMoves = {};
+    this.claimedToClear = [];
   }
 
   addShip(id, shipType, x, y, teamType) {
@@ -122,7 +126,7 @@ class Game {
     return this.map[y][x];
   }
 
-  moveShip(id, direction) {
+  moveShip(id, direction, moveObject) {
     const ship = this.getShipById(id);
 
     const frontX = ship.boardX + ship.getOrientation().xDir;
@@ -159,12 +163,15 @@ class Game {
         }
 
         // Free passing
-        prevCell.occupiedBy = null;
-        this.getCell(frontX, frontY).occupiedBy = id;
+        // prevCell.occupiedBy = null;
+        // this.getCell(frontX, frontY).occupiedBy = id;
 
-        ship.boardX = frontX;
-        ship.boardY = frontY;
-
+        // ship.boardX = frontX;
+        // ship.boardY = frontY;
+        const frontCell = this.getCell(frontX, frontY);
+        frontCell.claiming.push({ id, claimedPriority: 1 });
+        this.claimedToClear.push(frontCell);
+        moveObject.claimedCells.push({ cell: frontCell, claimedPriority: 1 });
         break;
       case Direction.LEFT:
         this._moveTurn("left", ship, frontX, frontY, prevCell);
@@ -172,6 +179,87 @@ class Game {
       case Direction.RIGHT:
         this._moveTurn("right", ship, frontX, frontY, prevCell);
         break;
+    }
+  }
+
+  firstPassClaimMoves() {}
+
+  moveClaim(id, direction, moveObj) {
+    const ship = this.getShipById(id);
+
+    const frontX = ship.boardX + ship.getOrientation().xDir;
+    const frontY = ship.boardY + ship.getOrientation().yDir;
+
+    const frontCell = this.getCell(frontX, frontY);
+
+    frontCell.claiming.push({ id, claimedPriority: 1 });
+    this.claimedToClear.push(frontCell);
+    moveObj.claimedCells.push({ cell: frontCell, claimedPriority: 1 });
+
+    switch (direction) {
+      case Direction.LEFT:
+      case Direction.RIGHT:
+        this._turnClaim(ship, frontX, frontY, direction, moveObj);
+        break;
+    }
+  }
+
+  _turnClaim(ship, frontX, frontY, dir, moveObj) {
+    dir = dir.toLowerCase();
+    const turnX = frontX + ship.getOrientation()[dir].x;
+    const turnY = frontY + ship.getOrientation()[dir].y;
+
+    const turnedCell = this.getCell(turnX, turnY);
+    turnedCell.claiming.push({ id: ship.shipId, claimedPriority: 2 });
+    this.claimedToClear.push(turnedCell);
+
+    moveObj.claimedCells.push({ cell: turnedCell, claimedPriority: 2 });
+  }
+
+  /**
+   *
+   * @param {Array.<PlayerMoves>} playerMoves
+   */
+  _handleClaims(playerMoves) {
+    // Handle first turn
+    for (let pMoves of playerMoves) {
+      const firstMove = pMoves.firstMove;
+
+      if (firstMove) {
+        if (!firstMove.direction) continue;
+
+        let firstCell;
+        let secondCell;
+        firstCell = firstMove.claimedCells[0];
+
+        if (firstMove.claimedCells.length > 1) {
+          secondCell = firstMove.claimedCells[1];
+        }
+
+        for (let claimObj of firstCell.claiming) {
+          const { id, claimedPriority } = claimObj;
+          if (id == firstMove.moveOwner) continue;
+
+          switch (firstMove.direction) {
+            case Direction.FORWARD:
+              break;
+            default:
+              break;
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   *
+   * @param {Move} move
+   */
+  isMovePrioritized(move) {
+    let ourPriority;
+
+    for (let claiming of move.claimedCell.claiming) {
+      const { id, claimedPriority } = claiming;
     }
   }
 
@@ -249,6 +337,8 @@ class Game {
    * @param {Array.<PlayerMoves>} playerMoves
    */
   calculateTurns(playerMoves) {
+    this.currentGameMoves = playerMoves;
+
     // Calculate first turn movement.
     for (let moveData of playerMoves) {
       const shipId = moveData.shipId;

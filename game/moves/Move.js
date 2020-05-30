@@ -5,10 +5,13 @@ class Move {
    *
    * @param {Direction} direction
    */
-  constructor(direction) {
+  constructor(direction, shipId) {
     this.direction = direction;
     this.leftGuns = [false, false];
     this.rightGuns = [false, false];
+
+    this.claimedCells = [];
+    this.moveOwner = shipId;
   }
 
   /**

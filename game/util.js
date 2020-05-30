@@ -11,6 +11,7 @@ function getFreshMapGrid(map) {
       const cellData = {
         cell_id: map[row][column],
         occupiedBy: null,
+        claiming: [],
       };
       detailedMap[row][column] = cellData;
     }
