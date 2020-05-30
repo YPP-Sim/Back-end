@@ -118,6 +118,9 @@ describe("Game functions", () => {
     //Expect ram damage to be taken
     expect(ship1.damage).toBe(ship2.shipType.ramDamage);
     expect(ship2.damage).toBe(ship1.shipType.ramDamage);
+
+    expect(ship1Moves.firstMove.cancelledMovement).toBe(true);
+    expect(ship2Moves.firstMove.cancelledMovement).toBe(true);
   });
 
   // ------------ SHIP MOVEMENT - NO COLLISION -----------------
