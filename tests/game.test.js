@@ -77,6 +77,12 @@ describe("Game functions", () => {
     ]);
   });
 
+  it("_rammedThisTurn", () => {
+    testGame.rammedShipsPerTurn.push(["testShip1", "testShip2"]);
+    expect(testGame._rammedThisTurn("testShip1", "testShip2")).toBe(true);
+    expect(testGame._rammedThisTurn("testShip1", "testShip3")).toBe(false);
+  });
+
   // ------------ SHIP MOVEMENT - NO COLLISION -----------------
   describe("Ship movement - no collision", () => {
     beforeEach(() => {

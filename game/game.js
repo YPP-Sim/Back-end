@@ -79,6 +79,8 @@ class Game {
 
     this.currentGameMoves = {};
     this.claimedToClear = [];
+
+    this.rammedShipsPerTurn = [];
   }
 
   addShip(id, shipType, x, y, teamType) {
@@ -242,6 +244,19 @@ class Game {
 
           switch (firstMove.direction) {
             case Direction.FORWARD:
+              if (claimedPriority == 1) {
+                // Someone is contesting and in same spot as this move.
+                // Ram ships, don't move ships,
+
+                if (!this._rammedThisTurn(id, firstMove.moveOwner)) {
+                  this.getShipById(id).ramShip(
+                    this.getShipById(firstMove.moveOwner)
+                  );
+                  this.rammedShipsPerTurn.push([id, firstMove.moveOwner]);
+                } else {
+                  console.log("Already rammed this turn");
+                }
+              }
               break;
             default:
               break;
@@ -249,6 +264,13 @@ class Game {
         }
       }
     }
+  }
+
+  _rammedThisTurn(shipId, otherId) {
+    for (let ramPair of this.rammedShipsPerTurn)
+      if (ramPair.includes(shipId) && ramPair.includes(otherId)) return true;
+
+    return false;
   }
 
   /**
