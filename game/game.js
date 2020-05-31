@@ -109,6 +109,14 @@ class Game {
     return playerShip;
   }
 
+  setShipPosition(shipId, x, y) {
+    this.getShipById(shipId).boardX = x;
+    this.getShipById(shipId).boardY = y;
+
+    const cell = this.getCell(x, y);
+    cell.occupiedBy = shipId;
+  }
+
   /**
    *
    * @param {number} amount
@@ -244,9 +252,9 @@ class Game {
       }
     };
     handleTurn("firstMove");
-    // handleTurn("secondMove");
-    // handleTurn("thirdMove");
-    // handleTurn("fourthMove");
+    handleTurn("secondMove");
+    handleTurn("thirdMove");
+    handleTurn("fourthMove");
   }
 
   _handleClaimPerMove(move) {
@@ -262,7 +270,6 @@ class Game {
       }
 
       this._handleCellClaimWithPrio(firstCell, 1, move, false);
-
       if (!move.cancelledMovement && secondCell)
         this._handleCellClaimWithPrio(secondCell, 2, move, true);
     }
@@ -273,7 +280,7 @@ class Game {
     for (let claimObj of cell.claiming) {
       const { id, claimedPriority } = claimObj;
       if (id == moveOwner) continue;
-      if (claimedPriority >= priority) {
+      if (claimedPriority <= priority) {
         if (!this._rammedThisTurn(id, moveOwner)) {
           this.getShipById(id).ramShip(this.getShipById(moveOwner));
           this.rammedShipsPerTurn.push([id, moveOwner]);
