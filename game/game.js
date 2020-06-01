@@ -147,60 +147,46 @@ class Game {
     return this.map[y][x];
   }
 
-  moveShip(id, direction, moveObject) {
+  /**
+   *
+   * @param {string} id
+   * @param {Direction} direction
+   * @param {Move} moveObject
+   */
+  moveShip(id, moveObject) {
+    const { direction } = moveObject;
     const ship = this.getShipById(id);
+    const toOrientation = getToOrientation(ship.getOrientation(), direction);
 
-    const frontX = ship.boardX + ship.getOrientation().xDir;
-    const frontY = ship.boardY + ship.getOrientation().yDir;
+    if (!moveObject.cancelledMovement) {
+      const ship = this.getShipById(id);
 
-    const prevCell = this.getCell(ship.boardX, ship.boardY);
+      const frontX = ship.boardX + ship.getOrientation().xDir;
+      const frontY = ship.boardY + ship.getOrientation().yDir;
 
-    switch (direction) {
-      case Direction.FORWARD:
-        // If we're going out of bounds, contain and do ram damage.
-        if (frontX < 0 || frontY < 0) {
-          ship.ramRocks();
-          return;
+      const prevCell = this.getCell(ship.boardX, ship.boardY);
+
+      if (!moveObject.direction.FORWARD) {
+        if (!moveObject.cancelledTurnal) {
+          const turnX = frontX + ship.getOrientation()[direction].x;
+          const turnY = frontY + ship.getOrientation()[direction].y;
+
+          prevCell.occupiedBy = null;
+          this.getCell(turnX, turnY).occupiedBy = id;
+
+          ship.boardX = turnX;
+          ship.boardY = turnY;
         }
+      } else {
+        prevCell.occupiedBy = null;
+        this.getCell(frontX, frontY).occupiedBy = id;
 
-        const cell = this.getCell(frontX, frontY);
-
-        if (isRock(cell.cell_id)) {
-          ship.ramRocks();
-          return;
-        }
-
-        if (cell.occupiedBy) {
-          const occupiedShip = cell.occupiedBy;
-
-          // Check if occupied cell's ship has a move on the same turn, in case of tortoise/hare situation.
-
-          // Cell is being occupied by another ship
-          // TODO - ram damage to both ships.
-
-          // TODO - Since it's a forward move, don't move original ship but move the rammed ship back by one
-          // Relative to the orientation this ship is facing
-          return;
-        }
-
-        // Free passing
-        // prevCell.occupiedBy = null;
-        // this.getCell(frontX, frontY).occupiedBy = id;
-
-        // ship.boardX = frontX;
-        // ship.boardY = frontY;
-        const frontCell = this.getCell(frontX, frontY);
-        frontCell.claiming.push({ id, claimedPriority: 1 });
-        this.claimedToClear.push(frontCell);
-        moveObject.claimedCells.push({ cell: frontCell, claimedPriority: 1 });
-        break;
-      case Direction.LEFT:
-        this._moveTurn("left", ship, frontX, frontY, prevCell);
-        break;
-      case Direction.RIGHT:
-        this._moveTurn("right", ship, frontX, frontY, prevCell);
-        break;
+        ship.boardX = turnX;
+        ship.boardY = turnY;
+      }
     }
+
+    ship.setOrientation(toOrientation);
   }
 
   /**
@@ -272,23 +258,16 @@ class Game {
   /**
    * @param {Array.<PlayerMoves>} playerMoves
    */
-  _handleClaims(playerMoves) {
-    const handleTurn = (turn) => {
-      for (let pMoves of playerMoves) {
-        const move = pMoves[turn];
-        this._handleClaimPerMove(move);
-      }
+  _handleClaims(playerMoves, turn) {
+    for (let pMoves of playerMoves) {
+      const move = pMoves[turn];
+      this._handleClaimPerMove(move);
+    }
 
-      this.rammedShipsPerTurn = [];
-      for (let claimedCell of this.claimedToClear) {
-        claimedCell.claiming = [];
-      }
-    };
-
-    handleTurn("firstMove");
-    handleTurn("secondMove");
-    handleTurn("thirdMove");
-    handleTurn("fourthMove");
+    this.rammedShipsPerTurn = [];
+    for (let claimedCell of this.claimedToClear) {
+      claimedCell.claiming = [];
+    }
   }
 
   _handleClaimPerMove(move) {
@@ -338,7 +317,6 @@ class Game {
   }
 
   /**
-   *
    * @param {*} dir
    * @param {PlayerShip} ship
    * @param {number} frontX
@@ -349,32 +327,12 @@ class Game {
     const turnX = frontX + ship.getOrientation()[dir].x;
     const turnY = frontY + ship.getOrientation()[dir].y;
 
-    // ship.setOrientation(ship.getOrientation()[dir].toOrientation);
-
     const toOrientation = getToOrientation(
       ship.getOrientation(),
       dir.toUpperCase()
     );
 
     ship.setOrientation(toOrientation);
-
-    // Detect frontal rock collision
-    if (this._rockCollisionDetect(frontX, frontY)) {
-      ship.ramRocks();
-      return;
-    }
-
-    // Detect turn rock collisions
-    if (this._rockCollisionDetect(turnX, turnY)) {
-      ship.ramRocks();
-      // Move forward.
-      prevCell.occupiedBy = null;
-      this.getCell(frontX, frontY).occupiedBy = ship.shipId;
-
-      ship.boardX = frontX;
-      ship.boardY = frontY;
-      return;
-    }
 
     // Free passing
     prevCell.occupiedBy = null;
@@ -389,7 +347,6 @@ class Game {
   }
 
   /**
-   *
    * @param {String} id
    * @returns {PlayerShip} the ship that was retrieved through the id.
    */
@@ -400,23 +357,30 @@ class Game {
   onGameTurn() {
     // TODO - Get all of the clients moves
     // TODO - Play out moves and calculate the damage taken to any ships and set new board based off ship moves.
-    this.calculateTurns();
     // TODO - Send out data to clients for them to visually show moves
   }
 
   /**
-   *  Will take an array of objects where each object contains the id of the player ship,
-   *  and the moves that it will be performing. If there is no object of data for a player on the board,
-   * that player will not move.
+   *
    * @param {Array.<PlayerMoves>} playerMoves
    */
-  calculateTurns(playerMoves) {
-    this.currentGameMoves = playerMoves;
+  executeMoves(playerMoves) {
+    const executeClaimsAndMove = (turn) => {
+      // Get and calculate claims
+      for (let pMove of playerMoves) {
+        this.moveClaim(pMove[turn]);
+      }
 
-    // Calculate first turn movement.
-    for (let moveData of playerMoves) {
-      const shipId = moveData.shipId;
-    }
+      // Handle claims
+      this._handleClaims(playerMoves, turn);
+
+      // Move the ships
+      for (let plMove of playerMoves) {
+        this.moveShip(plMove.shipId, plMove[turn]);
+      }
+    };
+
+    executeClaimsAndMove("firstMove");
   }
 
   /**
