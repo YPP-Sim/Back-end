@@ -137,6 +137,32 @@ describe("Game functions", () => {
       expect(ship2Moves.firstMove.cancelledMovement).toBe(true);
     });
 
+    it("turnal vs ship in front, heading same direction", () => {
+      testGame.setShipPosition("ship2", 15, 1);
+      ship1.setOrientation(Orientation.EAST);
+      const ship1Moves = new PlayerMoves("ship1");
+      ship1Moves.firstMove = new Move(Direction.FORWARD, "ship1");
+
+      const ship2Moves = new PlayerMoves("ship2");
+      ship2Moves.firstMove = new Move(Direction.RIGHT, "ship2");
+
+      //Claim cells from moves.
+      testGame.moveClaim(ship1Moves.firstMove);
+      testGame.moveClaim(ship2Moves.firstMove);
+
+      //Handle claim conflicts
+      testGame._handleClaims([ship1Moves, ship2Moves]);
+
+      //Expect ram damage to be taken
+      expect(ship1.damage).toBe(ship2.shipType.ramDamage);
+      expect(ship2.damage).toBe(ship1.shipType.ramDamage);
+
+      // Detect cancellation of moves
+      expect(ship1Moves.firstMove.cancelledMovement).toBe(false);
+      expect(ship2Moves.firstMove.cancelledMovement).toBe(false);
+      expect(ship2Moves.firstMove.cancelledTurnal).toBe(true);
+    });
+
     it("turnal priorities", () => {
       testGame.setShipPosition("ship2", 16, 2);
       const ship1Moves = new PlayerMoves("ship1");
