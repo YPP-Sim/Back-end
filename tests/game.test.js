@@ -123,6 +123,57 @@ describe("Game functions", () => {
       expect(ship2Moves.firstMove.cancelledMovement).toBe(true);
     });
 
+    it("forward border collision", () => {
+      ship1.setOrientation(Orientation.NORTH);
+      const ship1Moves = new PlayerMoves("ship1");
+      ship1Moves.firstMove = new Move(Direction.FORWARD, "ship1");
+
+      testGame.moveClaim(ship1Moves.firstMove);
+      testGame._handleClaims([ship1Moves]);
+      expect(ship1.damage).toBe(ship1.shipType.rockDamage);
+      expect(ship1Moves.firstMove.cancelledMovement).toBe(true);
+    });
+
+    it("turnal border collision", () => {
+      ship1.setOrientation(Orientation.WEST);
+      const ship1Moves = new PlayerMoves("ship1");
+      ship1Moves.firstMove = new Move(Direction.RIGHT, "ship1");
+
+      testGame.moveClaim(ship1Moves.firstMove);
+      testGame._handleClaims([ship1Moves]);
+      expect(ship1.damage).toBe(ship1.shipType.rockDamage);
+      expect(ship1Moves.firstMove.cancelledMovement).toBe(false);
+      expect(ship1Moves.firstMove.cancelledTurnal).toBe(true);
+    });
+
+    it("forward rock collision", () => {
+      testGame.setShipPosition("ship1", 0, 3);
+      ship1.setOrientation(Orientation.SOUTH);
+      const ship1Moves = new PlayerMoves("ship1");
+      ship1Moves.firstMove = new Move(Direction.FORWARD, "ship1");
+
+      testGame.moveClaim(ship1Moves.firstMove);
+      testGame._handleClaims([ship1Moves]);
+
+      expect(ship1.damage).toBe(ship1.shipType.rockDamage);
+      expect(ship1Moves.firstMove.cancelledMovement).toBe(true);
+    });
+
+    it("turnal rock collision", () => {
+      testGame.setShipPosition("ship1", 1, 3);
+      ship1.setOrientation(Orientation.WEST);
+      const ship1Moves = new PlayerMoves("ship1");
+      ship1Moves.firstMove = new Move(Direction.LEFT, "ship1");
+
+      testGame.moveClaim(ship1Moves.firstMove);
+      testGame._handleClaims([ship1Moves]);
+
+      expect(ship1.damage).toBe(ship1.shipType.rockDamage);
+      expect(ship1Moves.firstMove.cancelledMovement).toBe(false);
+      expect(ship1Moves.firstMove.cancelledTurnal).toBe(true);
+    });
+
+    it("Turnal rock collision", () => {});
     it("turnal movements", () => {
       const ship1Moves = new PlayerMoves("ship1");
       ship1Moves.firstMove = new Move(Direction.LEFT, "ship1");

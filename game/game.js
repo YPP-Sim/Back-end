@@ -213,10 +213,16 @@ class Game {
     const frontX = ship.boardX + ship.getOrientation().xDir;
     const frontY = ship.boardY + ship.getOrientation().yDir;
 
+    // Check for border/out of map collision
+    if (this.isOutOfBounds(frontX, frontY)) {
+      ship.ramRocks();
+      moveObj.cancelledMovement = true;
+      return;
+    }
+
     const frontCell = this.getCell(frontX, frontY);
 
-    // Check for border/out of map collision
-    if (frontX < 0 || frontY < 0) {
+    if (isRock(frontCell.cell_id)) {
       ship.ramRocks();
       moveObj.cancelledMovement = true;
       return;
@@ -239,13 +245,20 @@ class Game {
     const turnX = frontX + ship.getOrientation()[dir].x;
     const turnY = frontY + ship.getOrientation()[dir].y;
 
-    if (turnX < 0 || turnY < 0) {
+    if (this.isOutOfBounds(turnX, turnY)) {
       ship.ramRocks();
       moveObj.cancelledTurnal = true;
       return;
     }
 
     const turnedCell = this.getCell(turnX, turnY);
+
+    if (isRock(turnedCell.cell_id)) {
+      ship.ramRocks();
+      moveObj.cancelledTurnal = true;
+      return;
+    }
+
     turnedCell.claiming.push({ id: ship.shipId, claimedPriority: 2 });
     this.claimedToClear.push(turnedCell);
 
@@ -281,6 +294,7 @@ class Game {
   _handleClaimPerMove(move) {
     if (move) {
       if (!move.direction) return;
+      if (move.claimedCells.length === 0) return;
 
       let firstCell;
       let secondCell;
@@ -300,9 +314,6 @@ class Game {
     const { moveOwner } = move;
 
     for (let claimObj of cell.claiming) {
-      // Check for rock collisions here
-
-      // Then check if there are any player collisions on same target tiles
       const { id, claimedPriority } = claimObj;
       if (id == moveOwner) continue;
       if (claimedPriority <= priority) {
