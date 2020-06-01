@@ -118,7 +118,6 @@ class Game {
   }
 
   /**
-   *
    * @param {number} amount
    */
   addAttackerScore(amount) {
@@ -148,12 +147,12 @@ class Game {
   }
 
   /**
-   *
    * @param {string} id
    * @param {Direction} direction
    * @param {Move} moveObject
    */
   moveShip(id, moveObject) {
+    if (!moveObject) return;
     const { direction } = moveObject;
     const ship = this.getShipById(id);
     const toOrientation = getToOrientation(ship.getOrientation(), direction);
@@ -166,10 +165,12 @@ class Game {
 
       const prevCell = this.getCell(ship.boardX, ship.boardY);
 
-      if (!moveObject.direction.FORWARD) {
+      if (direction !== Direction.FORWARD) {
         if (!moveObject.cancelledTurnal) {
-          const turnX = frontX + ship.getOrientation()[direction].x;
-          const turnY = frontY + ship.getOrientation()[direction].y;
+          const turnX =
+            frontX + ship.getOrientation()[direction.toLowerCase()].x;
+          const turnY =
+            frontY + ship.getOrientation()[direction.toLowerCase()].y;
 
           prevCell.occupiedBy = null;
           this.getCell(turnX, turnY).occupiedBy = id;
@@ -181,8 +182,8 @@ class Game {
         prevCell.occupiedBy = null;
         this.getCell(frontX, frontY).occupiedBy = id;
 
-        ship.boardX = turnX;
-        ship.boardY = turnY;
+        ship.boardX = frontX;
+        ship.boardY = frontY;
       }
     }
 
@@ -193,6 +194,7 @@ class Game {
    * @param {Move} moveObj
    */
   moveClaim(moveObj) {
+    if (!moveObj) return;
     const { direction, moveOwner } = moveObj;
     const ship = this.getShipById(moveOwner);
 
@@ -381,6 +383,9 @@ class Game {
     };
 
     executeClaimsAndMove("firstMove");
+    executeClaimsAndMove("secondMove");
+    executeClaimsAndMove("thirdMove");
+    executeClaimsAndMove("fourthMove");
   }
 
   /**

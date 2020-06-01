@@ -6,7 +6,7 @@ const Move = require("../game/moves/Move");
 const PlayerMoves = require("../game/moves/PlayerMoves");
 
 const testMap = [
-  [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0],
+  [1, 0, 1, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0],
   [0, 0, 1, 0, 0, 0, 0, 0, 0, 15, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -246,32 +246,30 @@ describe("Game", () => {
     });
   });
 
-  // ------------ SHIP MOVEMENT - NO COLLISION -----------------
   describe("movement ", () => {
+    let ship1;
     beforeEach(() => {
-      testGame = new Game(testMap);
-      testGame.addShip("testShip", ShipType.WAR_FRIG, 1, 2, "DEFENDER");
-      testGame.getShipById("testShip").setOrientation(Orientation.SOUTH);
+      ship1 = testGame.addShip("testShip", ShipType.WAR_FRIG, 6, 0, "DEFENDER");
+      ship1.setOrientation(Orientation.SOUTH);
     });
 
-    // it("moveShip forward", () => {
-    //   testGame.moveShip("testShip", Direction.FORWARD);
-    //   expect(testGame.getCell(1, 2).occupiedBy).toEqual(null);
-    //   expect(testGame.getCell(1, 3).occupiedBy).toEqual("testShip");
-    // });
+    describe("executes moves and in order", () => {
+      let ship1Moves;
+      beforeEach(() => {
+        ship1Moves = new PlayerMoves("testShip");
+      });
+      it("Moves: FLRF", () => {
+        ship1Moves.setFirstMove(Direction.FORWARD);
+        ship1Moves.setSecondMove(Direction.LEFT);
+        ship1Moves.setThirdMove(Direction.RIGHT);
+        ship1Moves.setFourthMove(Direction.FORWARD);
 
-    // it("moves ships left", () => {
-    //   testGame.moveShip("testShip", Direction.LEFT);
-    //   expect(testGame.getCell(2, 3).occupiedBy).toEqual("testShip");
-    //   const ship = testGame.getShipById("testShip");
-    //   expect(ship.getOrientation()).toEqual(Orientation.EAST);
-    // });
-
-    // it("moves ships right", () => {
-    //   testGame.moveShip("testShip", Direction.RIGHT);
-    //   expect(testGame.getCell(0, 3).occupiedBy).toEqual("testShip");
-    //   const ship = testGame.getShipById("testShip");
-    //   expect(ship.getOrientation()).toEqual(Orientation.WEST);
-    // });
+        testGame.executeMoves([ship1Moves]);
+        expect(ship1.boardX).toBe(8);
+        expect(ship1.boardY).toBe(4);
+        expect(testGame.getCell(8, 4).occupiedBy).toBe("testShip");
+        expect(ship1.getOrientation()).toBe(Orientation.SOUTH);
+      });
+    });
   });
 });
