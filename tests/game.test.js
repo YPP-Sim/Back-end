@@ -36,6 +36,14 @@ describe("Game functions", () => {
     expect(ship).not.toBe(undefined);
   });
 
+  it("isOutOfBounds", () => {
+    expect(testGame.isOutOfBounds(20, 9)).toBe(true);
+    expect(testGame.isOutOfBounds(-1, 0)).toBe(true);
+    expect(testGame.isOutOfBounds(0, -1)).toBe(true);
+    expect(testGame.isOutOfBounds(21, 5)).toBe(true);
+    expect(testGame.isOutOfBounds(19, 5)).toBe(false);
+  });
+
   it("moveClaim forward", () => {
     testGame.addShip("testShip", ShipType.WAR_FRIG, 1, 2, "DEFENDER");
     testGame.getShipById("testShip").setOrientation(Orientation.SOUTH);

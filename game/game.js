@@ -203,8 +203,9 @@ class Game {
     }
   }
 
-  firstPassClaimMoves() {}
-
+  /**
+   * @param {Move} moveObj
+   */
   moveClaim(moveObj) {
     const { direction, moveOwner } = moveObj;
     const ship = this.getShipById(moveOwner);
@@ -213,6 +214,13 @@ class Game {
     const frontY = ship.boardY + ship.getOrientation().yDir;
 
     const frontCell = this.getCell(frontX, frontY);
+
+    // Check for border/out of map collision
+    if (frontX < 0 || frontY < 0) {
+      ship.ramRocks();
+      moveObj.cancelledMovement = true;
+      return;
+    }
 
     frontCell.claiming.push({ id: moveOwner, claimedPriority: 1 });
     this.claimedToClear.push(frontCell);
@@ -231,6 +239,12 @@ class Game {
     const turnX = frontX + ship.getOrientation()[dir].x;
     const turnY = frontY + ship.getOrientation()[dir].y;
 
+    if (turnX < 0 || turnY < 0) {
+      ship.ramRocks();
+      moveObj.cancelledTurnal = true;
+      return;
+    }
+
     const turnedCell = this.getCell(turnX, turnY);
     turnedCell.claiming.push({ id: ship.shipId, claimedPriority: 2 });
     this.claimedToClear.push(turnedCell);
@@ -238,19 +252,26 @@ class Game {
     moveObj.claimedCells.push({ cell: turnedCell, claimedPriority: 2 });
   }
 
+  isOutOfBounds(x, y) {
+    return x < 0 || y < 0 || x >= this.map[0].length || y >= this.map.length;
+  }
+
   /**
-   *
    * @param {Array.<PlayerMoves>} playerMoves
    */
   _handleClaims(playerMoves) {
-    // Handle first turn
-
     const handleTurn = (turn) => {
       for (let pMoves of playerMoves) {
         const move = pMoves[turn];
         this._handleClaimPerMove(move);
       }
+
+      this.rammedShipsPerTurn = [];
+      for (let claimedCell of this.claimedToClear) {
+        claimedCell.claiming = [];
+      }
     };
+
     handleTurn("firstMove");
     handleTurn("secondMove");
     handleTurn("thirdMove");
@@ -277,7 +298,11 @@ class Game {
 
   _handleCellClaimWithPrio(cell, priority, move, turnal) {
     const { moveOwner } = move;
+
     for (let claimObj of cell.claiming) {
+      // Check for rock collisions here
+
+      // Then check if there are any player collisions on same target tiles
       const { id, claimedPriority } = claimObj;
       if (id == moveOwner) continue;
       if (claimedPriority <= priority) {
