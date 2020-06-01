@@ -1,5 +1,5 @@
 const Move = require("./Move");
-
+const Direction = require("../Direction");
 class PlayerMoves {
   /**
    *
@@ -18,34 +18,34 @@ class PlayerMoves {
 
   /**
    * Set's the first move of the player move turn
-   * @param {Move} move
+   * @param {Direction} move
    */
-  setFirstMove(move) {
-    this.firstMove = move;
+  setFirstMove(dir) {
+    this.firstMove = new Move(dir, this.shipId);
   }
 
   /**
    * Set's the second move of the player move turn
-   * @param {Move} move
+   * @param {Direction} move
    */
-  setSecondMove(move) {
-    this.secondMove = move;
+  setSecondMove(dir) {
+    this.secondMove = new Move(dir, this.shipId);
   }
 
   /**
    * Set's the third move of the player move turn
-   * @param {Move} move
+   * @param {Direction} move
    */
-  setTirstMove(move) {
-    this.thirdMove = move;
+  setThirdMove(dir) {
+    this.thirdMove = new Move(dir, this.shipId);
   }
 
   /**
    * Set's the fourth move of the player move turn
-   * @param {Move} move
+   * @param {Direction} move
    */
-  setFourthtMove(move) {
-    this.fourthMove = move;
+  setFourthMove(dir) {
+    this.fourthMove = new Move(dir, this.shipId);
   }
 
   getShipId() {
