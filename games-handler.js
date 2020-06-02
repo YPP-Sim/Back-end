@@ -20,7 +20,7 @@ function getGame(id) {
 }
 
 function getAllGameIds() {
-  return games.keys();
+  return Object.keys(games);
 }
 
 module.exports = {
