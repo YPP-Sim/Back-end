@@ -35,7 +35,13 @@ function isRock(cell_id) {
 
 function readMapFromFile(mapName) {
   return new Promise((resolve, reject) => {
-    fs.readFile(`./maps/${mapName}.txt`, "utf8", (err, data) => {
+    const path = `./maps/${mapName}.txt`;
+    if (!fs.existsSync(path)) {
+      reject("Map does not exist: " + mapName);
+      return;
+    }
+
+    fs.readFile(path, "utf8", async (err, data) => {
       if (err) {
         reject(err);
       }
