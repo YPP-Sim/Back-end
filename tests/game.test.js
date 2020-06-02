@@ -6,7 +6,7 @@ const Move = require("../game/moves/Move");
 const PlayerMoves = require("../game/moves/PlayerMoves");
 
 const testMap = [
-  [1, 0, 1, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0],
+  [1, 0, 1, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0],
   [0, 0, 1, 0, 0, 0, 0, 0, 0, 15, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -248,6 +248,7 @@ describe("Game", () => {
 
   describe("movement ", () => {
     let ship1;
+    let ship2;
     beforeEach(() => {
       ship1 = testGame.addShip("testShip", ShipType.WAR_FRIG, 6, 0, "DEFENDER");
       ship1.setOrientation(Orientation.SOUTH);
@@ -258,7 +259,7 @@ describe("Game", () => {
       beforeEach(() => {
         ship1Moves = new PlayerMoves("testShip");
       });
-      it("Moves: FLRF", () => {
+      it("Free movement", () => {
         ship1Moves.setFirstMove(Direction.FORWARD);
         ship1Moves.setSecondMove(Direction.LEFT);
         ship1Moves.setThirdMove(Direction.RIGHT);
@@ -269,6 +270,27 @@ describe("Game", () => {
         expect(ship1.boardY).toBe(4);
         expect(testGame.getCell(8, 4).occupiedBy).toBe("testShip");
         expect(ship1.getOrientation()).toBe(Orientation.SOUTH);
+      });
+
+      it("Ship vs Ship proper movement and ram collision", () => {
+        ship1Moves.setFirstMove(Direction.FORWARD);
+        ship1Moves.setSecondMove(Direction.LEFT);
+
+        ship2 = testGame.addShip("ship2", ShipType.WAR_FRIG, 8, 0, "DEFENDER");
+        ship2.setOrientation(Orientation.SOUTH);
+        const ship2Moves = new PlayerMoves("ship2");
+        ship2Moves.setFirstMove(Direction.FORWARD);
+        ship2Moves.setSecondMove(Direction.RIGHT);
+
+        testGame.executeMoves([ship1Moves, ship2Moves]);
+        expect(ship1.boardX).toBe(6);
+        expect(ship1.boardY).toBe(2);
+        expect(ship1.damage).toBe(ship2.shipType.ramDamage);
+        expect(ship1.getOrientation()).toBe(Orientation.EAST);
+        expect(ship2.getOrientation()).toBe(Orientation.WEST);
+        expect(ship2.boardX).toBe(8);
+        expect(ship2.boardY).toBe(2);
+        expect(ship2.damage).toBe(ship1.shipType.ramDamage);
       });
     });
   });

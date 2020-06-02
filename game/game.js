@@ -165,25 +165,18 @@ class Game {
 
       const prevCell = this.getCell(ship.boardX, ship.boardY);
 
-      if (direction !== Direction.FORWARD) {
-        if (!moveObject.cancelledTurnal) {
-          const turnX =
-            frontX + ship.getOrientation()[direction.toLowerCase()].x;
-          const turnY =
-            frontY + ship.getOrientation()[direction.toLowerCase()].y;
+      prevCell.occupiedBy = null;
+      this.getCell(frontX, frontY).occupiedBy = id;
+      ship.boardX = frontX;
+      ship.boardY = frontY;
 
-          prevCell.occupiedBy = null;
-          this.getCell(turnX, turnY).occupiedBy = id;
+      if (direction !== Direction.FORWARD && !moveObject.cancelledTurnal) {
+        const turnX = frontX + ship.getOrientation()[direction.toLowerCase()].x;
+        const turnY = frontY + ship.getOrientation()[direction.toLowerCase()].y;
 
-          ship.boardX = turnX;
-          ship.boardY = turnY;
-        }
-      } else {
-        prevCell.occupiedBy = null;
-        this.getCell(frontX, frontY).occupiedBy = id;
-
-        ship.boardX = frontX;
-        ship.boardY = frontY;
+        this.getCell(turnX, turnY).occupiedBy = id;
+        ship.boardX = turnX;
+        ship.boardY = turnY;
       }
     }
 
