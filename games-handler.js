@@ -19,7 +19,12 @@ function getGame(id) {
   return games[id];
 }
 
+function getAllGameIds() {
+  return games.keys();
+}
+
 module.exports = {
   createGame,
   getGame,
+  getAllGameIds,
 };
