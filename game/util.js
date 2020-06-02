@@ -1,3 +1,5 @@
+const fs = require("fs");
+
 function getFreshMapGrid(map) {
   const rows = map.length;
   const columns = map[0].length;
@@ -31,7 +33,31 @@ function isRock(cell_id) {
   }
 }
 
+function readMapFromFile(mapName) {
+  return new Promise((resolve, reject) => {
+    fs.readFile(`./maps/${mapName}.txt`, "utf8", (err, data) => {
+      if (err) {
+        reject(err);
+      }
+
+      const lines = data.split(/\r?\n/);
+      const mapArray = [];
+      for (let line of lines) {
+        const cell_ids = line.split(",");
+        const xArray = [];
+        for (let cell of cell_ids) {
+          cell = cell.trim();
+          if (cell.length > 0) xArray.push(parseInt(cell));
+        }
+        if (xArray.length > 0) mapArray.push(xArray);
+      }
+      resolve(mapArray);
+    });
+  });
+}
+
 module.exports = {
   getFreshMapGrid,
   isRock,
+  readMapFromFile,
 };
