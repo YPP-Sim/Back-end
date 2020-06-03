@@ -61,7 +61,13 @@ function getToOrientation(startingOrientation, direction) {
 }
 
 class Game {
-  constructor(map = defaultMap, jobberQuality = JobberQuality.ELITE, io) {
+  constructor(
+    map = defaultMap,
+    jobberQuality = JobberQuality.ELITE,
+    gameId,
+    io
+  ) {
+    this.gameId = gameId;
     this.players = {};
     this.attackers = {};
     this.defenders = {};
@@ -352,14 +358,13 @@ class Game {
     // TODO - Get all of the clients moves
     // TODO - Play out moves and calculate the damage taken to any ships and set new board based off ship moves.
     // TODO - Send out data to clients for them to visually show moves
-
-    this.io.emit("gameTurn", "We're doing a game turn!");
+    this.io.in(this.gameId).emit("gameTurn", "We're doing a game turn!");
   }
 
   onGameTick() {
     this.turnTick++;
     // send the current turn tick to all the clients
-    this.io.emit("gameTick", this.turnTick);
+    this.io.in(this.gameId).emit("gameTick", this.turnTick);
     if (this.turnTick === this.turnTime) {
       this.onGameTurn();
       this.turnTick = 0;

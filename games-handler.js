@@ -13,7 +13,12 @@ const games = {};
 function createGame(id, map, jobberQuality) {
   if (games[id]) throw `Game with id '${id}' already exists`;
 
-  const newGame = new Game(map, jobberQuality, getSocketIO().sockets.in(id));
+  const newGame = new Game(
+    map,
+    jobberQuality,
+    id,
+    getSocketIO().sockets.in(id.toString())
+  );
 
   games[id] = newGame;
 }
