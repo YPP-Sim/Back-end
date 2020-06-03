@@ -61,11 +61,11 @@ function getToOrientation(startingOrientation, direction) {
 }
 
 class Game {
-  constructor(map = defaultMap, jobberQuality = JobberQuality.ELITE) {
+  constructor(map = defaultMap, jobberQuality = JobberQuality.ELITE, io) {
     this.players = {};
     this.attackers = {};
     this.defenders = {};
-
+    this.io = io;
     this.map = getFreshMapGrid(map);
     this.jobberQuality = jobberQuality;
 
@@ -73,7 +73,7 @@ class Game {
     this.attackerScore = 0;
 
     this.timeLeft = 0;
-    this.turnTime = 20; // in seconds
+    this.turnTime = 35; // in seconds
 
     this.gameStatus = GameStatus.LOBBY;
 
@@ -84,7 +84,6 @@ class Game {
   }
 
   /**
-   *
    * @param {string} id
    * @param {shipType} shipType
    * @param {number} x
@@ -353,6 +352,18 @@ class Game {
     // TODO - Get all of the clients moves
     // TODO - Play out moves and calculate the damage taken to any ships and set new board based off ship moves.
     // TODO - Send out data to clients for them to visually show moves
+
+    this.io.emit("gameTurn", "We're doing a game turn!");
+  }
+
+  onGameTick() {
+    this.turnTick++;
+    // send the current turn tick to all the clients
+    this.io.emit("gameTick", this.turnTick);
+    if (this.turnTick === this.turnTime) {
+      this.onGameTurn();
+      this.turnTick = 0;
+    }
   }
 
   /**
@@ -395,9 +406,10 @@ class Game {
     // TODO - Tell client the game has started, send out starting data to client.
     this.gameStatus = GameStatus.INGAME;
 
+    this.turnTick = 0;
     this.gameIntervalId = setInterval(() => {
-      this.onGameTurn();
-    }, this.turnTime);
+      this.onGameTick();
+    }, 1000);
   }
 
   stop() {

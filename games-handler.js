@@ -1,3 +1,5 @@
+const { getSocketIO } = require("./index");
+
 const Game = require("./game/game");
 const JobberQuality = require("./game/JobberQuality");
 
@@ -11,7 +13,8 @@ const games = {};
 function createGame(id, map, jobberQuality) {
   if (games[id]) throw `Game with id '${id}' already exists`;
 
-  const newGame = new Game(map, jobberQuality);
+  const newGame = new Game(map, jobberQuality, getSocketIO().sockets.in(id));
+
   games[id] = newGame;
 }
 

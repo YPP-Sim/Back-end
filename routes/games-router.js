@@ -35,4 +35,31 @@ router.post("/create-game", async (req, res) => {
   }
 });
 
+router.put("/start-game/:gameId", (req, res) => {
+  const { gameId } = req.params;
+  const game = getGame(gameId);
+  if (!game) {
+    res.status(404).json({ message: `Game not found with id ${gameId}` });
+    return;
+  }
+
+  game.start();
+  console.log("Starting game: ", gameId);
+  res.status(200).json({ message: "Game started successfully" });
+});
+
+router.put("/stop-game/:gameId", (req, res) => {
+  const { gameId } = req.params;
+  const game = getGame(gameId);
+
+  if (!game) {
+    res.status(404).json({ message: `Game not found with id ${gameId}` });
+    return;
+  }
+
+  game.stop();
+  console.log("stopping game: ", gameId);
+  res.status(200).json({ message: "Game stopped successfully" });
+});
+
 module.exports = router;

@@ -1,3 +1,7 @@
+module.exports = {
+  getSocketIO,
+};
+
 const express = require("express");
 const app = express();
 const http = require("http").createServer(app);
@@ -7,6 +11,10 @@ const onCommand = require("./socket-commands");
 const gamesRouter = require("./routes/games-router");
 
 const port = process.env.PORT || 4000;
+
+function getSocketIO() {
+  return io;
+}
 
 // Global middleware
 app.use(express.json());
@@ -25,6 +33,15 @@ io.on("connection", (socket) => {
   socket.on("clientCommand", (command, args) => {
     console.log("Client command: " + command, ", Args: " + args);
     onCommand(command, args, socket, io);
+  });
+
+  socket.on("joinGame", (gameId) => {
+    if (socket.room) socket.leave(socket.room);
+
+    socket.room = gameId;
+    socket.join(gameId);
+
+    console.log("A socket joined room: ", gameId);
   });
 
   socket.on("message", (data) => {
