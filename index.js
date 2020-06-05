@@ -3,6 +3,7 @@ module.exports = {
 };
 
 const express = require("express");
+const cors = require("cors");
 const app = express();
 const http = require("http").createServer(app);
 const io = require("socket.io")(http);
@@ -18,7 +19,7 @@ function getSocketIO() {
 
 // Global middleware
 app.use(express.json());
-
+app.use(cors());
 // --- Routes
 app.use("/games", gamesRouter);
 

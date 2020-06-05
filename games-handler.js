@@ -10,19 +10,36 @@ const games = {};
  * @param { Array.<Array.<number>>} map The map the game will be using
  * @param { JobberQuality } jobberQuality The quality of jobbers that everyone will get by default
  */
-function createGame(id, map, jobberQuality) {
+function createGame(
+  id,
+  map,
+  jobberQuality,
+  mapName,
+  maxPlayers,
+  locked,
+  password
+) {
   if (games[id]) throw `Game with id '${id}' already exists`;
 
   const newGame = new Game(
     map,
     jobberQuality,
     id,
-    getSocketIO().sockets.in(id.toString())
+    getSocketIO().sockets.in(id.toString()),
+    mapName,
+    maxPlayers,
+    locked,
+    password
   );
 
   games[id] = newGame;
 }
 
+/**
+ * @param {number} id
+ *
+ * @returns {Game} the game object
+ */
 function getGame(id) {
   return games[id];
 }
@@ -31,8 +48,13 @@ function getAllGameIds() {
   return Object.keys(games);
 }
 
+function getAllGames() {
+  return games;
+}
+
 module.exports = {
   createGame,
+  getAllGames,
   getGame,
   getAllGameIds,
 };

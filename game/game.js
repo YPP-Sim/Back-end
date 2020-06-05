@@ -65,16 +65,24 @@ class Game {
     map = defaultMap,
     jobberQuality = JobberQuality.ELITE,
     gameId,
-    io
+    io,
+    mapName,
+    maxPlayers,
+    locked,
+    password = ""
   ) {
+    this.maxPlayers = maxPlayers;
     this.gameId = gameId;
+    this.mapName = mapName;
     this.players = {};
     this.attackers = {};
     this.defenders = {};
-    this.io = io;
     this.map = getFreshMapGrid(map);
     this.jobberQuality = jobberQuality;
 
+    this.io = io;
+    this.password = password;
+    this.locked = locked;
     this.defenderScore = 0;
     this.attackerScore = 0;
 
