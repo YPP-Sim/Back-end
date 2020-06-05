@@ -89,7 +89,7 @@ class Game {
     this.timeLeft = 0;
     this.turnTime = 35; // in seconds
 
-    this.gameStatus = GameStatus.LOBBY;
+    this.gameStatus = GameStatus.WAITING;
 
     this.currentGameMoves = {};
     this.claimedToClear = [];

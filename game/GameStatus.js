@@ -1,5 +1,5 @@
 module.exports = {
-  LOBBY: "LOBBY",
+  WAITING: "WAITING",
   INGAME: "INGAME",
-  ENDED: "ENDED",
+  ENDING: "ENDING",
 };

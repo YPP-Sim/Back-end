@@ -16,7 +16,7 @@ router.get("/game-list", (req, res) => {
     gameInfo.mapName = gameObj.mapName;
     gameInfo.currentPlayers = Object.keys(gameObj.players).length;
     gameInfo.locked = gameObj.locked;
-
+    gameInfo.status = gameObj.gameStatus;
     gameArray.push(gameInfo);
   }
 
