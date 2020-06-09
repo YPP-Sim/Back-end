@@ -1,4 +1,5 @@
 const fs = require("fs");
+const path = require("path");
 
 function getFreshMapGrid(map) {
   const rows = map.length;
@@ -62,8 +63,30 @@ function readMapFromFile(mapName) {
   });
 }
 
+function getAllAvailableMaps() {
+  return new Promise((resolve, reject) => {
+    const directoryPath = path.join(__dirname, "../maps");
+    fs.readdir(directoryPath, (err, files) => {
+      if (err) {
+        reject(err);
+      } else {
+        const newFiles = removeFileExtensions(files);
+        resolve(newFiles);
+      }
+    });
+  });
+}
+
+function removeFileExtensions(files) {
+  const newFileArray = [];
+  for (file of files) newFileArray.push(file.split(".")[0]);
+
+  return newFileArray;
+}
+
 module.exports = {
   getFreshMapGrid,
   isRock,
   readMapFromFile,
+  getAllAvailableMaps,
 };

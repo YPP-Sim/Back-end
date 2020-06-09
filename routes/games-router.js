@@ -42,7 +42,7 @@ router.post("/create-game", async (req, res) => {
     return;
   }
 
-  if (!locked) {
+  if (!("locked" in req.body)) {
     res.status(401).json({
       message:
         "Must specify locked field, if the game is locked or not (using password)",

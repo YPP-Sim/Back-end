@@ -10,6 +10,7 @@ const io = require("socket.io")(http);
 const onCommand = require("./socket-commands");
 
 const gamesRouter = require("./routes/games-router");
+const mapRouter = require("./routes/maps-router");
 
 const port = process.env.PORT || 4000;
 
@@ -22,6 +23,7 @@ app.use(express.json());
 app.use(cors());
 // --- Routes
 app.use("/games", gamesRouter);
+app.use("/maps", mapRouter);
 
 app.get("/", (req, res) => {
   res.status(200).json({ message: "Works!" });
