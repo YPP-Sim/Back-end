@@ -47,7 +47,11 @@ io.on("connection", (socket) => {
     console.log("A socket joined room: ", gameId);
     // io.sockets.in(gameId).emit("message", "A new user joined!");
     socket.emit("message", "Test");
-    emitToRoom(gameId, "message", "A new user joined room: " + gameId);
+  });
+
+  socket.on("leaveGame", (gameId) => {
+    socket.leave(gameId);
+    console.log("User left room: ", gameId);
   });
 
   socket.on("message", (data) => {
