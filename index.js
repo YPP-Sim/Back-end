@@ -14,6 +14,8 @@ const mapRouter = require("./routes/maps-router");
 
 const port = process.env.PORT || 4000;
 
+let firstSent = false;
+
 function getSocketIO() {
   return io;
 }
@@ -45,13 +47,20 @@ io.on("connection", (socket) => {
     socket.join(gameId);
 
     console.log("A socket joined room: ", gameId);
-    // io.sockets.in(gameId).emit("message", "A new user joined!");
-    socket.emit("message", "Test");
+    if (!firstSent) {
+      io.sockets.in("removal").emit("remove", "tes");
+      firstSent = true;
+    }
   });
 
   socket.on("leaveGame", (gameId) => {
     socket.leave(gameId);
     console.log("User left room: ", gameId);
+  });
+
+  socket.on("playerMessage", (chatData) => {
+    const { message, sender, gameId } = chatData;
+    io.sockets.in(gameId).emit("playerMessage", { sender, message });
   });
 
   socket.on("message", (data) => {
