@@ -127,6 +127,14 @@ class Game {
     this.players[playerName] = new PlayerData(playerName, ship);
   }
 
+  getPlayerListString() {
+    return Object.keys(this.players);
+  }
+
+  getPlayerList() {
+    return Object.values(this.players);
+  }
+
   removePlayer(playerName) {
     if (this.players[playerName]) delete this.players[playerName];
   }
@@ -140,6 +148,10 @@ class Game {
       this.attackers[playerName] = this.getPlayer(playerName);
   }
 
+  getAttackers() {
+    return Object.values(this.attackers);
+  }
+
   removeAttacker(playerName) {
     if (this.attackers[playerName]) delete this.attackers[playerName];
   }
@@ -147,6 +159,10 @@ class Game {
   addDefender(playerName) {
     if (!this.defenders[playerName])
       this.defenders[playerName] = this.getPlayer(playerName);
+  }
+
+  getDefenders() {
+    return Object.values(this.defenders);
   }
 
   removeDefender(playerName) {
