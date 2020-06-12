@@ -4,16 +4,18 @@ class SocketHandler {
   constructor(io) {
     this.io = io;
     this.firstSent = false;
+
+    this.playerSockets = {};
   }
 
   registerEvents() {
     this.io.on("connection", (socket) => {
-      console.log("A connection has been established.");
-
       socket.on("joinGame", ({ gameId, playerName }) => {
+        // Pair the socket with a player
+        this.playerSockets[socket.id] = { playerName, gameId };
         const game = gameHandler.getGame(gameId);
         if (!game) {
-          socket.emit("error", `Game '${gameId}' does not exist!`);
+          socket.emit("gameError", `Game '${gameId}' does not exist!`);
           return;
         }
 
@@ -24,15 +26,16 @@ class SocketHandler {
         socket.room = gameId;
         socket.join(gameId);
 
-        console.log("A socket joined room: ", gameId);
-        if (!firstSent) {
+        console.log(`Player ${playerName} joined game: '${gameId}'`);
+
+        if (!this.firstSent) {
           this.io.sockets.in("removal").emit("remove", "tes");
           this.firstSent = true;
         }
 
         this.io.sockets
           .in(gameId)
-          .emit("gameMessage", `${playerName} has joined the game.`);
+          .emit("gameMessage", `${playerName} has joined the game`);
 
         const gameData = { players: [], status: game.getStatus() };
 
@@ -52,9 +55,31 @@ class SocketHandler {
         socket.emit("gameData", gameData);
       });
 
-      socket.on("leaveGame", (gameId) => {
+      socket.on("leaveGame", ({ gameId, playerName }) => {
         socket.leave(gameId);
         console.log("User left room: ", gameId);
+        const game = gameHandler.getGame(gameId);
+
+        if (!game) {
+          socket.emit("gameError", `Game '${gameId}' does not exist!`);
+          return;
+        }
+
+        game.removePlayer(playerName);
+        this.io.in(gameId).emit("gameMessage", `${playerName} left the game`);
+      });
+
+      socket.on("disconnect", (reason) => {
+        const socketId = socket.id;
+        if (this.playerSockets[socketId]) {
+          const { playerName, gameId } = this.playerSockets[socketId];
+          console.log(`Player ${playerName} has disconnected`);
+
+          const game = gameHandler.getGame(gameId);
+
+          game.removePlayer(playerName);
+          this.io.in(gameId).emit("gameMessage", `${playerName} left the game`);
+        }
       });
 
       socket.on("playerMessage", (chatData) => {

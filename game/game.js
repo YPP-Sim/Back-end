@@ -144,8 +144,8 @@ class Game {
   }
 
   addAttacker(playerName) {
-    if (!this.attackers[playerName]) const player = this.getPlayer(playerName);
-    this.attackers[playerName] = player;
+    if (!this.attackers[playerName])
+      this.attackers[playerName] = this.getPlayer(playerName);
   }
 
   getAttackers() {
