@@ -30,6 +30,10 @@ class SocketHandler {
           this.firstSent = true;
         }
 
+        this.io.sockets
+          .in(gameId)
+          .emit("gameMessage", `${playerName} has joined the game.`);
+
         const gameData = { players: [], status: game.getStatus() };
 
         for (let player of game.getPlayerList()) {
