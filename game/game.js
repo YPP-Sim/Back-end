@@ -152,6 +152,14 @@ class Game {
     return Object.values(this.attackers);
   }
 
+  isUndecided(playerName) {
+    return (
+      !this.attackers[playerName] &&
+      !this.defenders[playerName] &&
+      this.players[playerName]
+    );
+  }
+
   removeAttacker(playerName) {
     if (this.attackers[playerName]) delete this.attackers[playerName];
   }

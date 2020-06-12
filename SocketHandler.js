@@ -1,4 +1,24 @@
 const gameHandler = require("./games-handler");
+const { getGame } = require("./games-handler");
+
+function getGameData(game) {
+  const gameData = { players: [], status: game.getStatus() };
+
+  for (let player of game.getPlayerList()) {
+    let shipData;
+    if (player.getShip()) {
+      shipData = player.getShip().getShipStats();
+    }
+    const pData = {
+      playerName: player.getName(),
+      side: player.getSide(game),
+      shipData,
+    };
+    gameData.players.push(pData);
+  }
+
+  return gameData;
+}
 
 class SocketHandler {
   constructor(io) {
@@ -37,22 +57,7 @@ class SocketHandler {
           .in(gameId)
           .emit("gameMessage", `${playerName} has joined the game`);
 
-        const gameData = { players: [], status: game.getStatus() };
-
-        for (let player of game.getPlayerList()) {
-          let shipData;
-          if (player.getShip()) {
-            shipData = player.getShip().getShipStats();
-          }
-          const pData = {
-            playerName: player.getName(),
-            side: player.getSide(game),
-            shipData,
-          };
-          gameData.players.push(pData);
-        }
-
-        socket.emit("gameData", gameData);
+        this.io.to(gameId).emit("gameData", getGameData(game));
       });
 
       socket.on("leaveGame", ({ gameId, playerName }) => {
@@ -80,6 +85,25 @@ class SocketHandler {
           game.removePlayer(playerName);
           this.io.in(gameId).emit("gameMessage", `${playerName} left the game`);
         }
+      });
+
+      socket.on("joinTeam", ({ playerName, gameId, side }) => {
+        const game = gameHandler.getGame(gameId);
+        switch (side) {
+          case "ATTACKER":
+            if (game.isDefender(playerName)) game.removeDefender(playerName);
+            game.addAttacker(playerName);
+
+            break;
+          case "DEFENDER":
+            if (game.isAttacker(playerName)) game.removeAttacker(playerName);
+            game.addDefender(playerName);
+            break;
+          case "UNDECIDED":
+          default:
+            break;
+        }
+        this.io.to(gameId).emit("gameData", getGameData(game));
       });
 
       socket.on("playerMessage", (chatData) => {
