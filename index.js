@@ -7,14 +7,15 @@ const cors = require("cors");
 const app = express();
 const http = require("http").createServer(app);
 const io = require("socket.io")(http);
-const onCommand = require("./socket-commands");
+const SocketHandler = require("./SocketHandler");
 
 const gamesRouter = require("./routes/games-router");
 const mapRouter = require("./routes/maps-router");
 
 const port = process.env.PORT || 4000;
 
-let firstSent = false;
+const socketHandler = new SocketHandler(io);
+socketHandler.registerEvents();
 
 function getSocketIO() {
   return io;
@@ -32,41 +33,6 @@ app.get("/", (req, res) => {
 });
 
 // --- Web Sockets
-io.on("connection", (socket) => {
-  console.log("A connection has been established...");
-
-  socket.on("clientCommand", (command, args) => {
-    console.log("Client command: " + command, ", Args: " + args);
-    onCommand(command, args, socket, io);
-  });
-
-  socket.on("joinGame", (gameId) => {
-    if (socket.room) socket.leave(socket.room);
-
-    socket.room = gameId;
-    socket.join(gameId);
-
-    console.log("A socket joined room: ", gameId);
-    if (!firstSent) {
-      io.sockets.in("removal").emit("remove", "tes");
-      firstSent = true;
-    }
-  });
-
-  socket.on("leaveGame", (gameId) => {
-    socket.leave(gameId);
-    console.log("User left room: ", gameId);
-  });
-
-  socket.on("playerMessage", (chatData) => {
-    const { message, sender, gameId } = chatData;
-    io.sockets.in(gameId).emit("playerMessage", { sender, message });
-  });
-
-  socket.on("message", (data) => {
-    console.log("message: ", data);
-  });
-});
 
 // --- Server start/listen
 http.listen(port, () => {
