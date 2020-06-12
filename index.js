@@ -32,8 +32,6 @@ app.get("/", (req, res) => {
   res.status(200).json({ message: "Works!" });
 });
 
-// --- Web Sockets
-
 // --- Server start/listen
 http.listen(port, () => {
   console.log(`Listening on port: ${port}`);

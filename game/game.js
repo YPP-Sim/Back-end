@@ -2,6 +2,7 @@ const JobberQuality = require("./JobberQuality");
 const GameStatus = require("./GameStatus");
 const Direction = require("./Direction");
 const PlayerMoves = require("./moves/PlayerMoves");
+const PlayerData = require("./PlayerData");
 const PlayerShip = require("./PlayerShip");
 const Orientation = require("./Orientation");
 const Move = require("./moves/Move");
@@ -111,7 +112,7 @@ class Game {
     cell.occupiedBy = id;
     playerShip.boardX = x;
     playerShip.boardY = y;
-    this.players[id] = playerShip;
+    this.players[id].ship = playerShip;
 
     if (teamType === "ATTACKER") {
       this.attackers[id] = playerShip;
@@ -120,6 +121,36 @@ class Game {
     }
 
     return playerShip;
+  }
+
+  addPlayer(playerName, ship = null) {
+    this.players[playerName] = new PlayerData(playerName, ship);
+  }
+
+  removePlayer(playerName) {
+    if (this.players[playerName]) delete this.players[playerName];
+  }
+
+  getPlayer(playerName) {
+    return this.players[playerName];
+  }
+
+  addAttacker(playerName) {
+    if (!this.attackers[playerName])
+      this.attackers[playerName] = this.getPlayer(playerName);
+  }
+
+  removeAttacker(playerName) {
+    if (this.attackers[playerName]) delete this.attackers[playerName];
+  }
+
+  addDefender(playerName) {
+    if (!this.defenders[playerName])
+      this.defenders[playerName] = this.getPlayer(playerName);
+  }
+
+  removeDefender(playerName) {
+    if (this.defenders[playerName]) delete this.defenders[playerName];
   }
 
   setShipPosition(shipId, x, y) {
@@ -359,7 +390,7 @@ class Game {
    * @returns {PlayerShip} the ship that was retrieved through the id.
    */
   getShipById(id) {
-    return this.players[id];
+    return this.players[id].ship;
   }
 
   onGameTurn() {

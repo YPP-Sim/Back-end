@@ -1,3 +1,5 @@
+const gameHandler = require("./games-handler");
+
 class SocketHandler {
   constructor(io) {
     this.io = io;
@@ -8,7 +10,15 @@ class SocketHandler {
     this.io.on("connection", (socket) => {
       console.log("A connection has been established.");
 
-      socket.on("joinGame", (gameId) => {
+      socket.on("joinGame", ({ gameId, playerName }) => {
+        const game = gameHandler.getGame(gameId);
+        if (!game) {
+          socket.emit("error", `Game '${gameId}' does not exist!`);
+          return;
+        }
+
+        game.addPlayer(playerName);
+
         if (socket.room) socket.leave(socket.room);
 
         socket.room = gameId;

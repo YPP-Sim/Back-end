@@ -36,7 +36,7 @@ function createGame(
 }
 
 /**
- * @param {number} id
+ * @param {string} id
  *
  * @returns {Game} the game object
  */
