@@ -18,6 +18,21 @@ class PlayerShip {
     // TODO: Maybe a sunk boolean variable?
   }
 
+
+  getShipStats() {
+    return {
+      shipOwner: this.shipId,
+      shipType: this.shipType,
+      boardX: this.boardX,
+      boardY: this.boardY,
+
+      bilge: this.bilge,
+      damage = this.damage,
+
+      orientation: this.orientation
+    }
+  }
+
   ramRocks() {
     this.damageShip(this.shipType.rockDamage);
   }

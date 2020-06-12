@@ -144,8 +144,8 @@ class Game {
   }
 
   addAttacker(playerName) {
-    if (!this.attackers[playerName])
-      this.attackers[playerName] = this.getPlayer(playerName);
+    if (!this.attackers[playerName]) const player = this.getPlayer(playerName);
+    this.attackers[playerName] = player;
   }
 
   getAttackers() {
@@ -167,6 +167,14 @@ class Game {
 
   removeDefender(playerName) {
     if (this.defenders[playerName]) delete this.defenders[playerName];
+  }
+
+  isDefender(playerName) {
+    return this.defenders[playerName];
+  }
+
+  isAttacker(playerName) {
+    return this.attackers[playerName];
   }
 
   setShipPosition(shipId, x, y) {
@@ -458,6 +466,10 @@ class Game {
    */
   setJobberQuality(jobberQuality) {
     this.jobberQuality = jobberQuality;
+  }
+
+  getStatus() {
+    return this.gameStatus;
   }
 
   start() {

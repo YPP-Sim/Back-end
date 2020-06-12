@@ -29,6 +29,23 @@ class SocketHandler {
           this.io.sockets.in("removal").emit("remove", "tes");
           this.firstSent = true;
         }
+
+        const gameData = { players: [], status: game.getStatus() };
+
+        for (let player of game.getPlayerList()) {
+          let shipData;
+          if (player.getShip()) {
+            shipData = player.getShip().getShipStats();
+          }
+          const pData = {
+            playerName: player.getName(),
+            side: player.getSide(game),
+            shipData,
+          };
+          gameData.players.push(pData);
+        }
+
+        socket.emit("gameData", gameData);
       });
 
       socket.on("leaveGame", (gameId) => {
