@@ -26,7 +26,7 @@ class SocketHandler {
 
         console.log("A socket joined room: ", gameId);
         if (!firstSent) {
-          io.sockets.in("removal").emit("remove", "tes");
+          this.io.sockets.in("removal").emit("remove", "tes");
           this.firstSent = true;
         }
       });
@@ -38,7 +38,7 @@ class SocketHandler {
 
       socket.on("playerMessage", (chatData) => {
         const { message, sender, gameId } = chatData;
-        io.sockets.in(gameId).emit("playerMessage", { sender, message });
+        this.io.sockets.in(gameId).emit("playerMessage", { sender, message });
       });
 
       socket.on("message", (data) => {
