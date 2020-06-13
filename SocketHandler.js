@@ -2,6 +2,7 @@ const gameHandler = require("./games-handler");
 const PlayerShip = require("./game/PlayerShip");
 const GameStatus = require("./game/GameStatus");
 const ShipType = require("./game/ShipType");
+const util = require("./game/util");
 
 function getGameData(game) {
   const gameData = {
@@ -88,7 +89,13 @@ class SocketHandler {
           console.log(`Player ${playerName} has disconnected`);
 
           const game = gameHandler.getGame(gameId);
-
+          if (!game) {
+            console.log(
+              "Trying to disconnect from a game that does not exist: ",
+              gameId
+            );
+            return;
+          }
           game.removePlayer(playerName);
           this.io.in(gameId).emit("gameMessage", `${playerName} left the game`);
           this.io.in(gameId).emit("gameData", getGameData(game));
@@ -140,6 +147,10 @@ class SocketHandler {
         this.io.sockets.in(gameId).emit("playerMessage", { sender, message });
       });
 
+      socket.on("requestMap", ({ gameId }) => {
+        socket.emit("gameMap", gameHandler.getGame(gameId).rawMap);
+      });
+
       socket.on("startGame", ({ gameId }) => {
         const game = gameHandler.getGame(gameId);
         if (!game) {
@@ -152,6 +163,7 @@ class SocketHandler {
         game.start();
 
         const startingData = getGameData(game);
+        startingData.map = game.rawMap;
         this.io.to(gameId).emit("startGame", startingData);
       });
 

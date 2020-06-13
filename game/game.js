@@ -7,6 +7,7 @@ const PlayerShip = require("./PlayerShip");
 const Orientation = require("./Orientation");
 const Move = require("./moves/Move");
 const { getFreshMapGrid, isRock } = require("./util");
+const util = require("./util");
 
 const defaultMap = [
   [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -80,6 +81,9 @@ class Game {
     this.players = {};
     this.attackers = {};
     this.defenders = {};
+    util.readMapFromFile(mapName).then((map) => {
+      this.rawMap = util.addSafeZone(map);
+    });
     this.map = getFreshMapGrid(map);
     this.jobberQuality = jobberQuality;
 

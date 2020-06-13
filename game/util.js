@@ -104,4 +104,5 @@ module.exports = {
   isRock,
   readMapFromFile,
   getAllAvailableMaps,
+  addSafeZone,
 };
