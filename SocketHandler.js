@@ -140,9 +140,9 @@ class SocketHandler {
         this.io.sockets.in(gameId).emit("playerMessage", { sender, message });
       });
 
-      socket.on("startGame", ({gameId})) {
+      socket.on("startGame", ({ gameId }) => {
         const game = gameHandler.getGame(gameId);
-        if(!game) {
+        if (!game) {
           socket.emit("gameError", `Game does not exist: ${gameId}`);
           return;
         }
@@ -153,7 +153,7 @@ class SocketHandler {
 
         const startingData = getGameData(game);
         this.io.to(gameId).emit("startGame", startingData);
-      }
+      });
 
       socket.on("message", (data) => {
         console.log("message: ", data);

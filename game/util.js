@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 function getFreshMapGrid(map) {
+  map = addSafeZone(map);
   const rows = map.length;
   const columns = map[0].length;
 
@@ -20,6 +21,20 @@ function getFreshMapGrid(map) {
     }
   }
   return detailedMap;
+}
+
+function addSafeZone(map) {
+  const width = map[0].length;
+  const safeZoneRow = new Array(width).fill(-1);
+  map.push(safeZoneRow);
+  map.push(safeZoneRow);
+  map.push(safeZoneRow);
+
+  map.unshift(safeZoneRow);
+  map.unshift(safeZoneRow);
+  map.unshift(safeZoneRow);
+
+  return map;
 }
 
 function isRock(cell_id) {
