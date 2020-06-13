@@ -2,6 +2,7 @@ const CannonType = require("./CannonType");
 module.exports = {
   WAR_FRIG: {
     name: "War Frigate",
+    serverName: "WAR_FRIG",
     dualCannon: true,
     maxMoves: 3,
     cannonType: CannonType.LARGE,
@@ -13,6 +14,7 @@ module.exports = {
   },
   WAR_BRIG: {
     name: "War Brig",
+    serverName: "WAR_BRIG",
     dualCannon: true,
     maxMoves: 3,
     cannonType: CannonType.MEDIUM,

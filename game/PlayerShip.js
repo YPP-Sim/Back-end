@@ -21,14 +21,14 @@ class PlayerShip {
   getShipStats() {
     return {
       shipOwner: this.shipId,
-      shipType: this.shipType,
+      shipType: this.shipType.serverName,
       boardX: this.boardX,
       boardY: this.boardY,
 
       bilge: this.bilge,
       damage: this.damage,
 
-      orientation: this.orientation,
+      orientation: this.orientation.name,
     };
   }
 

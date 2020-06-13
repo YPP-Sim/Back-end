@@ -1,5 +1,7 @@
 const gameHandler = require("./games-handler");
 const { getGame } = require("./games-handler");
+const PlayerShip = require("./game/PlayerShip");
+const ShipType = require("./game/ShipType");
 
 function getGameData(game) {
   const gameData = { players: [], status: game.getStatus() };
@@ -91,6 +93,10 @@ class SocketHandler {
 
       socket.on("joinTeam", ({ playerName, gameId, side }) => {
         const game = gameHandler.getGame(gameId);
+        if (!game) {
+          socket.emit("gameError", `Game ${gameId} does not exist`);
+          return;
+        }
         switch (side) {
           case "ATTACKER":
             if (game.isDefender(playerName)) game.removeDefender(playerName);
@@ -105,6 +111,23 @@ class SocketHandler {
           default:
             break;
         }
+        this.io.to(gameId).emit("gameData", getGameData(game));
+      });
+
+      socket.on("playerChangeShip", ({ playerName, gameId, shipType }) => {
+        const game = gameHandler.getGame(gameId);
+        if (!game) {
+          socket.emit("gameError", `Game ${gameId} does not exist!`);
+          return;
+        }
+        const player = game.getPlayer(playerName);
+
+        if (!player.ship) {
+          player.ship = new PlayerShip(playerName, ShipType[shipType]);
+        } else {
+          player.ship.shipType = ShipType[shipType];
+        }
+
         this.io.to(gameId).emit("gameData", getGameData(game));
       });
 
