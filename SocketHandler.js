@@ -1,6 +1,6 @@
 const gameHandler = require("./games-handler");
-const { getGame } = require("./games-handler");
 const PlayerShip = require("./game/PlayerShip");
+const GameStatus = require("./game/GameStatus");
 const ShipType = require("./game/ShipType");
 
 function getGameData(game) {
@@ -139,6 +139,21 @@ class SocketHandler {
         const { message, sender, gameId } = chatData;
         this.io.sockets.in(gameId).emit("playerMessage", { sender, message });
       });
+
+      socket.on("startGame", ({gameId})) {
+        const game = gameHandler.getGame(gameId);
+        if(!game) {
+          socket.emit("gameError", `Game does not exist: ${gameId}`);
+          return;
+        }
+
+        game.gameStatus = GameStatus.INGAME;
+
+        game.start();
+
+        const startingData = getGameData(game);
+        this.io.to(gameId).emit("startGame", startingData);
+      }
 
       socket.on("message", (data) => {
         console.log("message: ", data);
