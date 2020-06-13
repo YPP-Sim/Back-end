@@ -17,7 +17,8 @@ function createGame(
   mapName,
   maxPlayers,
   locked,
-  password
+  password,
+  gameOwner
 ) {
   if (games[id]) throw `Game with id '${id}' already exists`;
 
@@ -29,7 +30,8 @@ function createGame(
     mapName,
     maxPlayers,
     locked,
-    password
+    password,
+    gameOwner
   );
 
   games[id] = newGame;

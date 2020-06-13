@@ -4,7 +4,11 @@ const PlayerShip = require("./game/PlayerShip");
 const ShipType = require("./game/ShipType");
 
 function getGameData(game) {
-  const gameData = { players: [], status: game.getStatus() };
+  const gameData = {
+    players: [],
+    gameOwner: game.gameOwner,
+    status: game.getStatus(),
+  };
 
   for (let player of game.getPlayerList()) {
     let shipData;

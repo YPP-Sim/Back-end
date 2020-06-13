@@ -70,11 +70,13 @@ class Game {
     mapName,
     maxPlayers,
     locked,
-    password = ""
+    password = "",
+    gameOwner
   ) {
     this.maxPlayers = maxPlayers;
     this.gameId = gameId;
     this.mapName = mapName;
+    this.gameOwner = gameOwner;
     this.players = {};
     this.attackers = {};
     this.defenders = {};

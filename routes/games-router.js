@@ -24,7 +24,15 @@ router.get("/game-list", (req, res) => {
 });
 
 router.post("/create-game", async (req, res) => {
-  let { id, mapName, jobberQuality, maxPlayers, locked, password } = req.body;
+  let {
+    id,
+    mapName,
+    jobberQuality,
+    maxPlayers,
+    locked,
+    password,
+    gameOwner,
+  } = req.body;
   if (!id) {
     res.status(401).json({ message: "Must specify an id for the game" });
     return;
@@ -62,7 +70,8 @@ router.post("/create-game", async (req, res) => {
       mapName,
       maxPlayers,
       locked,
-      password
+      password,
+      gameOwner
     );
     res.status(201).json({ message: "Created game successfully" });
   } catch (err) {
