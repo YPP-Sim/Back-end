@@ -72,9 +72,10 @@ class SocketHandler {
 
         game.removePlayer(playerName);
         this.io.in(gameId).emit("gameMessage", `${playerName} left the game`);
+        this.io.in(gameId).emit("gameData", getGameData(game));
       });
 
-      socket.on("disconnect", (reason) => {
+      socket.on("disconnect", () => {
         const socketId = socket.id;
         if (this.playerSockets[socketId]) {
           const { playerName, gameId } = this.playerSockets[socketId];
@@ -84,6 +85,7 @@ class SocketHandler {
 
           game.removePlayer(playerName);
           this.io.in(gameId).emit("gameMessage", `${playerName} left the game`);
+          this.io.in(gameId).emit("gameData", getGameData(game));
         }
       });
 
