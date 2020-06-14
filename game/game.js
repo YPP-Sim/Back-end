@@ -487,9 +487,7 @@ class Game {
   }
 
   start() {
-    // TODO - Set ships locations to their respective sides (attacking/defending)
-
-    // TODO - Tell client the game has started, send out starting data to client.
+    this._setRandomSpawns();
     this.gameStatus = GameStatus.INGAME;
 
     this.turnTick = 0;
@@ -502,6 +500,65 @@ class Game {
     clearInterval(this.gameIntervalId);
     this.gameStatus = GameStatus.ENDED;
   }
+
+  _setRandomSpawns() {
+    let rowCount = 0;
+
+    for (let attcker in this.attackers) {
+      const att = this.attackers[attcker];
+      while (rowCount < 3) {
+        const freeCells = getUnoccupiedRowCells(
+          this.map.length - 1 - rowCount,
+          this.map
+        );
+        if (freeCells.length === 0) {
+          rowCount++;
+          continue;
+        }
+        const rNum = getRandomInt(freeCells.length);
+        freeCells[rNum].occupiedBy = att.playerName;
+        att.ship.boardX = freeCells[rNum].index;
+        att.ship.boardY = this.map.length - 1 - rowCount;
+        att.ship.setOrientation(Orientation.NORTH);
+        break;
+      }
+    }
+
+    rowCount = 0;
+    for (let defender in this.defenders) {
+      const def = this.defenders[defender];
+      while (rowCount < 3) {
+        const freeCells = getUnoccupiedRowCells(0 + rowCount, this.map);
+        if (freeCells.length === 0) {
+          rowCount++;
+          continue;
+        }
+
+        const rNum = getRandomInt(freeCells.length);
+        freeCells[rNum].occupiedBy = def.playerName;
+        def.ship.boardX = freeCells[rNum].index;
+        def.ship.boardY = 0 + rowCount;
+
+        def.ship.setOrientation(Orientation.SOUTH);
+
+        break;
+      }
+    }
+  }
+}
+function getUnoccupiedRowCells(row, map) {
+  const rowCells = map[row].map((cell, index) => {
+    if (cell.occupiedBy) return null;
+    cell.index = index;
+    return cell;
+  });
+  const freeCells = rowCells.filter((cell) => cell);
+
+  return freeCells;
+}
+
+function getRandomInt(max) {
+  return Math.floor(Math.random() * Math.floor(max));
 }
 
 module.exports = Game;

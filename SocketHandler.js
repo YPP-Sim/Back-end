@@ -148,6 +148,11 @@ class SocketHandler {
       });
 
       socket.on("requestMap", ({ gameId }) => {
+        const game = gameHandler.getGame(gameId);
+        if (!game) {
+          socket.emit("gameError", `Game ${gameId} does not exist`);
+          return;
+        }
         socket.emit("gameMap", gameHandler.getGame(gameId).rawMap);
       });
 
