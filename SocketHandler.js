@@ -3,6 +3,8 @@ const PlayerShip = require("./game/PlayerShip");
 const GameStatus = require("./game/GameStatus");
 const ShipType = require("./game/ShipType");
 const util = require("./game/util");
+const Move = require("./game/moves/Move");
+const Direction = require("./game/Direction");
 
 function getGameData(game) {
   const gameData = {
@@ -170,6 +172,47 @@ class SocketHandler {
         const startingData = getGameData(game);
         startingData.map = game.rawMap;
         this.io.to(gameId).emit("startGame", startingData);
+      });
+
+      socket.on("setMove", ({ gameId, playerName, moveData }) => {
+        const game = gameHandler.getGame(gameId);
+
+        if (!game) {
+          socket.emit("gameError", `Game ${gameId} does not exist!`);
+          return;
+        }
+
+        const player = game.getPlayer(playerName);
+        if (!player) {
+          socket.emit("gameError", `Player ${playerName} does not exist!`);
+          return;
+        }
+
+        const { moveNumber, direction, leftGuns, rightGuns } = moveData;
+
+        const move = new Move(Direction[direction], playerName);
+        if (leftGuns) move.setLeftGuns(leftGuns);
+        if (rightGuns) move.setRightGuns(rightGuns);
+
+        switch (moveNumber) {
+          case 1:
+            player.setFirstMove(move);
+            break;
+          case 2:
+            player.setSecondMove(move);
+            break;
+          case 3:
+            player.setThirdMove(move);
+            break;
+          case 4:
+            player.setFourthMove(move);
+            break;
+        }
+
+        this.io.to(gameId).emit("updatePlayerMoves", {
+          playerName,
+          turnAmount: player.getMoves().getActiveTurnAmount(),
+        });
       });
 
       socket.on("message", (data) => {

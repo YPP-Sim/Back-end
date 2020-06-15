@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const Move = require("./moves/Move");
 
 function getFreshMapGrid(map) {
   map = addSafeZone(map);

@@ -48,6 +48,23 @@ class PlayerMoves {
     this.fourthMove = new Move(dir, this.shipId);
   }
 
+  getActiveTurnAmount() {
+    let count = 0;
+    if (this.firstMove) count++;
+    if (this.secondMove) count++;
+    if (this.thirdMove) count++;
+    if (this.fourthMove) count++;
+
+    return count;
+  }
+
+  clear() {
+    this.firstMove = null;
+    this.secondMove = null;
+    this.thirdMove = null;
+    this.fourthMove = null;
+  }
+
   getShipId() {
     return this.shipId;
   }

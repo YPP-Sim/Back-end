@@ -8,6 +8,7 @@ const Orientation = require("./Orientation");
 const Move = require("./moves/Move");
 const { getFreshMapGrid, isRock } = require("./util");
 const util = require("./util");
+const PlayerData = require("./PlayerData");
 
 const defaultMap = [
   [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -145,6 +146,11 @@ class Game {
     if (this.players[playerName]) delete this.players[playerName];
   }
 
+  /**
+   *
+   * @param {string} playerName the player to get by name
+   * @returns {PlayerData} the player data
+   */
   getPlayer(playerName) {
     return this.players[playerName];
   }
