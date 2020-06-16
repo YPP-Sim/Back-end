@@ -1,5 +1,17 @@
 const Move = require("./Move");
 const Direction = require("../Direction");
+
+function isActionableDirection(direction) {
+  if (direction === null || direction === undefined) return false;
+  switch (direction) {
+    case "FORWARD":
+    case "LEFT":
+    case "RIGHT":
+      return true;
+    default:
+      return false;
+  }
+}
 class PlayerMoves {
   /**
    *
@@ -50,10 +62,24 @@ class PlayerMoves {
 
   getActiveTurnAmount() {
     let count = 0;
-    if (this.firstMove) count++;
-    if (this.secondMove) count++;
-    if (this.thirdMove) count++;
-    if (this.fourthMove) count++;
+
+    function incrementOnActiveTurn(move) {
+      if (move) {
+        if (
+          !isActionableDirection(move.direction) &&
+          move.leftGuns[0] === false &&
+          move.rightGuns[0] === false
+        )
+          return;
+
+        count++;
+      }
+    }
+
+    incrementOnActiveTurn(this.firstMove);
+    incrementOnActiveTurn(this.secondMove);
+    incrementOnActiveTurn(this.thirdMove);
+    incrementOnActiveTurn(this.fourthMove);
 
     return count;
   }

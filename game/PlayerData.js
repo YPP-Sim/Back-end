@@ -14,19 +14,19 @@ class PlayerData {
   // Same is moves.set#####(move)
   // Just some more helpful sugar coating
   setFirstMove(move) {
-    this.moves.setFirstMove(move);
+    this.moves.firstMove = move;
   }
 
   setSecondMove(move) {
-    this.moves.setSecondMove(move);
+    this.moves.secondMove = move;
   }
 
   setThirdMove(move) {
-    this.moves.setThirdMove(move);
+    this.moves.thirdMove = move;
   }
 
   setFourthMove(move) {
-    this.moves.setFourthMove(move);
+    this.moves.fourthMove = move;
   }
 
   getSide(game) {

@@ -193,6 +193,7 @@ class SocketHandler {
         const { moveNumber, direction, leftGuns, rightGuns } = moveData;
 
         const move = new Move(Direction[direction], playerName);
+
         if (leftGuns) move.setLeftGuns(leftGuns);
         if (rightGuns) move.setRightGuns(rightGuns);
 
