@@ -35,6 +35,8 @@ class SocketHandler {
     this.firstSent = false;
 
     this.playerSockets = {};
+
+    this.actionAmountCache = {};
   }
 
   registerEvents() {
@@ -208,10 +210,19 @@ class SocketHandler {
             player.setFourthMove(move);
             break;
         }
-        this.io.to(gameId).emit("updatePlayerActions", {
-          playerName,
-          turnAmount: player.getMoves().getActiveTurnAmount(),
-        });
+
+        const activeTurns = player.getMoves().getActiveTurnAmount();
+        let prevTurns = -1;
+        if (this.actionAmountCache[playerName])
+          prevTurns = this.actionAmountCache[playerName];
+
+        if (prevTurns !== activeTurns)
+          this.io.to(gameId).emit("updatePlayerActions", {
+            playerName,
+            turnAmount: activeTurns,
+          });
+
+        this.actionAmountCache[playerName] = activeTurns;
       });
 
       socket.on("message", (data) => {
