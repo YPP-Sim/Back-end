@@ -8,7 +8,6 @@ const Orientation = require("./Orientation");
 const Move = require("./moves/Move");
 const { getFreshMapGrid, isRock } = require("./util");
 const util = require("./util");
-const PlayerData = require("./PlayerData");
 
 const defaultMap = [
   [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],

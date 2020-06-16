@@ -208,8 +208,7 @@ class SocketHandler {
             player.setFourthMove(move);
             break;
         }
-
-        this.io.to(gameId).emit("updatePlayerMoves", {
+        this.io.to(gameId).emit("updatePlayerActions", {
           playerName,
           turnAmount: player.getMoves().getActiveTurnAmount(),
         });
