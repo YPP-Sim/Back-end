@@ -456,12 +456,11 @@ class Game {
 
   _loadTurn(playerMovements, numberedTurn, namedTurn) {
     for (let playerName in this.players) {
-      console.log(`Viewing ${playerName} for turn ${numberedTurn}...`);
       const player = this.players[playerName];
       const pMoves = player.moves;
-      console.log("pMoves: ", player.moves);
+      if (!pMoves || !pMoves[namedTurn]) continue;
+
       const direction = pMoves[namedTurn].direction;
-      console.log("Direction: ", direction);
       if (isActionableDirection(direction)) {
         playerMovements["turn_" + numberedTurn].push({ playerName, direction });
       }
@@ -477,6 +476,16 @@ class Game {
     this.executeMoves(allPMoves);
 
     this.io.in(this.gameId).emit("gameTurn", { playerMovements });
+    setTimeout(() => {
+      this.io.in(this.gameId).emit("clearShips", "yeah");
+      this.clearAllMoves();
+    }, 3500);
+  }
+
+  clearAllMoves() {
+    for (let playerName in this.players) {
+      this.players[playerName].moves.clear();
+    }
   }
 
   onGameTick() {
