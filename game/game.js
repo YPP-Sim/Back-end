@@ -6,7 +6,7 @@ const PlayerData = require("./PlayerData");
 const PlayerShip = require("./PlayerShip");
 const Orientation = require("./Orientation");
 const Move = require("./moves/Move");
-const { getFreshMapGrid, isRock } = require("./util");
+const { getFreshMapGrid, isRock, isActionableDirection } = require("./util");
 const util = require("./util");
 
 const defaultMap = [
@@ -436,11 +436,47 @@ class Game {
     return this.players[id].ship;
   }
 
+  getAllPlayerMovements() {
+    const playerMovements = {
+      turn_1: [],
+      turn_1_shots: [],
+      turn_2: [],
+      turn_2_shots: [],
+      turn_3: [],
+      turn_3_shots: [],
+      turn_4: [],
+      turn_4_shots: [],
+    };
+    this._loadTurn(playerMovements, 1, "firstMove");
+    this._loadTurn(playerMovements, 2, "secondMove");
+    this._loadTurn(playerMovements, 3, "thirdMove");
+    this._loadTurn(playerMovements, 4, "fourthMove");
+    return playerMovements;
+  }
+
+  _loadTurn(playerMovements, numberedTurn, namedTurn) {
+    for (let playerName in this.players) {
+      console.log(`Viewing ${playerName} for turn ${numberedTurn}...`);
+      const player = this.players[playerName];
+      const pMoves = player.moves;
+      console.log("pMoves: ", player.moves);
+      const direction = pMoves[namedTurn].direction;
+      console.log("Direction: ", direction);
+      if (isActionableDirection(direction)) {
+        playerMovements["turn_" + numberedTurn].push({ playerName, direction });
+      }
+    }
+  }
+
   onGameTurn() {
-    // TODO - Get all of the clients moves
-    // TODO - Play out moves and calculate the damage taken to any ships and set new board based off ship moves.
-    // TODO - Send out data to clients for them to visually show moves
-    this.io.in(this.gameId).emit("gameTurn", "We're doing a game turn!");
+    const playerMovements = this.getAllPlayerMovements();
+    const allPMoves = [];
+    for (let playerName in this.players)
+      allPMoves.push(this.players[playerName].moves);
+
+    this.executeMoves(allPMoves);
+
+    this.io.in(this.gameId).emit("gameTurn", { playerMovements });
   }
 
   onGameTick() {

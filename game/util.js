@@ -100,10 +100,23 @@ function removeFileExtensions(files) {
   return newFileArray;
 }
 
+function isActionableDirection(direction) {
+  if (direction === null || direction === undefined) return false;
+  switch (direction) {
+    case "FORWARD":
+    case "LEFT":
+    case "RIGHT":
+      return true;
+    default:
+      return false;
+  }
+}
+
 module.exports = {
   getFreshMapGrid,
   isRock,
   readMapFromFile,
   getAllAvailableMaps,
   addSafeZone,
+  isActionableDirection,
 };

@@ -17,6 +17,10 @@ class Move {
     this.cancelledTurnal = false;
   }
 
+  getDirection() {
+    return this.direction;
+  }
+
   /**
    *    set's if the move will be shooting guns on the right side.
    *    Example input: [true,false], means that it's a single shot on the right side.

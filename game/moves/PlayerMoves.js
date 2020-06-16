@@ -1,17 +1,6 @@
 const Move = require("./Move");
 const Direction = require("../Direction");
-
-function isActionableDirection(direction) {
-  if (direction === null || direction === undefined) return false;
-  switch (direction) {
-    case "FORWARD":
-    case "LEFT":
-    case "RIGHT":
-      return true;
-    default:
-      return false;
-  }
-}
+const { isActionableDirection } = require("../util");
 class PlayerMoves {
   /**
    *
