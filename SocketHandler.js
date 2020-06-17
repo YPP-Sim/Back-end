@@ -231,11 +231,21 @@ class SocketHandler {
         if (!game) {
           return;
         }
-        const { bilge, damage } = game
-          .getPlayer(playerName)
-          .getShip()
-          .getShipStats();
-        socket.emit("updateShipStats", { bilge, damage });
+        if (
+          game.getPlayer(playerName) &&
+          game.getPlayer(playerName).getShip()
+        ) {
+          const { bilge, damage } = game
+            .getPlayer(playerName)
+            .getShip()
+            .getShipStats();
+          socket.emit("updateShipStats", { bilge, damage });
+        } else {
+          socket.emit(
+            "gameError",
+            `player ${playerName} does not exist or does not yet have a ship`
+          );
+        }
       });
 
       socket.on("message", (data) => {
