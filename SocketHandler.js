@@ -226,6 +226,18 @@ class SocketHandler {
         this.actionAmountCache[playerName] = activeTurns;
       });
 
+      socket.on("requestShipStats", ({ playerName, gameId }) => {
+        const game = gameHandler.getGame(gameId);
+        if (!game) {
+          return;
+        }
+        const { bilge, damage } = game
+          .getPlayer(playerName)
+          .getShip()
+          .getShipStats();
+        socket.emit("updateShipStats", { bilge, damage });
+      });
+
       socket.on("message", (data) => {
         console.log("message: ", data);
       });

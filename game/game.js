@@ -474,8 +474,8 @@ class Game {
       allPMoves.push(this.players[playerName].moves);
 
     this.executeMoves(allPMoves);
-
-    this.io.in(this.gameId).emit("gameTurn", { playerMovements });
+    const playerData = this.getAllPlayerPositions();
+    this.io.in(this.gameId).emit("gameTurn", { playerMovements, playerData });
     setTimeout(() => {
       this.io.in(this.gameId).emit("clearShips", "yeah");
       this.clearAllMoves();
@@ -486,6 +486,23 @@ class Game {
     for (let playerName in this.players) {
       this.players[playerName].moves.clear();
     }
+  }
+
+  getAllPlayerPositions() {
+    const playersData = [];
+    for (let playerName in this.players) {
+      const player = this.players[playerName];
+      if (player && player.ship)
+        playersData.push({
+          playerName,
+          boardX: player.ship.boardX,
+          boardY: player.ship.boardY,
+          orientation: player.ship.getOrientation().name,
+          bilge: player.ship.bilge,
+          damage: player.ship.damage,
+        });
+    }
+    return playersData;
   }
 
   onGameTick() {

@@ -1,4 +1,5 @@
 const PlayerMoves = require("./moves/PlayerMoves");
+const PlayerShip = require("./PlayerShip");
 
 class PlayerData {
   constructor(playerName, ship = null) {
@@ -42,6 +43,9 @@ class PlayerData {
     return this.playerName;
   }
 
+  /**
+   * @returns {PlayerShip}
+   */
   getShip() {
     return this.ship;
   }
