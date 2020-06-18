@@ -242,6 +242,7 @@ class Game {
     if (!moveObject) return;
     const { direction } = moveObject;
     const ship = this.getShipById(id);
+    if (!ship) return;
     const toOrientation = getToOrientation(ship.getOrientation(), direction);
 
     if (!moveObject.cancelledMovement) {
@@ -277,7 +278,7 @@ class Game {
     if (!moveObj) return;
     const { direction, moveOwner } = moveObj;
     const ship = this.getShipById(moveOwner);
-
+    if (!ship) return;
     const frontX = ship.boardX + ship.getOrientation().xDir;
     const frontY = ship.boardY + ship.getOrientation().yDir;
 

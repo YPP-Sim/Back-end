@@ -27,7 +27,8 @@ class PlayerShip {
 
       bilge: this.bilge,
       damage: this.damage,
-
+      dualCannon: this.shipType.dualCannon,
+      stallToken: this.shipType.stallToken,
       orientation: this.orientation.name,
     };
   }
