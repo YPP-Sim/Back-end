@@ -73,6 +73,33 @@ class PlayerMoves {
     return count;
   }
 
+  checkAndCreate(turn) {
+    if (this[turn]) return;
+    this[turn] = new Move(null, this.shipId);
+    return this[turn];
+  }
+
+  setGuns(turnNumber, side, gunData) {
+    let move;
+    switch (turnNumber) {
+      case 1:
+        move = this.checkAndCreate("firstMove");
+        break;
+      case 2:
+        move = this.checkAndCreate("secondMove");
+        break;
+      case 3:
+        move = this.checkAndCreate("thirdMove");
+        break;
+      case 4:
+        move = this.checkAndCreate("fourthMove");
+        break;
+      default:
+        return;
+    }
+    move[side + "Guns"] = gunData;
+  }
+
   clear() {
     this.firstMove = null;
     this.secondMove = null;

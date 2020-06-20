@@ -39,6 +39,16 @@ class SocketHandler {
     this.actionAmountCache = {};
   }
 
+  handleActionUpdates(player, cb) {
+    const activeTurns = player.getMoves().getActiveTurnAmount();
+    let prevTurns = -1;
+    if (this.actionAmountCache[player.playerName])
+      prevTurns = this.actionAmountCache[player.playerName];
+
+    if (prevTurns !== activeTurns) cb(activeTurns);
+    this.actionAmountCache[playerName] = activeTurns;
+  }
+
   registerEvents() {
     this.io.on("connection", (socket) => {
       socket.on("joinGame", ({ gameId, playerName }) => {
@@ -212,19 +222,46 @@ class SocketHandler {
             break;
         }
 
-        const activeTurns = player.getMoves().getActiveTurnAmount();
-        let prevTurns = -1;
-        if (this.actionAmountCache[playerName])
-          prevTurns = this.actionAmountCache[playerName];
-
-        if (prevTurns !== activeTurns)
+        this.handleActionUpdates(player, (activeTurns) => {
           this.io.to(gameId).emit("updatePlayerActions", {
             playerName,
             turnAmount: activeTurns,
           });
-
-        this.actionAmountCache[playerName] = activeTurns;
+        });
       });
+
+      socket.on(
+        "setGuns",
+        ({ gameId, playerName, numberedTurn, side, gunData }) => {
+          const game = gameHandler.getGame(gameId);
+
+          if (!game) {
+            socket.emit(
+              "gameError",
+              `Game ${gameId} does not exist for setting guns`
+            );
+            return;
+          }
+
+          const player = game.getPlayer(playerName);
+          if (!player || !player.getShip()) {
+            socket.emit(
+              "gameError",
+              "Player does not exist in the game or does not have a ship yet"
+            );
+            return;
+          }
+
+          player.moves.setGuns(numberedTurn, side, gunData);
+
+          this.handleActionUpdates(player, (activeTurns) => {
+            this.io.to(gameId).emit("updatePlayerActions", {
+              playerName,
+              turnAmount: activeTurns,
+            });
+          });
+        }
+      );
 
       socket.on("requestShipStats", ({ playerName, gameId }) => {
         const game = gameHandler.getGame(gameId);
