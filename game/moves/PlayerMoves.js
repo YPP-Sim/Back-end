@@ -74,7 +74,7 @@ class PlayerMoves {
   }
 
   checkAndCreate(turn) {
-    if (this[turn]) return;
+    if (this[turn]) return this[turn];
     this[turn] = new Move(null, this.shipId);
     return this[turn];
   }
@@ -97,6 +97,7 @@ class PlayerMoves {
       default:
         return;
     }
+    side = side.toLowerCase();
     move[side + "Guns"] = gunData;
   }
 

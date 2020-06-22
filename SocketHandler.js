@@ -46,7 +46,7 @@ class SocketHandler {
       prevTurns = this.actionAmountCache[player.playerName];
 
     if (prevTurns !== activeTurns) cb(activeTurns);
-    this.actionAmountCache[playerName] = activeTurns;
+    this.actionAmountCache[player.playerName] = activeTurns;
   }
 
   registerEvents() {
@@ -253,7 +253,6 @@ class SocketHandler {
           }
 
           player.moves.setGuns(numberedTurn, side, gunData);
-
           this.handleActionUpdates(player, (activeTurns) => {
             this.io.to(gameId).emit("updatePlayerActions", {
               playerName,

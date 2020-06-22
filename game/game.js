@@ -241,6 +241,7 @@ class Game {
   moveShip(id, moveObject) {
     if (!moveObject) return;
     const { direction } = moveObject;
+    if (!direction) return;
     const ship = this.getShipById(id);
     if (!ship) return;
     const toOrientation = getToOrientation(ship.getOrientation(), direction);
