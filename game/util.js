@@ -2,6 +2,18 @@ const fs = require("fs");
 const path = require("path");
 const Move = require("./moves/Move");
 
+const defaultMap = [
+  [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 13, 0, 11, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [15, 0, 14, 0, 10, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [3, 7, 8, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [15, 6, 5, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [15, 0, 0, 0, 4, 4, 4, 4, 4, 4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0],
+];
+
 function getFreshMapGrid(map) {
   map = addSafeZone(map);
   const rows = map.length;
@@ -39,6 +51,18 @@ function addSafeZone(map) {
 }
 
 function isRock(cell_id) {
+  switch (cell_id) {
+    case 13:
+    case 14:
+    case 15:
+    case 16:
+      return true;
+    default:
+      return false;
+  }
+}
+
+function isTallRock(cell_id) {
   switch (cell_id) {
     case 13:
     case 14:
@@ -115,8 +139,10 @@ function isActionableDirection(direction) {
 module.exports = {
   getFreshMapGrid,
   isRock,
+  isTallRock,
   readMapFromFile,
   getAllAvailableMaps,
   addSafeZone,
   isActionableDirection,
+  defaultMap,
 };

@@ -15,6 +15,11 @@ class Move {
 
     this.cancelledMovement = false;
     this.cancelledTurnal = false;
+
+    // This is data to be sent to the client to determine how far the cannonball should travel in terms of squares.
+    // If cannon hits a ship early, the data here will change for this specific move.
+    this.leftGunEnd = 3;
+    this.rightGunEnd = 3;
   }
 
   getDirection() {

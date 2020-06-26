@@ -6,20 +6,14 @@ const PlayerData = require("./PlayerData");
 const PlayerShip = require("./PlayerShip");
 const Orientation = require("./Orientation");
 const Move = require("./moves/Move");
-const { getFreshMapGrid, isRock, isActionableDirection } = require("./util");
+const {
+  getFreshMapGrid,
+  isRock,
+  isActionableDirection,
+  defaultMap,
+  isTallRock,
+} = require("./util");
 const util = require("./util");
-
-const defaultMap = [
-  [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 13, 0, 11, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [15, 0, 14, 0, 10, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [3, 7, 8, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [15, 6, 5, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [15, 0, 0, 0, 4, 4, 4, 4, 4, 4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0],
-];
 
 /**
  *
@@ -102,6 +96,8 @@ class Game {
     this.claimedToClear = [];
 
     this.rammedShipsPerTurn = [];
+
+    this.cannonRange = 3;
   }
 
   /**
@@ -118,6 +114,10 @@ class Game {
     cell.occupiedBy = id;
     playerShip.boardX = x;
     playerShip.boardY = y;
+
+    if (!this.players[id]) {
+      this.addPlayer(id);
+    }
     this.players[id].ship = playerShip;
 
     if (teamType === "ATTACKER") {
@@ -230,6 +230,8 @@ class Game {
   }
 
   getCell(x, y) {
+    if (x < 0 || y < 0 || y >= this.map.length || x >= this.map[0].length)
+      return null;
     return this.map[y][x];
   }
 
@@ -462,9 +464,24 @@ class Game {
       const pMoves = player.moves;
       if (!pMoves || !pMoves[namedTurn]) continue;
 
-      const direction = pMoves[namedTurn].direction;
-      if (isActionableDirection(direction)) {
-        playerMovements["turn_" + numberedTurn].push({ playerName, direction });
+      const move = pMoves[namedTurn];
+      const { direction, rightGuns, leftGuns, rightGunEnd, leftGunEnd } = move;
+
+      if (
+        isActionableDirection(direction) ||
+        move.rightGuns[0] ||
+        move.leftGuns[0]
+      ) {
+        playerMovements["turn_" + numberedTurn].push({
+          playerName,
+          direction,
+        });
+        playerMovements["turn_" + numberedTurn + "_shots"].push({
+          rightGuns,
+          rightGunEnd,
+          leftGuns,
+          leftGunEnd,
+        });
       }
     }
   }
@@ -535,12 +552,65 @@ class Game {
       for (let plMove of playerMoves) {
         this.moveShip(plMove.shipId, plMove[turn]);
       }
+
+      // Fire the cannons
+      this.executeCannonShots(turn, playerMoves);
     };
 
     executeClaimsAndMove("firstMove");
     executeClaimsAndMove("secondMove");
     executeClaimsAndMove("thirdMove");
     executeClaimsAndMove("fourthMove");
+  }
+
+  /**
+   * For private use in the "executeCannonShots" function
+   *
+   * @param {string} cannonSide
+   * @param {Move} move
+   * @param {PlayerShip} ship
+   */
+  _calculateCannonSide(cannonSide, move, ship) {
+    // Shoot if there are guns on that side
+    if (!move) return;
+    if (move[cannonSide + "Guns"][0]) {
+      // Detect if there are any ships in range
+      for (let i = 0; i < this.cannonRange; i++) {
+        // Get cells
+        const xIncr = ship.getOrientation()[cannonSide].x * (i + 1);
+        const yIncr = ship.getOrientation()[cannonSide].y * (i + 1);
+        const toCell = this.getCell(ship.boardX + xIncr, ship.boardY + yIncr);
+
+        if (toCell === null) continue;
+
+        if (toCell.occupiedBy !== null) {
+          console.log("Someone occupying the cell: ", toCell.occupiedBy);
+          const hitShip = this.getShipById(toCell.occupiedBy);
+          if (hitShip && ship.shipType) {
+            let cannonHits = 1;
+            if (move[cannonSide + "Guns"].length > 1)
+              if (move[cannonSide + "Guns"][1]) cannonHits = 2;
+
+            hitShip.damageShip(ship.shipType.cannonType.damage * cannonHits);
+            move[cannonSide + "GunEnd"] = i + 1;
+            break;
+          } else if (isTallRock(toCell.cell_id)) {
+            move[cannonSide + "GunEnd"] = i + 1;
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  executeCannonShots(turn, playerMoves) {
+    for (let pMove of playerMoves) {
+      const move = pMove[turn];
+      const ship = this.getShipById(pMove.shipId);
+
+      this._calculateCannonSide("left", move, ship);
+      this._calculateCannonSide("right", move, ship);
+    }
   }
 
   /**

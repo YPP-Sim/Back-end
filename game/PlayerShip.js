@@ -1,5 +1,6 @@
 const Orientation = require("./Orientation");
 const ShipType = require("./ShipType");
+const CannonType = require("./CannonType");
 
 class PlayerShip {
   constructor(id, shipType) {
