@@ -461,22 +461,44 @@ class Game {
   _loadTurn(playerMovements, numberedTurn, namedTurn) {
     for (let playerName in this.players) {
       const player = this.players[playerName];
+      if (!player) continue;
       const pMoves = player.moves;
       if (!pMoves || !pMoves[namedTurn]) continue;
 
       const move = pMoves[namedTurn];
-      const { direction, rightGuns, leftGuns, rightGunEnd, leftGunEnd } = move;
+      const { direction } = move;
 
-      if (
-        isActionableDirection(direction) ||
-        move.rightGuns[0] ||
-        move.leftGuns[0]
-      ) {
+      if (isActionableDirection(direction)) {
         playerMovements["turn_" + numberedTurn].push({
           playerName,
           direction,
         });
+      }
+
+      // if (move.rightGuns[0] || move.leftGuns[0]) {
+      //   playerMovements["turn_" + numberedTurn + "_shots"].push({
+      //     playerName,
+      //     rightGuns,
+      //     rightGunEnd,
+      //     leftGuns,
+      //     leftGunEnd,
+      //   });
+      // }
+    }
+  }
+
+  _fillShotDataPerTurn(playerMovements, numberedTurn, namedTurn) {
+    for (let playerName in this.players) {
+      const player = this.players[playerName];
+      if (!player) continue;
+      const pMoves = player.moves;
+      if (!pMoves || !pMoves[namedTurn]) continue;
+
+      const move = pMoves[namedTurn];
+      const { rightGuns, leftGuns, rightGunEnd, leftGunEnd } = move;
+      if (move.rightGuns[0] || move.leftGuns[0]) {
         playerMovements["turn_" + numberedTurn + "_shots"].push({
+          playerName,
           rightGuns,
           rightGunEnd,
           leftGuns,
@@ -486,6 +508,13 @@ class Game {
     }
   }
 
+  _fillShotData(playerMovements) {
+    this._fillShotDataPerTurn(playerMovements, 1, "firstMove");
+    this._fillShotDataPerTurn(playerMovements, 2, "secondMove");
+    this._fillShotDataPerTurn(playerMovements, 3, "thirdMove");
+    this._fillShotDataPerTurn(playerMovements, 4, "fourthMove");
+  }
+
   onGameTurn() {
     const playerMovements = this.getAllPlayerMovements();
     const allPMoves = [];
@@ -493,6 +522,8 @@ class Game {
       allPMoves.push(this.players[playerName].moves);
 
     this.executeMoves(allPMoves);
+
+    this._fillShotData(playerMovements);
     const playerData = this.getAllPlayerPositions();
     this.io.in(this.gameId).emit("gameTurn", { playerMovements, playerData });
     setTimeout(() => {
@@ -593,11 +624,13 @@ class Game {
 
             hitShip.damageShip(ship.shipType.cannonType.damage * cannonHits);
             move[cannonSide + "GunEnd"] = i + 1;
-            break;
-          } else if (isTallRock(toCell.cell_id)) {
-            move[cannonSide + "GunEnd"] = i + 1;
+            console.log("setting " + cannonSide + "GunEnd to " + (i + 1));
+            console.log("Move : ", move);
             break;
           }
+        } else if (isTallRock(toCell.cell_id)) {
+          move[cannonSide + "GunEnd"] = i + 1;
+          break;
         }
       }
     }

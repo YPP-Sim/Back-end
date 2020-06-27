@@ -27,7 +27,7 @@ class PlayerShip {
       boardY: this.boardY,
 
       bilge: this.bilge,
-      damage: this.damage,
+      damage: this.damage / this.shipType.maxDamage, // Returns damage as a percentage instead of the raw value
       dualCannon: this.shipType.dualCannon,
       stallToken: this.shipType.stallToken,
       orientation: this.orientation.name,
