@@ -474,16 +474,6 @@ class Game {
           direction,
         });
       }
-
-      // if (move.rightGuns[0] || move.leftGuns[0]) {
-      //   playerMovements["turn_" + numberedTurn + "_shots"].push({
-      //     playerName,
-      //     rightGuns,
-      //     rightGunEnd,
-      //     leftGuns,
-      //     leftGunEnd,
-      //   });
-      // }
     }
   }
 
@@ -548,8 +538,6 @@ class Game {
           boardX: player.ship.boardX,
           boardY: player.ship.boardY,
           orientation: player.ship.getOrientation().name,
-          bilge: player.ship.bilge,
-          damage: player.ship.damage,
         });
     }
     return playersData;
