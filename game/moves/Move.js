@@ -20,6 +20,8 @@ class Move {
     // If cannon hits a ship early, the data here will change for this specific move.
     this.leftGunEnd = 3;
     this.rightGunEnd = 3;
+    this.rightHit = false;
+    this.leftHit = false;
   }
 
   getDirection() {

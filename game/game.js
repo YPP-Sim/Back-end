@@ -254,18 +254,23 @@ class Game {
       const frontX = ship.boardX + ship.getOrientation().xDir;
       const frontY = ship.boardY + ship.getOrientation().yDir;
 
-      const prevCell = this.getCell(ship.boardX, ship.boardY);
+      let prevCell = this.getCell(ship.boardX, ship.boardY);
 
       prevCell.occupiedBy = null;
-      this.getCell(frontX, frontY).occupiedBy = id;
+      let currentCell = this.getCell(frontX, frontY);
+      currentCell.occupiedBy = id;
       ship.boardX = frontX;
       ship.boardY = frontY;
 
+      prevCell = currentCell;
       if (direction !== Direction.FORWARD && !moveObject.cancelledTurnal) {
         const turnX = frontX + ship.getOrientation()[direction.toLowerCase()].x;
         const turnY = frontY + ship.getOrientation()[direction.toLowerCase()].y;
 
-        this.getCell(turnX, turnY).occupiedBy = id;
+        currentCell = this.getCell(turnX, turnY);
+        currentCell.occupiedBy = id;
+        prevCell.occupiedBy = null;
+
         ship.boardX = turnX;
         ship.boardY = turnY;
       }
@@ -485,7 +490,14 @@ class Game {
       if (!pMoves || !pMoves[namedTurn]) continue;
 
       const move = pMoves[namedTurn];
-      const { rightGuns, leftGuns, rightGunEnd, leftGunEnd } = move;
+      const {
+        rightGuns,
+        leftGuns,
+        rightGunEnd,
+        leftGunEnd,
+        leftHit,
+        rightHit,
+      } = move;
       if (move.rightGuns[0] || move.leftGuns[0]) {
         playerMovements["turn_" + numberedTurn + "_shots"].push({
           playerName,
@@ -493,6 +505,8 @@ class Game {
           rightGunEnd,
           leftGuns,
           leftGunEnd,
+          leftHit,
+          rightHit,
         });
       }
     }
@@ -603,7 +617,6 @@ class Game {
         if (toCell === null) continue;
 
         if (toCell.occupiedBy !== null) {
-          console.log("Someone occupying the cell: ", toCell.occupiedBy);
           const hitShip = this.getShipById(toCell.occupiedBy);
           if (hitShip && ship.shipType) {
             let cannonHits = 1;
@@ -612,12 +625,15 @@ class Game {
 
             hitShip.damageShip(ship.shipType.cannonType.damage * cannonHits);
             move[cannonSide + "GunEnd"] = i + 1;
-            console.log("setting " + cannonSide + "GunEnd to " + (i + 1));
-            console.log("Move : ", move);
+            move[cannonSide + "Hit"] = true;
+
+            console.log("occupied cell hit: ", toCell);
+            //TODO
             break;
           }
         } else if (isTallRock(toCell.cell_id)) {
           move[cannonSide + "GunEnd"] = i + 1;
+          move[cannonSide + "Hit"] = true;
           break;
         }
       }
