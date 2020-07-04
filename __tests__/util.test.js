@@ -28,10 +28,10 @@ const testMap = [
 describe("util functions", () => {
   it("getFreshMapGrid", () => {
     const gameMap = getFreshMapGrid(testMap);
-    expect(gameMap[0][0].cell_id).toBe(1);
+    expect(gameMap[0][0].cell_id).toBe(-1);
     expect(gameMap[0][0].occupiedBy).toEqual(null);
 
-    expect(gameMap[4][0].cell_id).toBe(15);
+    expect(gameMap[3][0].cell_id).toBe(1);
   });
 
   it("readMapFromFile", async () => {

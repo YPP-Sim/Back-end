@@ -75,8 +75,8 @@ class Game {
     this.players = {};
     this.attackers = {};
     this.defenders = {};
-    util.readMapFromFile(mapName).then((map) => {
-      this.rawMap = util.addSafeZone(map);
+    util.readMapFromFile(mapName).then((rawMap) => {
+      this.rawMap = util.addSafeZone(rawMap);
     });
     this.map = getFreshMapGrid(map);
     this.jobberQuality = jobberQuality;
@@ -471,12 +471,14 @@ class Game {
       if (!pMoves || !pMoves[namedTurn]) continue;
 
       const move = pMoves[namedTurn];
-      const { direction } = move;
+      const { direction, cancelledMovement, cancelledTurnal } = move;
 
       if (isActionableDirection(direction)) {
         playerMovements["turn_" + numberedTurn].push({
           playerName,
           direction,
+          cancelledTurnal,
+          cancelledMovement,
         });
       }
     }
@@ -520,13 +522,12 @@ class Game {
   }
 
   onGameTurn() {
-    const playerMovements = this.getAllPlayerMovements();
     const allPMoves = [];
     for (let playerName in this.players)
       allPMoves.push(this.players[playerName].moves);
 
     this.executeMoves(allPMoves);
-
+    const playerMovements = this.getAllPlayerMovements();
     this._fillShotData(playerMovements);
     const playerData = this.getAllPlayerPositions();
     this.io.in(this.gameId).emit("gameTurn", { playerMovements, playerData });

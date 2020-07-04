@@ -15,18 +15,20 @@ const defaultMap = [
 ];
 
 function getFreshMapGrid(map) {
-  map = addSafeZone(map);
-  const rows = map.length;
-  const columns = map[0].length;
+  let mapCopy = JSON.parse(JSON.stringify(map));
+  const newMap = addSafeZone(mapCopy);
+  const rows = newMap.length;
+  const columns = newMap[0].length;
 
   // We clone the multi-dimensional array this way, as the spread (...) operator does not work on
   // Mutli dimensional arrays, as the next level deep will just pass by reference
-  const detailedMap = JSON.parse(JSON.stringify(map));
+
+  const detailedMap = JSON.parse(JSON.stringify(newMap));
 
   for (let row = 0; row < rows; row++) {
     for (let column = 0; column < columns; column++) {
       const cellData = {
-        cell_id: map[row][column],
+        cell_id: newMap[row][column],
         occupiedBy: null,
         claiming: [],
       };
