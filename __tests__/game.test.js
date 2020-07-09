@@ -181,6 +181,20 @@ describe("Game", () => {
 
       expect(jestEmitMock.mock.calls[0][1]).toStrictEqual(testGameTurnData);
     });
+
+    it("isWind", () => {
+      const isWind = testGame.isWind;
+      const windCellIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+      const nonWindCells = [-1, 0, 13, 14, "what"];
+
+      for (let windId of windCellIds) {
+        expect(isWind(windId)).toBe(true);
+      }
+
+      for (let nonWindId of nonWindCells) {
+        expect(isWind(nonWindId)).toBe(false);
+      }
+    });
   });
 
   describe("handling claims", () => {

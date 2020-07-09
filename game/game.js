@@ -587,6 +587,8 @@ class Game {
         this.moveShip(plMove.shipId, plMove[turn]);
       }
 
+      // Handle wind moves
+
       // Fire the cannons
       this.executeCannonShots(turn, playerMoves);
     };
@@ -595,6 +597,31 @@ class Game {
     executeClaimsAndMove("secondMove");
     executeClaimsAndMove("thirdMove");
     executeClaimsAndMove("fourthMove");
+  }
+
+  _handleWindMove(shipId) {
+    const { boardX, boardY } = this.getShipById(shipId);
+    const cell = this.getCell(boardX, boardY);
+  }
+
+  isWind(cellId) {
+    switch (cellId) {
+      case 1:
+      case 2:
+      case 3:
+      case 4:
+      case 5:
+      case 6:
+      case 7:
+      case 8:
+      case 9:
+      case 10:
+      case 11:
+      case 12:
+        return true;
+      default:
+        return false;
+    }
   }
 
   /**
