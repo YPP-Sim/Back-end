@@ -5,6 +5,11 @@ const Orientation = require("../game/Orientation");
 const Move = require("../game/moves/Move");
 const PlayerMoves = require("../game/moves/PlayerMoves");
 const JobberQuality = require("../game/JobberQuality");
+const util = require("util");
+
+// Will console log out all the io events and data that would be sent by the server
+// during testing
+let logMockEmits = false;
 
 const testMap = [
   [1, 0, 1, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0],
@@ -18,24 +23,33 @@ const testMap = [
   [15, 0, 0, 0, 4, 4, 4, 4, 4, 4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0],
 ];
 
+function mockEmit(eventName, eventData) {
+  if (logMockEmits)
+    console.log(
+      `Event ${eventName} emitted with data: ${util.inspect(
+        eventData,
+        false,
+        null,
+        true
+      )}`
+    );
+  return eventData;
+}
+
+const jestEmitMock = jest.fn(mockEmit);
+
 const ioMock = {
-  emit: jest.fn(),
+  emit: jestEmitMock,
+  in: () => {
+    return {
+      emit: jestEmitMock,
+    };
+  },
 };
 
 let testGame;
 describe("Game", () => {
   beforeEach(() => {
-    /**
-     *  map = defaultMap,
-    jobberQuality = JobberQuality.ELITE,
-    gameId,
-    io,
-    mapName,
-    maxPlayers,
-    locked,
-    password = "",
-    gameOwner
-     */
     testGame = new Game(
       testMap,
       JobberQuality.ELITE,
@@ -117,6 +131,55 @@ describe("Game", () => {
       testGame.rammedShipsPerTurn.push(["testShip1", "testShip2"]);
       expect(testGame._rammedThisTurn("testShip1", "testShip2")).toBe(true);
       expect(testGame._rammedThisTurn("testShip1", "testShip3")).toBe(false);
+    });
+
+    it("onGameTurn", () => {
+      testGame.addShip("ship1", ShipType.WAR_FRIG, 0, 4, "DEFENDER");
+      testGame.addShip("ship2", ShipType.WAR_FRIG, 1, 4, "ATTACKER");
+
+      const player1 = testGame.getPlayer("ship1");
+      const player2 = testGame.getPlayer("ship2");
+
+      const p1Move1 = new Move(Direction.LEFT, player1.playerName);
+      const p2Move1 = new Move(Direction.FORWARD, player2.playerName);
+
+      player1.setFirstMove(p1Move1);
+      player2.setFirstMove(p2Move1);
+
+      testGame.onGameTurn();
+
+      expect(jestEmitMock.mock.calls[0][0]).toBe("gameTurn");
+      const testGameTurnData = {
+        playerMovements: {
+          turn_1: [
+            {
+              playerName: "ship1",
+              direction: "LEFT",
+              cancelledTurnal: true,
+              cancelledMovement: false,
+            },
+            {
+              playerName: "ship2",
+              direction: "FORWARD",
+              cancelledTurnal: false,
+              cancelledMovement: false,
+            },
+          ],
+          turn_1_shots: [],
+          turn_2: [],
+          turn_2_shots: [],
+          turn_3: [],
+          turn_3_shots: [],
+          turn_4: [],
+          turn_4_shots: [],
+        },
+        playerData: [
+          { playerName: "ship1", boardX: 0, boardY: 5, orientation: "EAST" },
+          { playerName: "ship2", boardX: 1, boardY: 5, orientation: "SOUTH" },
+        ],
+      };
+
+      expect(jestEmitMock.mock.calls[0][1]).toStrictEqual(testGameTurnData);
     });
   });
 
