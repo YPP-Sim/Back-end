@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const Move = require("./moves/Move");
+const WindType = require("./WindType");
 
 const defaultMap = [
   [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -13,6 +14,42 @@ const defaultMap = [
   [15, 6, 5, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [15, 0, 0, 0, 4, 4, 4, 4, 4, 4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0],
 ];
+
+/**
+ *
+ * @param {number} cell_id
+ * @returns { WindType }
+ */
+function getWindTypeById(cell_id) {
+  switch (cell_id) {
+    case 1:
+      return WindType.NORTH_WIND;
+    case 2:
+      return WindType.EAST_WIND;
+    case 3:
+      return WindType.SOUTH_WIND;
+    case 4:
+      return WindType.WEST_WIND;
+    case 5:
+      return WindType.WHIRLWIND_CLOCKWISE_SE;
+    case 6:
+      return WindType.WHIRLWIND_CLOCKWISE_SW;
+    case 7:
+      return WindType.WHIRLWIND_CLOCKWISE_NW;
+    case 8:
+      return WindType.WHIRLWIND_CLOCKWISE_NE;
+    case 9:
+      return WindType.WHIRLWIND_COUNTER_CLOCKWISE_SE;
+    case 10:
+      return WindType.WHIRLWIND_COUNTER_CLOCKWISE_SW;
+    case 11:
+      return WindType.WHIRLWIND_COUNTER_CLOCKWISE_NW;
+    case 12:
+      return WindType.WHIRLWIND_COUNTER_CLOCKWISE_NE;
+    default:
+      return null;
+  }
+}
 
 function getFreshMapGrid(map) {
   let mapCopy = JSON.parse(JSON.stringify(map));
@@ -131,6 +168,7 @@ function isActionableDirection(direction) {
   switch (direction) {
     case "FORWARD":
     case "LEFT":
+    case "STALL":
     case "RIGHT":
       return true;
     default:
@@ -142,6 +180,7 @@ module.exports = {
   getFreshMapGrid,
   isRock,
   isTallRock,
+  getWindTypeById,
   readMapFromFile,
   getAllAvailableMaps,
   addSafeZone,

@@ -16,6 +16,9 @@ class Move {
     this.cancelledMovement = false;
     this.cancelledTurnal = false;
 
+    // If this move puts the ship on a wind cell, this data will change and help handle the interaction
+    this.windTypeMovement = null;
+
     // This is data to be sent to the client to determine how far the cannonball should travel in terms of squares.
     // If cannon hits a ship early, the data here will change for this specific move.
     this.leftGunEnd = 3;

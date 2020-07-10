@@ -11,6 +11,7 @@ const {
   isRock,
   isActionableDirection,
   defaultMap,
+  getWindTypeById,
   isTallRock,
 } = require("./util");
 const util = require("./util");
@@ -131,6 +132,10 @@ class Game {
 
   addPlayer(playerName, ship = null) {
     this.players[playerName] = new PlayerData(playerName, ship);
+  }
+
+  getPlayerById(playerName) {
+    return this.players[playerName];
   }
 
   getPlayerListString() {
@@ -448,12 +453,16 @@ class Game {
   getAllPlayerMovements() {
     const playerMovements = {
       turn_1: [],
+      turn_1_winds: [],
       turn_1_shots: [],
       turn_2: [],
+      turn_2_winds: [],
       turn_2_shots: [],
       turn_3: [],
+      turn_3_winds: [],
       turn_3_shots: [],
       turn_4: [],
+      turn_4_winds: [],
       turn_4_shots: [],
     };
     this._loadTurn(playerMovements, 1, "firstMove");
@@ -521,6 +530,31 @@ class Game {
     this._fillShotDataPerTurn(playerMovements, 4, "fourthMove");
   }
 
+  _fillWindData(playerMovements) {
+    this._fillWindDataPerTurn(playerMovements, 1, "firstMove");
+    this._fillWindDataPerTurn(playerMovements, 2, "secondMove");
+    this._fillWindDataPerTurn(playerMovements, 3, "thirdMove");
+    this._fillWindDataPerTurn(playerMovements, 4, "fourthMove");
+  }
+
+  _fillWindDataPerTurn(playerMovements, numberedTurn, namedTurn) {
+    for (let playerName in this.players) {
+      const player = this.players[playerName];
+      if (!player) continue;
+      const pMoves = player.moves;
+      if (!pMoves || !pMoves[namedTurn]) continue;
+
+      const move = pMoves[namedTurn];
+      const { windTypeMovement } = move;
+      if (windTypeMovement) {
+        playerMovements["turn_" + numberedTurn + "_winds"].push({
+          playerName,
+          windType: windTypeMovement,
+        });
+      }
+    }
+  }
+
   onGameTurn() {
     const allPMoves = [];
     for (let playerName in this.players)
@@ -528,6 +562,7 @@ class Game {
 
     this.executeMoves(allPMoves);
     const playerMovements = this.getAllPlayerMovements();
+    this._fillWindData(playerMovements);
     this._fillShotData(playerMovements);
     const playerData = this.getAllPlayerPositions();
     this.io.in(this.gameId).emit("gameTurn", { playerMovements, playerData });
@@ -581,13 +616,16 @@ class Game {
 
       // Handle claims
       this._handleClaims(playerMoves, turn);
+      this.claimedToClear = [];
 
       // Move the ships
       for (let plMove of playerMoves) {
-        this.moveShip(plMove.shipId, plMove[turn]);
+        const move = plMove[turn];
+        this.moveShip(plMove.shipId, move);
       }
 
-      // Handle wind moves
+      // Handle wind moves after ship movement
+      this._handleWinds(turn);
 
       // Fire the cannons
       this.executeCannonShots(turn, playerMoves);
@@ -599,9 +637,54 @@ class Game {
     executeClaimsAndMove("fourthMove");
   }
 
-  _handleWindMove(shipId) {
-    const { boardX, boardY } = this.getShipById(shipId);
+  _handleWinds(turn) {
+    // Claim cells that the winds push the ships into
+    for (let player of this.getPlayerList()) {
+      const ship = player.getShip();
+      if (!ship) continue;
+
+      this._windClaim(ship, turn);
+    }
+
+    // Consume the claims, and move ships, handle collisions/etc.
+  }
+
+  _windClaim(ship, turn) {
+    const { boardX, boardY, shipId } = ship;
     const cell = this.getCell(boardX, boardY);
+
+    if (this.isWind(cell.cell_id)) {
+      //Player landed on a wind cell
+      const windType = getWindTypeById(cell.cell_id);
+
+      const player = this.getPlayerById(shipId);
+
+      let move = player.getMoves()[turn];
+
+      if (!move) {
+        move = new Move(Direction.STALL, shipId);
+        player.getMoves()[turn] = move;
+      }
+
+      move.windTypeMovement = windType.name;
+
+      const toX1 = boardX + windType.direction.xDir;
+      const toY1 = boardY + windType.direction.yDir;
+
+      const toCell1 = this.getCell(toX1, toY1);
+      toCell1.claiming.push({ id: shipId, claimedPriority: 1 });
+      this.claimedToClear.push(toCell1);
+
+      // If this is a whirlwind, we will have a cell to 'turn' into.
+      if (windType.turnDirection) {
+        const toX2 = toX1 + windType.turnDirection.x;
+        const toY2 = toY1 + windType.turnDirection.y;
+
+        const toCell2 = this.getCell(toX2, toY2);
+        toCell2.claiming.push({ id: shipId, claimedPriority: 2 });
+        this.claimedToClear.push(toCell2);
+      }
+    }
   }
 
   isWind(cellId) {
