@@ -1,4 +1,4 @@
-import Orientation from "./Orientation";
+const Orientation = require("./Orientation");
 
 module.exports = {
   NORTH_WIND: {

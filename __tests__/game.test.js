@@ -149,6 +149,21 @@ describe("Game", () => {
       testGame.onGameTurn();
 
       expect(jestEmitMock.mock.calls[0][0]).toBe("gameTurn");
+
+      /**
+       *   turn_1: [],
+      turn_1_winds: [],
+      turn_1_shots: [],
+      turn_2: [],
+      turn_2_winds: [],
+      turn_2_shots: [],
+      turn_3: [],
+      turn_3_winds: [],
+      turn_3_shots: [],
+      turn_4: [],
+      turn_4_winds: [],
+      turn_4_shots: [],
+       */
       const testGameTurnData = {
         playerMovements: {
           turn_1: [
@@ -165,12 +180,19 @@ describe("Game", () => {
               cancelledMovement: false,
             },
           ],
+          turn_1_winds: [],
           turn_1_shots: [],
+
           turn_2: [],
+          turn_2_winds: [],
           turn_2_shots: [],
+
           turn_3: [],
+          turn_3_winds: [],
           turn_3_shots: [],
+
           turn_4: [],
+          turn_4_winds: [],
           turn_4_shots: [],
         },
         playerData: [
