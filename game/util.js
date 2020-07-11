@@ -168,7 +168,6 @@ function isActionableDirection(direction) {
   switch (direction) {
     case "FORWARD":
     case "LEFT":
-    case "STALL":
     case "RIGHT":
       return true;
     default:

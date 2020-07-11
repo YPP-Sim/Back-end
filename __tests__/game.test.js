@@ -13,7 +13,7 @@ let logMockEmits = false;
 
 const testMap = [
   [1, 0, 1, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0],
-  [0, 0, 1, 0, 0, 0, 0, 0, 0, 15, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 1, 1, 2, 3, 4, 0, 0, 0, 15, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [15, 15, 15, 0, 11, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -61,6 +61,10 @@ describe("Game", () => {
       "",
       "testPlayer"
     );
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   describe("common functions", () => {
@@ -150,20 +154,6 @@ describe("Game", () => {
 
       expect(jestEmitMock.mock.calls[0][0]).toBe("gameTurn");
 
-      /**
-       *   turn_1: [],
-      turn_1_winds: [],
-      turn_1_shots: [],
-      turn_2: [],
-      turn_2_winds: [],
-      turn_2_shots: [],
-      turn_3: [],
-      turn_3_winds: [],
-      turn_3_shots: [],
-      turn_4: [],
-      turn_4_winds: [],
-      turn_4_shots: [],
-       */
       const testGameTurnData = {
         playerMovements: {
           turn_1: [
@@ -396,6 +386,48 @@ describe("Game", () => {
     beforeEach(() => {
       ship1 = testGame.addShip("testShip", ShipType.WAR_FRIG, 6, 0, "DEFENDER");
       ship1.setOrientation(Orientation.SOUTH);
+
+      jest.clearAllMocks();
+    });
+
+    describe("winds/whirlwinds", () => {
+      it("north wind push", () => {
+        testGame.setShipPosition(ship1.shipId, 1, 4);
+        testGame.onGameTurn();
+
+        expect(jestEmitMock.mock.calls[0][0]).toBe("gameTurn");
+        const testGameTurnData = {
+          playerMovements: {
+            turn_1: [],
+            turn_1_winds: [
+              {
+                playerName: "testShip",
+                windType: { type: "NORTH_WIND", cancelledMovement: false },
+              },
+            ],
+            turn_1_shots: [],
+            turn_2: [],
+            turn_2_winds: [],
+            turn_2_shots: [],
+            turn_3: [],
+            turn_3_winds: [],
+            turn_3_shots: [],
+            turn_4: [],
+            turn_4_winds: [],
+            turn_4_shots: [],
+          },
+          playerData: [
+            {
+              playerName: "testShip",
+              boardX: 1,
+              boardY: 3,
+              orientation: "SOUTH",
+            },
+          ],
+        };
+
+        expect(jestEmitMock.mock.calls[0][1]).toStrictEqual(testGameTurnData);
+      });
     });
 
     describe("executes moves and in order", () => {
@@ -410,10 +442,11 @@ describe("Game", () => {
         ship1Moves.setFourthMove(Direction.FORWARD);
 
         testGame.executeMoves([ship1Moves]);
-        expect(ship1.boardX).toBe(8);
-        expect(ship1.boardY).toBe(4);
-        expect(testGame.getCell(8, 4).occupiedBy).toBe("testShip");
+        expect(ship1.boardX).toBe(9);
+        expect(ship1.boardY).toBe(3);
+        expect(testGame.getCell(9, 3).occupiedBy).toBe("testShip");
         expect(ship1.getOrientation()).toBe(Orientation.SOUTH);
+        expect(ship1.damage).toBe(ship1.shipType.rockDamage);
       });
 
       it("Ship vs Ship proper movement and ram collision", () => {

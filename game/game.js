@@ -15,6 +15,7 @@ const {
   isTallRock,
 } = require("./util");
 const util = require("./util");
+const WindType = require("./WindType");
 
 /**
  *
@@ -202,8 +203,9 @@ class Game {
   }
 
   setShipPosition(shipId, x, y) {
-    this.getShipById(shipId).boardX = x;
-    this.getShipById(shipId).boardY = y;
+    const ship = this.getShipById(shipId);
+    ship.boardX = x;
+    ship.boardY = y;
 
     const cell = this.getCell(x, y);
     cell.occupiedBy = shipId;
@@ -385,7 +387,7 @@ class Game {
     }
   }
 
-  _handleCellClaimWithPrio(cell, priority, move, turnal) {
+  _handleCellClaimWithPrio(cell, priority, move, turnal, windClaim) {
     const { moveOwner } = move;
 
     for (let claimObj of cell.claiming) {
@@ -397,9 +399,11 @@ class Game {
           this.rammedShipsPerTurn.push([id, moveOwner]);
         }
         if (turnal) {
-          move.cancelledTurnal = true;
+          if (windClaim) move.windTypeMovement.cancelledTurnal = true;
+          else move.cancelledTurnal = true;
         } else {
-          move.cancelledMovement = true;
+          if (windClaim) move.windTypeMovement.cancelledMovement = true;
+          else move.cancelledMovement = true;
         }
       }
     }
@@ -647,6 +651,93 @@ class Game {
     }
 
     // Consume the claims, and move ships, handle collisions/etc.
+    for (let player of this.getPlayerList()) {
+      const ship = player.getShip();
+      if (!ship) continue;
+
+      this._handleWindClaim(ship, turn);
+    }
+
+    for (let player of this.getPlayerList()) {
+      const ship = player.getShip();
+      if (!ship) continue;
+
+      this._windMove(ship, turn);
+    }
+
+    this.rammedShipsPerTurn = [];
+    for (let claimedCell of this.claimedToClear) {
+      claimedCell.claiming = [];
+    }
+  }
+
+  _handleWindClaim(ship, turn) {
+    const player = this.getPlayerById(ship.shipId);
+    if (!player) return;
+
+    const pMoves = player.getMoves();
+    if (!pMoves) return;
+
+    const move = pMoves[turn];
+
+    if (!move) return;
+    if (!move.windTypeMovement) return;
+    if (!move.claimedCells || move.claimedCells.length === 0) return;
+
+    const firstCell = move.claimedCells[0];
+    let secondCell;
+
+    if (move.claimedCells.length === 2) {
+      secondCell = move.claimedCells[1];
+    }
+
+    this._handleCellClaimWithPrio(firstCell, 1, move, false, true);
+
+    if (!move.cancelledMovement && secondCell)
+      this._handleCellClaimWithPrio(secondCell, 2, move, true, true);
+  }
+
+  _windMove(ship, turn) {
+    const player = this.getPlayerById(ship.shipId);
+    if (!player) return;
+
+    const pMoves = player.getMoves();
+    if (!pMoves) return;
+
+    const move = pMoves[turn];
+
+    if (!move) return;
+
+    if (!move.windTypeMovement) return;
+
+    if (move.windTypeMovement.cancelledMovement) return;
+
+    const windType = WindType[move.windTypeMovement.type];
+    let direction = windType.direction;
+
+    const toCell1X = ship.boardX + direction.xDir;
+    const toCell1Y = ship.boardY + direction.yDir;
+
+    let prevCell = this.getCell(ship.boardX, ship.boardY);
+    prevCell.occupiedBy = null;
+    let currentCell = this.getCell(toCell1X, toCell1Y);
+    currentCell.occupiedBy = ship.shipId;
+    ship.boardX = toCell1X;
+    ship.boardY = toCell1Y;
+
+    prevCell = currentCell;
+    if (windType.turn_direction && !move.windTypeMovement.cancelledTurnal) {
+      direction = windType.turn_direction;
+      const toCell2X = ship.boardX + direction.xDir;
+      const toCell2Y = ship.boardY + direction.yDir;
+
+      currentCell = this.getCell(toCell2X, toCell2Y);
+      currentCell.occupiedBy = ship.shipId;
+      prevCell.occupiedBy = null;
+
+      ship.boardX = toCell2X;
+      ship.boardY = toCell2Y;
+    }
   }
 
   _windClaim(ship, turn) {
@@ -666,13 +757,19 @@ class Game {
         player.getMoves()[turn] = move;
       }
 
-      move.windTypeMovement = windType.name;
+      move.windTypeMovement = {
+        type: windType.name,
+        cancelledMovement: false,
+      };
+
+      move.claimedCells = [];
 
       const toX1 = boardX + windType.direction.xDir;
       const toY1 = boardY + windType.direction.yDir;
 
       const toCell1 = this.getCell(toX1, toY1);
       toCell1.claiming.push({ id: shipId, claimedPriority: 1 });
+      move.claimedCells.push(toCell1);
       this.claimedToClear.push(toCell1);
 
       // If this is a whirlwind, we will have a cell to 'turn' into.
@@ -683,6 +780,9 @@ class Game {
         const toCell2 = this.getCell(toX2, toY2);
         toCell2.claiming.push({ id: shipId, claimedPriority: 2 });
         this.claimedToClear.push(toCell2);
+
+        move.claimedCells.push(tocell2);
+        move.windTypeMovement.cancelledTurnal = false;
       }
     }
   }
