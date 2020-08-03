@@ -919,10 +919,10 @@ class Game {
       }
       const rNum = getRandomInt(freeCells.length);
       freeCells[rNum].occupiedBy = ship.shipId;
-      ship.boardX = freeCells[rNum].index;
-      ship.boardY = attackingSide
-        ? this.map.length - 1 - rowCount
-        : 0 + rowCount;
+      const x = freeCells[rNum].index;
+      const y = attackingSide ? this.map.length - 1 - rowCount : 0 + rowCount;
+
+      this.setShipPosition(ship.shipId, x, y);
       ship.setOrientation(toOrientation);
       break;
     }
