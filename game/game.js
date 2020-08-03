@@ -113,7 +113,7 @@ class Game {
    * @returns {PlayerShip} the ship that we're adding
    */
   addShip(id, shipType, x, y, teamType) {
-    const playerShip = new PlayerShip(id, shipType);
+    const playerShip = new PlayerShip(id, shipType, teamType);
     const cell = this.map[y][x];
     cell.occupiedBy = id;
     playerShip.boardX = x;
@@ -126,6 +126,7 @@ class Game {
 
     if (teamType === "ATTACKER") {
       this.attackers[id] = playerShip;
+      2;
     } else if (teamType === "DEFENDER") {
       this.defenders[id] = playerShip;
     }
@@ -585,7 +586,7 @@ class Game {
 
   resetSunkShips() {
     for (let ship of this.sinking) {
-      this.setShipPosition(ship.shipId);
+      this.setRandomSpawn(ship);
     }
   }
 

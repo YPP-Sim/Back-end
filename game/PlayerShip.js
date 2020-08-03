@@ -3,7 +3,7 @@ const ShipType = require("./ShipType");
 const CannonType = require("./CannonType");
 
 class PlayerShip {
-  constructor(id, shipType) {
+  constructor(id, shipType, side = "ATTACKING") {
     this.shipId = id;
     this.shipType = shipType;
     this.boardX = 0;
@@ -15,8 +15,7 @@ class PlayerShip {
     this.orientation = Orientation.SOUTH;
 
     this.sinking = false;
-
-    // TODO: Maybe a sunk boolean variable?
+    this.side = side;
   }
 
   getShipStats() {
