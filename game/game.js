@@ -100,6 +100,8 @@ class Game {
     this.rammedShipsPerTurn = [];
 
     this.cannonRange = 3;
+
+    this.sinking = [];
   }
 
   /**
@@ -253,6 +255,8 @@ class Game {
     if (!direction) return;
     const ship = this.getShipById(id);
     if (!ship) return;
+    if (ship.sinking) return;
+
     const toOrientation = getToOrientation(ship.getOrientation(), direction);
 
     if (!moveObject.cancelledMovement) {
@@ -294,6 +298,7 @@ class Game {
     const { direction, moveOwner } = moveObj;
     const ship = this.getShipById(moveOwner);
     if (!ship) return;
+    if (ship.sinking) return;
     const frontX = ship.boardX + ship.getOrientation().xDir;
     const frontY = ship.boardY + ship.getOrientation().yDir;
 
@@ -568,12 +573,20 @@ class Game {
     const playerMovements = this.getAllPlayerMovements();
     this._fillWindData(playerMovements);
     this._fillShotData(playerMovements);
+
     const playerData = this.getAllPlayerPositions();
     this.io.in(this.gameId).emit("gameTurn", { playerMovements, playerData });
+
     setTimeout(() => {
       this.io.in(this.gameId).emit("clearShips", "yeah");
       this.clearAllMoves();
     }, 3500);
+  }
+
+  resetSunkShips() {
+    for (let ship of this.sinking) {
+      this.setShipPosition(ship.shipId);
+    }
   }
 
   clearAllMoves() {
@@ -672,6 +685,7 @@ class Game {
   }
 
   _handleWindClaim(ship, turn) {
+    if (ship.sinking) return;
     const player = this.getPlayerById(ship.shipId);
     if (!player) return;
 
@@ -698,6 +712,8 @@ class Game {
   }
 
   _windMove(ship, turn) {
+    if (ship.sinking) return;
+
     const player = this.getPlayerById(ship.shipId);
     if (!player) return;
 
@@ -741,9 +757,9 @@ class Game {
   }
 
   _windClaim(ship, turn) {
-    const { boardX, boardY, shipId } = ship;
+    const { boardX, boardY, shipId, sinking } = ship;
     const cell = this.getCell(boardX, boardY);
-
+    if (sinking) return;
     if (this.isWind(cell.cell_id)) {
       //Player landed on a wind cell
       const windType = getWindTypeById(cell.cell_id);
@@ -888,48 +904,37 @@ class Game {
     this.gameStatus = GameStatus.ENDED;
   }
 
-  _setRandomSpawns() {
+  setRandomSpawn(ship, attackingSide = true) {
     let rowCount = 0;
+    const toOrientation = attackingSide ? Orientation.NORTH : Orientation.SOUTH;
 
+    while (rowCount < 3) {
+      const freeCells = getUnoccupiedRowCells(
+        attackingSide ? this.map.length - 1 - rowCount : 0 + rowCount,
+        this.map
+      );
+      if (freeCells.length === 0) {
+        rowCount++;
+        continue;
+      }
+      const rNum = getRandomInt(freeCells.length);
+      freeCells[rNum].occupiedBy = ship.shipId;
+      ship.boardX = freeCells[rNum].index;
+      ship.boardY = this.map.length - 1 - rowCount;
+      ship.setOrientation(toOrientation);
+      break;
+    }
+  }
+
+  _setRandomSpawns() {
     for (let attcker in this.attackers) {
       const att = this.attackers[attcker];
-      while (rowCount < 3) {
-        const freeCells = getUnoccupiedRowCells(
-          this.map.length - 1 - rowCount,
-          this.map
-        );
-        if (freeCells.length === 0) {
-          rowCount++;
-          continue;
-        }
-        const rNum = getRandomInt(freeCells.length);
-        freeCells[rNum].occupiedBy = att.playerName;
-        att.ship.boardX = freeCells[rNum].index;
-        att.ship.boardY = this.map.length - 1 - rowCount;
-        att.ship.setOrientation(Orientation.NORTH);
-        break;
-      }
+      this.setRandomSpawn(att.getShip());
     }
 
-    rowCount = 0;
     for (let defender in this.defenders) {
       const def = this.defenders[defender];
-      while (rowCount < 3) {
-        const freeCells = getUnoccupiedRowCells(0 + rowCount, this.map);
-        if (freeCells.length === 0) {
-          rowCount++;
-          continue;
-        }
-
-        const rNum = getRandomInt(freeCells.length);
-        freeCells[rNum].occupiedBy = def.playerName;
-        def.ship.boardX = freeCells[rNum].index;
-        def.ship.boardY = 0 + rowCount;
-
-        def.ship.setOrientation(Orientation.SOUTH);
-
-        break;
-      }
+      this.setRandomSpawn(def.getShip());
     }
   }
 }
