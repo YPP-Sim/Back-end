@@ -920,7 +920,9 @@ class Game {
       const rNum = getRandomInt(freeCells.length);
       freeCells[rNum].occupiedBy = ship.shipId;
       ship.boardX = freeCells[rNum].index;
-      ship.boardY = this.map.length - 1 - rowCount;
+      ship.boardY = attackingSide
+        ? this.map.length - 1 - rowCount
+        : 0 + rowCount;
       ship.setOrientation(toOrientation);
       break;
     }
