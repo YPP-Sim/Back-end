@@ -489,15 +489,19 @@ class Game {
       turn_1: [],
       turn_1_winds: [],
       turn_1_shots: [],
+      turn_1_sinks: [],
       turn_2: [],
       turn_2_winds: [],
       turn_2_shots: [],
+      turn_2_sinks: [],
       turn_3: [],
       turn_3_winds: [],
       turn_3_shots: [],
+      turn_3_sinks: [],
       turn_4: [],
       turn_4_winds: [],
       turn_4_shots: [],
+      turn_4_sinks: [],
     };
     this._loadTurn(playerMovements, 1, "firstMove");
     this._loadTurn(playerMovements, 2, "secondMove");
@@ -589,6 +593,21 @@ class Game {
     }
   }
 
+  _fillSinkData(playerMovements) {
+    for (let playerName in this.players) {
+      const player = this.players[playerName];
+      if (!player) continue;
+
+      const sunkOnTurn = player.ship.sunkOnTurn;
+
+      if (sunkOnTurn > 0) {
+        playerMovements["turn_" + sunkOnTurn + "_sinks"].push({
+          playerName,
+        });
+      }
+    }
+  }
+
   onGameTurn() {
     const allPMoves = [];
     for (let playerName in this.players)
@@ -598,12 +617,13 @@ class Game {
     const playerMovements = this.getAllPlayerMovements();
     this._fillWindData(playerMovements);
     this._fillShotData(playerMovements);
-    this.resetSunkShips();
+    this._fillSinkData(playerMovements);
 
     const playerData = this.getAllPlayerPositions();
     this.io.in(this.gameId).emit("gameTurn", { playerMovements, playerData });
 
     setTimeout(() => {
+      this.resetSunkShips();
       this.io.in(this.gameId).emit("clearShips", "yeah");
       this.clearAllMoves();
     }, 3500);
@@ -614,7 +634,16 @@ class Game {
       ship.bilge = 0;
       ship.damage = 0;
       ship.sinking = false;
+      ship.sunkOnTurn = 0;
       this.setRandomSpawn(ship);
+
+      const eventObj = {
+        shipId: ship.shipId,
+        boardX: ship.boardX,
+        boardY: ship.boardY,
+        orientation: ship.getOrientation().name,
+      };
+      this.io.in(this.gameId).emit("shipPositionChange", eventObj);
     }
   }
 
