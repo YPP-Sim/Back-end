@@ -16,6 +16,9 @@ class PlayerShip {
 
     this.sinking = false;
     this.side = side;
+
+    // Will hold the value of the which turn the ship was sunk on, e.g ship was sunk on turn 3.
+    this.sunkOnTurn = 0;
   }
 
   getShipStats() {
@@ -41,19 +44,22 @@ class PlayerShip {
    *
    * @param {PlayerShip} otherShip  The other player ship that is ramming this ship.
    */
-  ramShip(otherShip) {
-    otherShip.damageShip(this.shipType.ramDamage);
-    this.damageShip(otherShip.shipType.ramDamage);
+  ramShip(otherShip, turn) {
+    otherShip.damageShip(this.shipType.ramDamage, turn);
+    this.damageShip(otherShip.shipType.ramDamage, turn);
   }
 
-  damageShip(amount) {
+  damageShip(amount, turn) {
     let total = this.damage + amount;
 
     if (this.total > amount) this.total = amount;
 
     this.damage = total;
 
-    if (this._checkSink()) this.sinking = true;
+    if (this._checkSink()) {
+      this.sinking = true;
+      this.sunkOnTurn = turn;
+    }
   }
 
   _checkSink() {

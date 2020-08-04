@@ -362,10 +362,10 @@ class Game {
   /**
    * @param {Array.<PlayerMoves>} playerMoves
    */
-  _handleClaims(playerMoves, turn) {
+  _handleClaims(playerMoves, turn, numberedTurn) {
     for (let pMoves of playerMoves) {
       const move = pMoves[turn];
-      this._handleClaimPerMove(move);
+      this._handleClaimPerMove(move, numberedTurn);
     }
 
     this.rammedShipsPerTurn = [];
@@ -374,7 +374,7 @@ class Game {
     }
   }
 
-  _handleClaimPerMove(move) {
+  _handleClaimPerMove(move, numberedTurn) {
     if (move) {
       if (!move.direction) return;
       if (move.claimedCells.length === 0) return;
@@ -387,13 +387,34 @@ class Game {
         secondCell = move.claimedCells[1].cell;
       }
 
-      this._handleCellClaimWithPrio(firstCell, 1, move, false);
+      this._handleCellClaimWithPrio(
+        firstCell,
+        1,
+        move,
+        false,
+        false,
+        numberedTurn
+      );
       if (!move.cancelledMovement && secondCell)
-        this._handleCellClaimWithPrio(secondCell, 2, move, true);
+        this._handleCellClaimWithPrio(
+          secondCell,
+          2,
+          move,
+          true,
+          false,
+          numberedTurn
+        );
     }
   }
 
-  _handleCellClaimWithPrio(cell, priority, move, turnal, windClaim) {
+  _handleCellClaimWithPrio(
+    cell,
+    priority,
+    move,
+    turnal,
+    windClaim,
+    numberedTurn
+  ) {
     const { moveOwner } = move;
 
     for (let claimObj of cell.claiming) {
@@ -401,7 +422,10 @@ class Game {
       if (id == moveOwner) continue;
       if (claimedPriority <= priority) {
         if (!this._rammedThisTurn(id, moveOwner)) {
-          this.getShipById(id).ramShip(this.getShipById(moveOwner));
+          this.getShipById(id).ramShip(
+            this.getShipById(moveOwner),
+            numberedTurn
+          );
           this.rammedShipsPerTurn.push([id, moveOwner]);
         }
         if (turnal) {
@@ -574,6 +598,7 @@ class Game {
     const playerMovements = this.getAllPlayerMovements();
     this._fillWindData(playerMovements);
     this._fillShotData(playerMovements);
+    this.resetSunkShips();
 
     const playerData = this.getAllPlayerPositions();
     this.io.in(this.gameId).emit("gameTurn", { playerMovements, playerData });
@@ -586,6 +611,9 @@ class Game {
 
   resetSunkShips() {
     for (let ship of this.sinking) {
+      ship.bilge = 0;
+      ship.damage = 0;
+      ship.sinking = false;
       this.setRandomSpawn(ship);
     }
   }
@@ -626,14 +654,14 @@ class Game {
    * @param {Array.<PlayerMoves>} playerMoves
    */
   executeMoves(playerMoves) {
-    const executeClaimsAndMove = (turn) => {
+    const executeClaimsAndMove = (turn, numberedTurn) => {
       // Get and calculate claims
       for (let pMove of playerMoves) {
         this.moveClaim(pMove[turn]);
       }
 
       // Handle claims
-      this._handleClaims(playerMoves, turn);
+      this._handleClaims(playerMoves, turn, numberedTurn);
       this.claimedToClear = [];
 
       // Move the ships
@@ -646,13 +674,13 @@ class Game {
       this._handleWinds(turn);
 
       // Fire the cannons
-      this.executeCannonShots(turn, playerMoves);
+      this.executeCannonShots(turn, playerMoves, numberedTurn);
     };
 
-    executeClaimsAndMove("firstMove");
-    executeClaimsAndMove("secondMove");
-    executeClaimsAndMove("thirdMove");
-    executeClaimsAndMove("fourthMove");
+    executeClaimsAndMove("firstMove", 1);
+    executeClaimsAndMove("secondMove", 2);
+    executeClaimsAndMove("thirdMove", 3);
+    executeClaimsAndMove("fourthMove", 4);
   }
 
   _handleWinds(turn) {
@@ -831,7 +859,7 @@ class Game {
    * @param {Move} move
    * @param {PlayerShip} ship
    */
-  _calculateCannonSide(cannonSide, move, ship) {
+  _calculateCannonSide(cannonSide, move, ship, numberedTurn) {
     // Shoot if there are guns on that side
     if (!move) return;
     if (move[cannonSide + "Guns"][0]) {
@@ -851,12 +879,12 @@ class Game {
             if (move[cannonSide + "Guns"].length > 1)
               if (move[cannonSide + "Guns"][1]) cannonHits = 2;
 
-            hitShip.damageShip(ship.shipType.cannonType.damage * cannonHits);
+            hitShip.damageShip(
+              ship.shipType.cannonType.damage * cannonHits,
+              numberedTurn
+            );
             move[cannonSide + "GunEnd"] = i + 1;
             move[cannonSide + "Hit"] = true;
-
-            console.log("occupied cell hit: ", toCell);
-            //TODO
             break;
           }
         } else if (isTallRock(toCell.cell_id)) {
@@ -868,13 +896,13 @@ class Game {
     }
   }
 
-  executeCannonShots(turn, playerMoves) {
+  executeCannonShots(turn, playerMoves, numberedTurn) {
     for (let pMove of playerMoves) {
       const move = pMove[turn];
       const ship = this.getShipById(pMove.shipId);
 
-      this._calculateCannonSide("left", move, ship);
-      this._calculateCannonSide("right", move, ship);
+      this._calculateCannonSide("left", move, ship, numberedTurn);
+      this._calculateCannonSide("right", move, ship, numberedTurn);
     }
   }
 
