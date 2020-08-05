@@ -172,18 +172,22 @@ describe("Game", () => {
           ],
           turn_1_winds: [],
           turn_1_shots: [],
+          turn_1_sinks: [],
 
           turn_2: [],
           turn_2_winds: [],
           turn_2_shots: [],
+          turn_2_sinks: [],
 
           turn_3: [],
           turn_3_winds: [],
           turn_3_shots: [],
+          turn_3_sinks: [],
 
           turn_4: [],
           turn_4_winds: [],
           turn_4_shots: [],
+          turn_4_sinks: [],
         },
         playerData: [
           { playerName: "ship1", boardX: 0, boardY: 5, orientation: "EAST" },
@@ -406,15 +410,19 @@ describe("Game", () => {
               },
             ],
             turn_1_shots: [],
+            turn_1_sinks: [],
             turn_2: [],
             turn_2_winds: [],
             turn_2_shots: [],
+            turn_2_sinks: [],
             turn_3: [],
             turn_3_winds: [],
             turn_3_shots: [],
+            turn_3_sinks: [],
             turn_4: [],
             turn_4_winds: [],
             turn_4_shots: [],
+            turn_4_sinks: [],
           },
           playerData: [
             {
