@@ -27,7 +27,7 @@ class PlayerShip {
       shipType: this.shipType.serverName,
       boardX: this.boardX,
       boardY: this.boardY,
-      sunkOnTurn,
+      sunkOnTurn: this.sunkOnTurn,
       bilge: this.bilge,
       damage: this.damage / this.shipType.maxDamage, // Returns damage as a percentage instead of the raw value
       dualCannon: this.shipType.dualCannon,
