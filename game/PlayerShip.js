@@ -50,6 +50,8 @@ class PlayerShip {
   }
 
   damageShip(amount, turn) {
+    if (this.sinking) return;
+
     let total = this.damage + amount;
 
     if (this.total > amount) this.total = amount;
