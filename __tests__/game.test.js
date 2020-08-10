@@ -479,4 +479,44 @@ describe("Game", () => {
       });
     });
   });
+
+  describe("Full turn interactions", () => {
+    beforeEach(() => {
+      // Add ships
+      testGame.addShip("ship1", ShipType.WAR_FRIG, 0, 6, "DEFENDER");
+      testGame.addShip("ship2", ShipType.WAR_FRIG, 1, 6, "ATTACKER");
+
+      testGame.getShipById("ship1").setOrientation(Orientation.SOUTH);
+      testGame.getShipById("ship2").setOrientation(Orientation.SOUTH);
+    });
+
+    afterEach(() => {
+      // Remove ships
+      testGame.removePlayer("ship1");
+      testGame.removePlayer("ship2");
+    });
+
+    it("handles ship sinks", () => {
+      const player1 = testGame.getPlayer("ship1");
+      const player2 = testGame.getPlayer("ship2");
+      player1.getShip().damage = 40;
+
+      player2.getMoves().setGuns(1, "right", [true, true]);
+      player2.getMoves().setGuns(2, "right", [true, true]);
+      player2.getMoves().setGuns(3, "right", [true, true]);
+      player2.getMoves().setGuns(4, "right", [true, true]);
+
+      testGame.onGameTurn();
+
+      expect(jestEmitMock.mock.calls[0][0]).toBe("gameTurn");
+
+      const gameEmitData = jestEmitMock.mock.calls[0][1];
+      const turn3Sinks = gameEmitData.playerMovements.turn_3_sinks;
+
+      expect(turn3Sinks.length).toBe(1);
+      expect(turn3Sinks[0]).toStrictEqual({
+        playerName: "ship1",
+      });
+    });
+  });
 });
