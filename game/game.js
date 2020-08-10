@@ -152,6 +152,8 @@ class Game {
 
   removePlayer(playerName) {
     if (this.players[playerName]) delete this.players[playerName];
+    this.removeAttacker(playerName);
+    this.removeDefender(playerName);
   }
 
   /**
