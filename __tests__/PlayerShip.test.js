@@ -1,6 +1,5 @@
 const PlayerShip = require("../game/PlayerShip");
 const ShipType = require("../game/ShipType");
-const Orientation = require("../game/Orientation");
 
 let testShip;
 describe("ship functions", () => {
