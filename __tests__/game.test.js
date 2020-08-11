@@ -501,6 +501,8 @@ describe("Game", () => {
       const player2 = testGame.getPlayer("ship2");
       player1.getShip().damage = 40;
 
+      player1.getMoves().setFourthMove(Direction.FORWARD);
+
       player2.getMoves().setGuns(1, "right", [true, true]);
       player2.getMoves().setGuns(2, "right", [true, true]);
       player2.getMoves().setGuns(3, "right", [true, true]);
@@ -511,12 +513,13 @@ describe("Game", () => {
       expect(jestEmitMock.mock.calls[0][0]).toBe("gameTurn");
 
       const gameEmitData = jestEmitMock.mock.calls[0][1];
-      const turn3Sinks = gameEmitData.playerMovements.turn_3_sinks;
+      const { turn_3_sinks, turn_4 } = gameEmitData.playerMovements;
 
-      expect(turn3Sinks.length).toBe(1);
-      expect(turn3Sinks[0]).toStrictEqual({
+      expect(turn_3_sinks.length).toBe(1);
+      expect(turn_3_sinks[0]).toStrictEqual({
         playerName: "ship1",
       });
+      expect(turn_4.length).toBe(0);
     });
   });
 });

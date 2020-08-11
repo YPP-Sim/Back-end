@@ -519,6 +519,9 @@ class Game {
       const pMoves = player.moves;
       if (!pMoves || !pMoves[namedTurn]) continue;
 
+      const ship = player.getShip();
+      if (ship.sinking && numberedTurn > ship.sunkOnTurn) continue;
+
       const move = pMoves[namedTurn];
       const { direction, cancelledMovement, cancelledTurnal } = move;
 
@@ -600,6 +603,7 @@ class Game {
       const player = this.players[playerName];
       if (!player) continue;
 
+      if (!player.ship) return;
       const sunkOnTurn = player.ship.sunkOnTurn;
 
       if (sunkOnTurn > 0) {
