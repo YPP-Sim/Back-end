@@ -6,6 +6,7 @@ const Move = require("../game/moves/Move");
 const PlayerMoves = require("../game/moves/PlayerMoves");
 const JobberQuality = require("../game/JobberQuality");
 const util = require("util");
+const PlayerShip = require("../game/PlayerShip");
 
 // Will console log out all the io events and data that would be sent by the server
 // during testing
@@ -491,6 +492,8 @@ describe("Game", () => {
     });
 
     afterEach(() => {
+      // Clear Mocks
+      jest.clearAllMocks();
       // Remove ships
       testGame.removePlayer("ship1");
       testGame.removePlayer("ship2");
@@ -520,6 +523,52 @@ describe("Game", () => {
         playerName: "ship1",
       });
       expect(turn_4.length).toBe(0);
+    });
+  });
+
+  describe("spawning", () => {
+    let attackerPlayer;
+    let defenderPlayer;
+    beforeEach(() => {
+      // Add players
+      testGame.addAttacker("attacker1");
+      testGame.addDefender("defender1");
+
+      attackerPlayer = testGame.getPlayer("attacker1");
+      defenderPlayer = testGame.getPlayer("defender1");
+      attackerPlayer.ship = new PlayerShip(
+        attackerPlayer.playerName,
+        ShipType.WAR_FRIG,
+        "ATTACKER"
+      );
+      defenderPlayer.ship = new PlayerShip(
+        defenderPlayer.playerName,
+        ShipType.WAR_FRIG,
+        "DEFENDER"
+      );
+    });
+
+    afterEach(() => {
+      testGame.removeAttacker("attacker1");
+      testGame.removeDefender("defender1");
+    });
+
+    it("spawns attackers correctly", () => {
+      testGame._setRandomSpawns();
+
+      const attackerShip = testGame.getShipById("attacker1");
+      expect(attackerShip).not.toBeNull();
+      expect(attackerShip.boardY).toBeGreaterThanOrEqual(testMap.length + 3);
+      expect(attackerShip.boardY).toBeLessThan(testMap.length + 6);
+    });
+
+    it("spawns defenders correctly", () => {
+      testGame._setRandomSpawns();
+
+      const defenderShip = testGame.getShipById("defender1");
+      expect(defenderShip).not.toBeNull();
+      expect(defenderShip.boardY).toBeGreaterThanOrEqual(0);
+      expect(defenderShip.boardY).toBeLessThan(3);
     });
   });
 });
