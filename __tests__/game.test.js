@@ -549,8 +549,8 @@ describe("Game", () => {
     });
 
     afterEach(() => {
-      testGame.removeAttacker("attacker1");
-      testGame.removeDefender("defender1");
+      testGame.removePlayer("attacker1");
+      testGame.removePlayer("defender1");
     });
 
     it("spawns attackers correctly", () => {
