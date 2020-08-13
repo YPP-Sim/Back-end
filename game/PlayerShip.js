@@ -10,7 +10,7 @@ class PlayerShip {
     this.boardY = 0;
 
     this.bilge = 0;
-    this.damage = 0;
+    this.damage = 40;
 
     this.orientation = Orientation.SOUTH;
 

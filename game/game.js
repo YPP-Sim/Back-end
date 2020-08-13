@@ -607,6 +607,7 @@ class Game {
       const sunkOnTurn = player.ship.sunkOnTurn;
 
       if (sunkOnTurn > 0) {
+        this.sinking.push(player.ship);
         playerMovements["turn_" + sunkOnTurn + "_sinks"].push({
           playerName,
         });
