@@ -166,8 +166,12 @@ class Game {
   }
 
   addAttacker(playerName) {
-    if (!this.attackers[playerName])
+    if (!this.attackers[playerName]) {
+      if (!this.getPlayer(playerName)) {
+        this.addPlayer(playerName);
+      }
       this.attackers[playerName] = this.getPlayer(playerName);
+    }
   }
 
   getAttackers() {
@@ -187,8 +191,12 @@ class Game {
   }
 
   addDefender(playerName) {
-    if (!this.defenders[playerName])
+    if (!this.defenders[playerName]) {
+      if (!this.getPlayer(playerName)) {
+        this.addPlayer(playerName);
+      }
       this.defenders[playerName] = this.getPlayer(playerName);
+    }
   }
 
   getDefenders() {
@@ -483,6 +491,7 @@ class Game {
    * @returns {PlayerShip} the ship that was retrieved through the id.
    */
   getShipById(id) {
+    if (!this.players[id]) return null;
     return this.players[id].ship;
   }
 
@@ -1001,7 +1010,7 @@ class Game {
 
     for (let defender in this.defenders) {
       const def = this.defenders[defender];
-      this.setRandomSpawn(def.getShip());
+      this.setRandomSpawn(def.getShip(), false);
     }
   }
 }
