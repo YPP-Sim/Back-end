@@ -638,8 +638,8 @@ class Game {
     const playerData = this.getAllPlayerPositions();
     this.io.in(this.gameId).emit("gameTurn", { playerMovements, playerData });
 
+    this.resetSunkShips();
     setTimeout(() => {
-      this.resetSunkShips();
       this.io.in(this.gameId).emit("clearShips", "yeah");
       this.clearAllMoves();
     }, 3500);
@@ -647,20 +647,25 @@ class Game {
 
   resetSunkShips() {
     for (let ship of this.sinking) {
-      ship.bilge = 0;
-      ship.damage = 0;
-      ship.sinking = false;
-      ship.sunkOnTurn = 0;
-      this.setRandomSpawn(ship);
+      setTimeout(() => {
+        ship.bilge = 0;
+        ship.damage = 0;
+        ship.sinking = false;
+        ship.sunkOnTurn = 0;
+        this.setRandomSpawn(ship);
 
-      const eventObj = {
-        shipId: ship.shipId,
-        boardX: ship.boardX,
-        boardY: ship.boardY,
-        orientation: ship.getOrientation().name,
-      };
-      this.io.in(this.gameId).emit("shipPositionChange", eventObj);
+        const eventObj = {
+          shipId: ship.shipId,
+          boardX: ship.boardX,
+          boardY: ship.boardY,
+          orientation: ship.getOrientation().name,
+        };
+
+        this.io.in(this.gameId).emit("shipPositionChange", eventObj);
+      }, 5000 + 3000 * ship.sunkOnTurn);
     }
+
+    this.sinking = [];
   }
 
   clearAllMoves() {
