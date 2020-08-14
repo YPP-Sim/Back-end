@@ -571,4 +571,188 @@ describe("Game", () => {
       expect(defenderShip.boardY).toBeLessThan(3);
     });
   });
+
+  describe("full collision handling", () => {
+    let player;
+    beforeEach(() => {
+      // Add player
+      testGame.addAttacker("attacker1");
+
+      player = testGame.getPlayer("attacker1");
+      player.ship = new PlayerShip(
+        player.playerName,
+        ShipType.WAR_FRIG,
+        "ATTACKER"
+      );
+    });
+
+    afterEach(() => {
+      testGame.removePlayer("attacker1");
+    });
+
+    describe("rock collisions", () => {
+      describe("Rock directly in front of ship", () => {
+        beforeEach(() => {
+          const ship = player.getShip();
+          testGame.setShipPosition(ship.shipId, 1, 6);
+          ship.setOrientation(Orientation.SOUTH);
+
+          ship.damage = 0;
+          ship.bilge = 0;
+        });
+
+        afterEach(() => {
+          jest.clearAllMocks();
+        });
+
+        it("correctly handles FORWARD direction", () => {
+          player.getMoves().setFirstMove(Direction.FORWARD);
+          testGame.onGameTurn();
+          expect(jestEmitMock.mock.calls[0][0]).toBe("gameTurn");
+
+          const gameEmitData = jestEmitMock.mock.calls[0][1];
+          const { turn_1 } = gameEmitData.playerMovements;
+
+          expect(turn_1.length).toBe(1);
+
+          const compareObj = {
+            playerName: player.playerName,
+            direction: "FORWARD",
+            cancelledTurnal: false,
+            cancelledMovement: true,
+          };
+
+          expect(turn_1[0]).toStrictEqual(compareObj);
+          expect(player.getShip().damage).toEqual(
+            player.getShip().shipType.rockDamage
+          );
+        });
+
+        it("correctly handles RIGHT direction", () => {
+          player.getMoves().setFirstMove(Direction.RIGHT);
+          testGame.onGameTurn();
+          expect(jestEmitMock.mock.calls[0][0]).toBe("gameTurn");
+
+          const gameEmitData = jestEmitMock.mock.calls[0][1];
+          const { turn_1 } = gameEmitData.playerMovements;
+
+          expect(turn_1.length).toBe(1);
+
+          const compareObj = {
+            playerName: player.playerName,
+            direction: "RIGHT",
+            cancelledTurnal: false,
+            cancelledMovement: true,
+          };
+
+          expect(turn_1[0]).toStrictEqual(compareObj);
+          expect(player.getShip().getOrientation()).toStrictEqual(
+            Orientation.WEST
+          );
+          expect(player.getShip().damage).toEqual(
+            player.getShip().shipType.rockDamage
+          );
+        });
+
+        it("correctly handles LEFT direction", () => {
+          player.getMoves().setFirstMove(Direction.LEFT);
+          testGame.onGameTurn();
+          expect(jestEmitMock.mock.calls[0][0]).toBe("gameTurn");
+
+          const gameEmitData = jestEmitMock.mock.calls[0][1];
+          const { turn_1 } = gameEmitData.playerMovements;
+
+          expect(turn_1.length).toBe(1);
+
+          const compareObj = {
+            playerName: player.playerName,
+            direction: "LEFT",
+            cancelledTurnal: false,
+            cancelledMovement: true,
+          };
+
+          expect(turn_1[0]).toStrictEqual(compareObj);
+          expect(player.getShip().getOrientation()).toStrictEqual(
+            Orientation.EAST
+          );
+          expect(player.getShip().damage).toEqual(
+            player.getShip().shipType.rockDamage
+          );
+        });
+      });
+
+      describe("Rock at side, turning into rock", () => {
+        beforeEach(() => {
+          const ship = player.getShip();
+          testGame.setShipPosition(ship.shipId, 10, 3);
+          ship.setOrientation(Orientation.SOUTH);
+
+          ship.damage = 0;
+          ship.bilge = 0;
+        });
+
+        afterEach(() => {
+          jest.clearAllMocks();
+        });
+
+        it("handles LEFT turn into rock", () => {
+          player.getMoves().setFirstMove(Direction.LEFT);
+          testGame.onGameTurn();
+          expect(jestEmitMock.mock.calls[0][0]).toBe("gameTurn");
+
+          const gameEmitData = jestEmitMock.mock.calls[0][1];
+          const { turn_1 } = gameEmitData.playerMovements;
+
+          expect(turn_1.length).toBe(1);
+
+          const compareObj = {
+            playerName: player.playerName,
+            direction: "LEFT",
+            cancelledTurnal: true,
+            cancelledMovement: false,
+          };
+
+          expect(turn_1[0]).toStrictEqual(compareObj);
+          expect(player.getShip().getOrientation()).toStrictEqual(
+            Orientation.EAST
+          );
+          expect(player.getShip().damage).toEqual(
+            player.getShip().shipType.rockDamage
+          );
+
+          expect(player.getShip().boardX).toEqual(10);
+          expect(player.getShip().boardY).toEqual(4);
+        });
+
+        it("handles RIGHT turn into rock", () => {
+          player.getMoves().setFirstMove(Direction.RIGHT);
+          testGame.onGameTurn();
+          expect(jestEmitMock.mock.calls[0][0]).toBe("gameTurn");
+
+          const gameEmitData = jestEmitMock.mock.calls[0][1];
+          const { turn_1 } = gameEmitData.playerMovements;
+
+          expect(turn_1.length).toBe(1);
+
+          const compareObj = {
+            playerName: player.playerName,
+            direction: "RIGHT",
+            cancelledTurnal: true,
+            cancelledMovement: false,
+          };
+
+          expect(turn_1[0]).toStrictEqual(compareObj);
+          expect(player.getShip().getOrientation()).toStrictEqual(
+            Orientation.WEST
+          );
+          expect(player.getShip().damage).toEqual(
+            player.getShip().shipType.rockDamage
+          );
+
+          expect(player.getShip().boardX).toEqual(10);
+          expect(player.getShip().boardY).toEqual(4);
+        });
+      });
+    });
+  });
 });
