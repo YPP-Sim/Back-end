@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const Move = require("./moves/Move");
 const WindType = require("./WindType");
+const Orientation = require("./Orientation");
 
 const defaultMap = [
   [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -163,6 +164,22 @@ function removeFileExtensions(files) {
   return newFileArray;
 }
 
+function getOppositeOrientation(orientation) {
+  switch (orientation) {
+    case Orientation.EAST:
+      return Orientation.WEST;
+    case Orientation.WEST:
+      return Orientation.EAST;
+    case Orientation.NORTH:
+      return Orientation.SOUTH;
+    case Orientation.SOUTH:
+      return Orientation.NORTH;
+
+    default:
+      return null;
+  }
+}
+
 function isActionableDirection(direction) {
   if (direction === null || direction === undefined) return false;
   switch (direction) {
@@ -180,6 +197,7 @@ module.exports = {
   isRock,
   isTallRock,
   getWindTypeById,
+  getOppositeOrientation,
   readMapFromFile,
   getAllAvailableMaps,
   addSafeZone,

@@ -13,6 +13,7 @@ const {
   defaultMap,
   getWindTypeById,
   isTallRock,
+  getOppositeOrientation,
 } = require("./util");
 const util = require("./util");
 const WindType = require("./WindType");
@@ -339,6 +340,24 @@ class Game {
       ship.ramRocks();
       moveObj.cancelledMovement = true;
       return;
+    }
+
+    // If front cell has a ship
+    if (frontCell.occupiedBy) {
+      const otherShip = this.getShipById(frontCell.occupiedBy);
+
+      // If ships are facing eachother, cancel movement and ram
+      if (
+        ship.getOrientation() ===
+        getOppositeOrientation(otherShip.getOrientation())
+      ) {
+        moveObj.cancelledMovement = true;
+        if (!this._rammedThisTurn(ship.shipId, otherShip.shipId)) {
+          ship.ramShip(otherShip, 1);
+          this.rammedShipsPerTurn.push([ship.shipId, otherShip.shipId]);
+        }
+        return;
+      }
     }
 
     frontCell.claiming.push({ id: moveOwner, claimedPriority: 1 });

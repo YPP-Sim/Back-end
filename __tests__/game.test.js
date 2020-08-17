@@ -771,8 +771,6 @@ describe("Game", () => {
     });
 
     describe("ship on ship collisions", () => {
-      beforeEach(() => {});
-
       afterEach(() => {
         jest.clearAllMocks();
       });
@@ -856,6 +854,157 @@ describe("Game", () => {
         expect(player.getShip().damage).toEqual(
           player.getShip().shipType.ramDamage
         );
+      });
+
+      describe("2 ships looking at eachother, correctly handing collision on move", () => {
+        beforeEach(() => {
+          player.ship.setPosition(6, 5);
+          player.ship.setOrientation(Orientation.EAST);
+          player2.ship.setPosition(7, 5);
+          player2.ship.setOrientation(Orientation.WEST);
+        });
+
+        it("both moving FORWARD", () => {
+          player.getMoves().setFirstMove(Direction.FORWARD);
+          player2.getMoves().setFirstMove(Direction.FORWARD);
+
+          testGame.onGameTurn();
+          expect(jestEmitMock.mock.calls[0][0]).toBe("gameTurn");
+
+          const gameEmitData = jestEmitMock.mock.calls[0][1];
+          const { turn_1 } = gameEmitData.playerMovements;
+
+          expect(turn_1.length).toBe(2);
+
+          const player1MovementObject = {
+            playerName: player.playerName,
+            direction: "FORWARD",
+            cancelledTurnal: false,
+            cancelledMovement: true,
+          };
+
+          const player2MovementObject = {
+            playerName: player2.playerName,
+            direction: "FORWARD",
+            cancelledTurnal: false,
+            cancelledMovement: true,
+          };
+
+          expect(turn_1[0]).toStrictEqual(player1MovementObject);
+          expect(turn_1[1]).toStrictEqual(player2MovementObject);
+
+          expect(player.getShip().damage).toEqual(
+            player2.getShip().shipType.ramDamage
+          );
+
+          expect(player2.getShip().damage).toEqual(
+            player.getShip().shipType.ramDamage
+          );
+        });
+
+        it("both moving LEFT", () => {
+          player.getMoves().setFirstMove(Direction.LEFT);
+          player2.getMoves().setFirstMove(Direction.LEFT);
+
+          testGame.onGameTurn();
+          expect(jestEmitMock.mock.calls[0][0]).toBe("gameTurn");
+
+          const gameEmitData = jestEmitMock.mock.calls[0][1];
+          const { turn_1 } = gameEmitData.playerMovements;
+
+          expect(turn_1.length).toBe(2);
+
+          const player1MovementObject = {
+            playerName: player.playerName,
+            direction: "LEFT",
+            cancelledTurnal: false,
+            cancelledMovement: true,
+          };
+
+          const player2MovementObject = {
+            playerName: player2.playerName,
+            direction: "LEFT",
+            cancelledTurnal: false,
+            cancelledMovement: true,
+          };
+
+          expect(turn_1[0]).toStrictEqual(player1MovementObject);
+          expect(turn_1[1]).toStrictEqual(player2MovementObject);
+
+          expect(player.getShip().damage).toEqual(
+            player2.getShip().shipType.ramDamage
+          );
+
+          expect(player2.getShip().damage).toEqual(
+            player.getShip().shipType.ramDamage
+          );
+        });
+
+        it("both moving RIGHT", () => {
+          player.getMoves().setFirstMove(Direction.RIGHT);
+          player2.getMoves().setFirstMove(Direction.RIGHT);
+
+          testGame.onGameTurn();
+          expect(jestEmitMock.mock.calls[0][0]).toBe("gameTurn");
+
+          const gameEmitData = jestEmitMock.mock.calls[0][1];
+          const { turn_1 } = gameEmitData.playerMovements;
+
+          expect(turn_1.length).toBe(2);
+
+          const player1MovementObject = {
+            playerName: player.playerName,
+            direction: "RIGHT",
+            cancelledTurnal: false,
+            cancelledMovement: true,
+          };
+
+          const player2MovementObject = {
+            playerName: player2.playerName,
+            direction: "RIGHT",
+            cancelledTurnal: false,
+            cancelledMovement: true,
+          };
+
+          expect(turn_1[0]).toStrictEqual(player1MovementObject);
+          expect(turn_1[1]).toStrictEqual(player2MovementObject);
+
+          expect(player.getShip().damage).toEqual(
+            player2.getShip().shipType.ramDamage
+          );
+
+          expect(player2.getShip().damage).toEqual(
+            player.getShip().shipType.ramDamage
+          );
+        });
+
+        it("one moves, one sits stationary", () => {
+          player.getMoves().setFirstMove(Direction.LEFT);
+
+          testGame.onGameTurn();
+          expect(jestEmitMock.mock.calls[0][0]).toBe("gameTurn");
+
+          const gameEmitData = jestEmitMock.mock.calls[0][1];
+          const { turn_1 } = gameEmitData.playerMovements;
+          expect(turn_1.length).toBe(1);
+
+          const player1MovementObject = {
+            playerName: player.playerName,
+            direction: "LEFT",
+            cancelledTurnal: false,
+            cancelledMovement: true,
+          };
+
+          expect(turn_1[0]).toStrictEqual(player1MovementObject);
+
+          expect(player.getShip().damage).toEqual(
+            player2.getShip().shipType.ramDamage
+          );
+
+          expect(player2.getShip().damage).toEqual(
+            player.getShip().shipType.ramDamage
+          );
+        });
       });
     });
   });
