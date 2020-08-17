@@ -217,6 +217,11 @@ class Game {
 
   setShipPosition(shipId, x, y) {
     const ship = this.getShipById(shipId);
+
+    // Remove previous cell occupiedBy
+    const cellToRemove = this.getCell(ship.boardX, ship.boardY);
+    cellToRemove.occupiedBy = null;
+
     ship.boardX = x;
     ship.boardY = y;
 
