@@ -319,12 +319,9 @@ class Game {
 
       stationaryCell.claiming.push({ id: shipId, claimedPriority: 1 });
       this.claimedToClear.push(stationaryCell);
-      // moveObj.claimedCells.push({ cell: stationaryCell, claimedPriority: 1 });
-
       return;
     }
 
-    // if (!moveObj) return;
     const { direction, moveOwner } = moveObj;
     const frontX = ship.boardX + ship.getOrientation().xDir;
     const frontY = ship.boardY + ship.getOrientation().yDir;
