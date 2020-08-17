@@ -3,12 +3,13 @@ const ShipType = require("./ShipType");
 const CannonType = require("./CannonType");
 
 class PlayerShip {
-  constructor(id, shipType, side = "ATTACKING") {
+  constructor(id, shipType, side = "ATTACKING", game) {
     this.shipId = id;
     this.shipType = shipType;
     this.boardX = 0;
     this.boardY = 0;
 
+    this.game = game;
     this.bilge = 0;
     this.damage = 0;
 
@@ -19,6 +20,10 @@ class PlayerShip {
 
     // Will hold the value of the which turn the ship was sunk on, e.g ship was sunk on turn 3.
     this.sunkOnTurn = 0;
+  }
+
+  setPosition(x, y) {
+    this.game.setShipPosition(this.shipId, x, y);
   }
 
   getShipStats() {

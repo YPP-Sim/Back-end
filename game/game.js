@@ -90,7 +90,7 @@ class Game {
     this.attackerScore = 0;
 
     this.timeLeft = 0;
-    this.turnTime = 35; // in seconds
+    this.turnTime = 20; // in seconds
 
     this.gameStatus = GameStatus.WAITING;
 
@@ -113,7 +113,7 @@ class Game {
    * @returns {PlayerShip} the ship that we're adding
    */
   addShip(id, shipType, x, y, teamType) {
-    const playerShip = new PlayerShip(id, shipType, teamType);
+    const playerShip = new PlayerShip(id, shipType, teamType, this);
     const cell = this.map[y][x];
     cell.occupiedBy = id;
     playerShip.boardX = x;
@@ -309,12 +309,23 @@ class Game {
   /**
    * @param {Move} moveObj
    */
-  moveClaim(moveObj) {
-    if (!moveObj) return;
-    const { direction, moveOwner } = moveObj;
-    const ship = this.getShipById(moveOwner);
+  moveClaim(moveObj, shipId) {
+    const ship = this.getShipById(shipId);
     if (!ship) return;
     if (ship.sinking) return;
+
+    if (!moveObj || moveObj.direction === Direction.STALL || ship.sinking) {
+      const stationaryCell = this.getCell(ship.boardX, ship.boardY);
+
+      stationaryCell.claiming.push({ id: shipId, claimedPriority: 1 });
+      this.claimedToClear.push(stationaryCell);
+      // moveObj.claimedCells.push({ cell: stationaryCell, claimedPriority: 1 });
+
+      return;
+    }
+
+    // if (!moveObj) return;
+    const { direction, moveOwner } = moveObj;
     const frontX = ship.boardX + ship.getOrientation().xDir;
     const frontY = ship.boardY + ship.getOrientation().yDir;
 
@@ -434,6 +445,10 @@ class Game {
 
     for (let claimObj of cell.claiming) {
       const { id, claimedPriority } = claimObj;
+
+      //Handle stationary ship collisions
+
+      // Handle multiple claims
       if (id == moveOwner) continue;
       if (claimedPriority <= priority) {
         if (!this._rammedThisTurn(id, moveOwner)) {
@@ -712,7 +727,7 @@ class Game {
     const executeClaimsAndMove = (turn, numberedTurn) => {
       // Get and calculate claims
       for (let pMove of playerMoves) {
-        this.moveClaim(pMove[turn]);
+        this.moveClaim(pMove[turn], pMove.shipId);
       }
 
       // Handle claims
