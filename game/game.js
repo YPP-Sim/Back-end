@@ -92,7 +92,7 @@ class Game {
     this.attackerScore = 0;
 
     this.timeLeft = 0;
-    this.turnTime = 20; // in seconds
+    this.turnTime = 35; // in seconds
 
     this.gameStatus = GameStatus.WAITING;
 
