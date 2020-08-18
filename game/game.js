@@ -461,9 +461,6 @@ class Game {
 
     for (let claimObj of cell.claiming) {
       const { id, claimedPriority } = claimObj;
-
-      //Handle stationary ship collisions
-
       // Handle multiple claims
       if (id == moveOwner) continue;
       if (claimedPriority <= priority) {
