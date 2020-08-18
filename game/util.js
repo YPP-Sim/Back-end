@@ -3,6 +3,7 @@ const path = require("path");
 const Move = require("./moves/Move");
 const WindType = require("./WindType");
 const Orientation = require("./Orientation");
+const Flag = require("./Flag");
 
 const defaultMap = [
   [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -191,12 +192,10 @@ function getFlagLocationsList(rawMap) {
       const cell_id = rawMap[y][x];
 
       if (cell_id === 17 || cell_id === 18 || cell_id === 19) {
-        const flagObj = {
-          cell_id,
-          x,
-          y,
-        };
-        flagsArray.push(flagObj);
+        // Checks point value of cell id, 17 = 1, 18 = 2, 19 = 3.
+        const pointValue = cell_id === 17 ? 1 : cell_id === 18 ? 2 : 3;
+
+        flagsArray.push(new Flag(x, y, pointValue));
       }
     }
   }
