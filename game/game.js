@@ -80,6 +80,7 @@ class Game {
     this.defenders = {};
     util.readMapFromFile(mapName).then((rawMap) => {
       this.rawMap = util.addSafeZone(rawMap);
+      this.flags = util.getFlagLocationsList(rawMap);
     });
     this.map = getFreshMapGrid(map);
     this.jobberQuality = jobberQuality;

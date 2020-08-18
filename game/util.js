@@ -180,6 +180,30 @@ function getOppositeOrientation(orientation) {
   }
 }
 
+function getFlagLocationsList(rawMap) {
+  const height = rawMap.length;
+  const length = rawMap[0].length;
+
+  const flagsArray = [];
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < length; x++) {
+      const cell_id = rawMap[y][x];
+
+      if (cell_id === 17 || cell_id === 18 || cell_id === 19) {
+        const flagObj = {
+          cell_id,
+          x,
+          y,
+        };
+        flagsArray.push(flagObj);
+      }
+    }
+  }
+
+  return flagsArray;
+}
+
 function isActionableDirection(direction) {
   if (direction === null || direction === undefined) return false;
   switch (direction) {
@@ -194,6 +218,7 @@ function isActionableDirection(direction) {
 
 module.exports = {
   getFreshMapGrid,
+  getFlagLocationsList,
   isRock,
   isTallRock,
   getWindTypeById,
