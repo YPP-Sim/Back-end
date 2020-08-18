@@ -22,3 +22,6 @@
 | Tall Rocks 2                  | 14  |
 | Tall Rocks 3                  | 15  |
 | Tall Rocks 4                  | 16  |
+| 1-Point Flag                  | 17  |
+| 2-Point Flag                  | 18  |
+| 3-Point Flag                  | 19  |
