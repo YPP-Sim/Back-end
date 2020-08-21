@@ -526,17 +526,29 @@ class Game {
    */
   checkFlags() {
     for (let flag in this.flags) {
+      // Reset side contesting booleans
+      flag.attackersContesting = false;
+      flag.defendersContesting = false;
+      // Clear players contesting before pushing more onto the list
+      flag.playersContesting = [];
+
+      // For every player, find out if the ship's influence is in range of the flag
       for (let player in this.players) {
         const ship = player.getShip();
         const influenceRadius = ship.shipType.influenceDiameter / 2;
+
         const dX = Math.abs(flag.x - ship.boardX);
         const dY = Math.abs(flag.y - ship.boardY);
 
-        // Test for that extra 1-2 ranged block. TODO
-
-        if (dX + dY <= influenceRadius) {
+        // Using the circle formula: x^2 + y^2 = r^2
+        // Translating it to dX^2 + dY^2 <= influenceRadius^2
+        const distance = Math.pow(dX, 2) + Math.pow(dY, 2);
+        if (distance <= Math.pow(influenceRadius, 2)) {
           // Contesting flag
           flag.playersContesting.push(player.playerName);
+
+          if (ship.side === "ATTACKING") flag.attackersContesting = true;
+          else flag.defendersContesting = true;
         }
       }
     }
