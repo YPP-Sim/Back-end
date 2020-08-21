@@ -78,10 +78,8 @@ class Game {
     this.players = {};
     this.attackers = {};
     this.defenders = {};
-    util.readMapFromFile(mapName).then((rawMap) => {
-      this.rawMap = util.addSafeZone(rawMap);
-      this.flags = util.getFlagLocationsList(rawMap);
-    });
+    this.rawMap = util.addSafeZone(map);
+    this.flags = util.getFlagLocationsList(this.rawMap);
     this.map = getFreshMapGrid(map);
     this.jobberQuality = jobberQuality;
 
@@ -703,8 +701,12 @@ class Game {
     this._fillShotData(playerMovements);
     this._fillSinkData(playerMovements);
 
+    this.checkFlags();
+
     const playerData = this.getAllPlayerPositions();
-    this.io.in(this.gameId).emit("gameTurn", { playerMovements, playerData });
+    this.io
+      .in(this.gameId)
+      .emit("gameTurn", { playerMovements, playerData, flags: this.flags });
 
     this.resetSunkShips();
     setTimeout(() => {

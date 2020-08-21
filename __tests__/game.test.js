@@ -156,6 +156,7 @@ describe("Game", () => {
       expect(jestEmitMock.mock.calls[0][0]).toBe("gameTurn");
 
       const testGameTurnData = {
+        flags: [],
         playerMovements: {
           turn_1: [
             {
@@ -401,41 +402,15 @@ describe("Game", () => {
         testGame.onGameTurn();
 
         expect(jestEmitMock.mock.calls[0][0]).toBe("gameTurn");
-        const testGameTurnData = {
-          playerMovements: {
-            turn_1: [],
-            turn_1_winds: [
-              {
-                playerName: "testShip",
-                windType: { type: "NORTH_WIND", cancelledMovement: false },
-              },
-            ],
-            turn_1_shots: [],
-            turn_1_sinks: [],
-            turn_2: [],
-            turn_2_winds: [],
-            turn_2_shots: [],
-            turn_2_sinks: [],
-            turn_3: [],
-            turn_3_winds: [],
-            turn_3_shots: [],
-            turn_3_sinks: [],
-            turn_4: [],
-            turn_4_winds: [],
-            turn_4_shots: [],
-            turn_4_sinks: [],
-          },
-          playerData: [
-            {
-              playerName: "testShip",
-              boardX: 1,
-              boardY: 3,
-              orientation: "SOUTH",
-            },
-          ],
+
+        const { turn_1_winds } = jestEmitMock.mock.calls[0][1].playerMovements;
+        const compareObj = {
+          playerName: "testShip",
+          windType: { type: "NORTH_WIND", cancelledMovement: false },
         };
 
-        expect(jestEmitMock.mock.calls[0][1]).toStrictEqual(testGameTurnData);
+        expect(turn_1_winds.length).toBe(1);
+        expect(turn_1_winds[0]).toStrictEqual(compareObj);
       });
     });
 

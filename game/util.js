@@ -78,17 +78,19 @@ function getFreshMapGrid(map) {
 }
 
 function addSafeZone(map) {
-  const width = map[0].length;
+  let mapCopy = JSON.parse(JSON.stringify(map));
+
+  const width = mapCopy[0].length;
   const safeZoneRow = new Array(width).fill(-1);
-  map.push(safeZoneRow);
-  map.push(safeZoneRow);
-  map.push(safeZoneRow);
+  mapCopy.push(safeZoneRow);
+  mapCopy.push(safeZoneRow);
+  mapCopy.push(safeZoneRow);
 
-  map.unshift(safeZoneRow);
-  map.unshift(safeZoneRow);
-  map.unshift(safeZoneRow);
+  mapCopy.unshift(safeZoneRow);
+  mapCopy.unshift(safeZoneRow);
+  mapCopy.unshift(safeZoneRow);
 
-  return map;
+  return mapCopy;
 }
 
 function isRock(cell_id) {
