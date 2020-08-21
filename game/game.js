@@ -525,8 +525,6 @@ class Game {
   checkFlags() {
     for (let flag of this.flags) {
       // Reset side contesting booleans
-      // console.log("Type of flag: ", typeof(flag));
-
       flag.attackersContesting = false;
       flag.defendersContesting = false;
       // Clear players contesting before pushing more onto the list
