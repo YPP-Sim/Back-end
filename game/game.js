@@ -521,6 +521,28 @@ class Game {
   }
 
   /**
+   * Will determine if a ship or ships are contesting certain flags, if they are in
+   * their respective influence radius.
+   */
+  checkFlags() {
+    for (let flag in this.flags) {
+      for (let player in this.players) {
+        const ship = player.getShip();
+        const influenceRadius = ship.shipType.influenceDiameter / 2;
+        const dX = Math.abs(flag.x - ship.boardX);
+        const dY = Math.abs(flag.y - ship.boardY);
+
+        // Test for that extra 1-2 ranged block. TODO
+
+        if (dX + dY <= influenceRadius) {
+          // Contesting flag
+          flag.playersContesting.push(player.playerName);
+        }
+      }
+    }
+  }
+
+  /**
    * @param {String} id
    * @returns {PlayerShip} the ship that was retrieved through the id.
    */
