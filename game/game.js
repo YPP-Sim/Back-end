@@ -523,15 +523,18 @@ class Game {
    * their respective influence radius.
    */
   checkFlags() {
-    for (let flag in this.flags) {
+    for (let flag of this.flags) {
       // Reset side contesting booleans
+      // console.log("Type of flag: ", typeof(flag));
+
       flag.attackersContesting = false;
       flag.defendersContesting = false;
       // Clear players contesting before pushing more onto the list
       flag.playersContesting = [];
 
       // For every player, find out if the ship's influence is in range of the flag
-      for (let player in this.players) {
+      for (let playerName in this.players) {
+        const player = this.getPlayerById(playerName);
         const ship = player.getShip();
         const influenceRadius = ship.shipType.influenceDiameter / 2;
 
