@@ -26,6 +26,8 @@ function getGameData(game) {
     gameData.players.push(pData);
   }
 
+  gameData.flags = game.flags;
+
   return gameData;
 }
 
