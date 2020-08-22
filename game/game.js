@@ -534,6 +534,8 @@ class Game {
       for (let playerName in this.players) {
         const player = this.getPlayerById(playerName);
         const ship = player.getShip();
+        if (!ship) continue;
+
         const influenceRadius = ship.shipType.influenceDiameter / 2;
 
         const dX = Math.abs(flag.x - ship.boardX);
