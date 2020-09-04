@@ -148,9 +148,14 @@ class SocketHandler {
           return;
         }
         const player = game.getPlayer(playerName);
-
+        const side = player.getSide(game);
         if (!player.ship) {
-          player.ship = new PlayerShip(playerName, ShipType[shipType]);
+          player.ship = new PlayerShip(
+            playerName,
+            ShipType[shipType],
+            side,
+            game
+          );
         } else {
           player.ship.shipType = ShipType[shipType];
         }

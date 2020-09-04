@@ -171,6 +171,8 @@ class Game {
         this.addPlayer(playerName);
       }
       this.attackers[playerName] = this.getPlayer(playerName);
+      if (this.attackers[playerName].ship)
+        this.attackers[playerName].ship.side = "ATTACKER";
     }
   }
 
@@ -196,6 +198,8 @@ class Game {
         this.addPlayer(playerName);
       }
       this.defenders[playerName] = this.getPlayer(playerName);
+      if (this.defenders[playerName].ship)
+        this.defenders[playerName].ship.side = "DEFENDER";
     }
   }
 
@@ -548,7 +552,8 @@ class Game {
           // Contesting flag
           flag.playersContesting.push(player.playerName);
 
-          if (ship.side === "ATTACKING") flag.attackersContesting = true;
+          console.log("SHIP: ", playerName, ship.side);
+          if (ship.side === "ATTACKER") flag.attackersContesting = true;
           else flag.defendersContesting = true;
         }
       }
