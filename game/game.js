@@ -6,6 +6,7 @@ const PlayerData = require("./PlayerData");
 const PlayerShip = require("./PlayerShip");
 const Orientation = require("./Orientation");
 const Move = require("./moves/Move");
+const Timer = require("./Timer");
 const {
   getFreshMapGrid,
   isRock,
@@ -102,6 +103,12 @@ class Game {
     this.cannonRange = 3;
 
     this.sinking = [];
+
+    // Timer
+    this.gameTimer = new Timer(60 * 15, (currentTime) => {
+      // Update clients of time remaining
+      this.io.to(this.gameId).emit("gameTime", currentTime);
+    });
   }
 
   /**
@@ -1054,6 +1061,9 @@ class Game {
     this.gameIntervalId = setInterval(() => {
       this.onGameTick();
     }, 1000);
+
+    // Start time remaining countdown
+    this.gameTimer.start();
   }
 
   stop() {
