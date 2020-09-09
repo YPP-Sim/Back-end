@@ -87,6 +87,7 @@ class Game {
     this.io = io;
     this.password = password;
     this.locked = locked;
+
     this.defenderScore = 0;
     this.attackerScore = 0;
 
@@ -559,12 +560,35 @@ class Game {
           // Contesting flag
           flag.playersContesting.push(player.playerName);
 
-          console.log("SHIP: ", playerName, ship.side);
           if (ship.side === "ATTACKER") flag.attackersContesting = true;
           else flag.defendersContesting = true;
         }
       }
     }
+  }
+
+  /**
+   * Will Award teams their points dependent on the flags that they are contesting currently AND
+   * send out updates to all clients connected.
+   */
+  awardPoints() {
+    for (let flag of this.flags) {
+      // No points awarded as both teams are contesting current flag
+      if (flag.attackersContesting && flag.defendersContesting) continue;
+
+      // Award attackers points if they are the ones in control.
+      if (flag.attackersContesting) this.attackerScore += flag.pointValue;
+
+      // Award defenders points if they are the ones in control
+      if (flag.defendersContesting) this.defenderScore += flag.pointValue;
+    }
+
+    // Send out update to all clients
+    const pointsObj = {
+      attackerScore: this.attackerScore,
+      defenderScore: this.defenderScore,
+    };
+    this.io.in(this.gameId).emit("updatePoints", pointsObj);
   }
 
   /**
@@ -723,6 +747,7 @@ class Game {
       .in(this.gameId)
       .emit("gameTurn", { playerMovements, playerData, flags: this.flags });
 
+    this.awardPoints();
     this.resetSunkShips();
     setTimeout(() => {
       this.io.in(this.gameId).emit("clearShips", "yeah");
