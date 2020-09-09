@@ -1,6 +1,6 @@
 const uuid = require("uuid");
 class Flag {
-  constructor(x, y, pointValue, id = "1") {
+  constructor(x, y, pointValue) {
     this.x = x;
     this.y = y;
     this.pointValue = pointValue;
