@@ -99,7 +99,7 @@ function addSafeZone(map) {
  */
 function findSmallestNumber(obj) {
   let smallestPropName = null;
-  for (let prop of obj) {
+  for (let prop in obj) {
     if (smallestPropName === null) {
       smallestPropName = prop;
       continue;
