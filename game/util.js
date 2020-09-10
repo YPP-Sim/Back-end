@@ -93,6 +93,23 @@ function addSafeZone(map) {
   return mapCopy;
 }
 
+/**
+ * Finds the property in the object with the smallest number, then returns that property name.
+ * @param {*} obj
+ */
+function findSmallestNumber(obj) {
+  let smallestPropName = null;
+  for (let prop of obj) {
+    if (smallestPropName === null) {
+      smallestPropName = prop;
+      continue;
+    }
+
+    if (obj[prop] < obj[smallestPropName]) smallestPropName = prop;
+  }
+  return smallestPropName;
+}
+
 function isRock(cell_id) {
   switch (cell_id) {
     case 13:
@@ -225,6 +242,7 @@ module.exports = {
   getWindTypeById,
   getOppositeOrientation,
   readMapFromFile,
+  findSmallestNumber,
   getAllAvailableMaps,
   addSafeZone,
   isActionableDirection,
