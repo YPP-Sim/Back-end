@@ -62,7 +62,7 @@ class SocketHandler {
           return;
         }
 
-        game.addPlayer(playerName);
+        game.addPlayer(playerName, socket);
 
         if (socket.room) socket.leave(socket.room);
 

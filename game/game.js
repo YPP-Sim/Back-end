@@ -129,6 +129,9 @@ class Game {
 
     if (!this.players[id]) {
       this.addPlayer(id);
+      console.warn(
+        "addPlayer getting called with no socket input...if you receive this message you need to rework."
+      );
     }
     this.players[id].ship = playerShip;
 
@@ -142,8 +145,8 @@ class Game {
     return playerShip;
   }
 
-  addPlayer(playerName, ship = null) {
-    this.players[playerName] = new PlayerData(playerName, ship);
+  addPlayer(playerName, socket = null, ship = null) {
+    this.players[playerName] = new PlayerData(playerName, socket, this, ship);
   }
 
   getPlayerById(playerName) {
