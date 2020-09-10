@@ -18,7 +18,7 @@ class PlayerShip {
     this.sinking = false;
     this.side = side;
 
-    // Will hold the value of the which turn the ship was sunk on, e.g ship was sunk on turn 3.
+    // Will hold the value of the which turn the ship was sunk on, e.g ship was sunk on 3rd move.
     this.sunkOnTurn = 0;
   }
 
