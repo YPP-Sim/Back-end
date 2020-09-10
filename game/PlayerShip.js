@@ -34,11 +34,19 @@ class PlayerShip {
       boardY: this.boardY,
       sunkOnTurn: this.sunkOnTurn,
       bilge: this.bilge,
-      damage: this.damage / this.shipType.maxDamage, // Returns damage as a percentage instead of the raw value
+      damage: this.getDamagePercentage(), // Returns damage as a percentage instead of the numerical max damage
       dualCannon: this.shipType.dualCannon,
       stallToken: this.shipType.stallToken,
       orientation: this.orientation.name,
     };
+  }
+
+  getBilgePercentage() {
+    return this.bilge;
+  }
+
+  getDamagePercentage() {
+    return this.damage / this.shipType.maxDamage;
   }
 
   ramRocks() {
