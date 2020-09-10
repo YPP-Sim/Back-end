@@ -1,6 +1,7 @@
 const PlayerMoves = require("./moves/PlayerMoves");
 const PlayerShip = require("./PlayerShip");
 const game = require("./game");
+const { findSmallestNumber } = require("./util");
 const Direction = require("./Direction");
 
 class PlayerData {
@@ -23,9 +24,9 @@ class PlayerData {
 
     // Available moves
     this.tokens = {
-      left: 2,
-      forward: 4,
-      right: 2,
+      LEFT: 2,
+      FORWARD: 4,
+      RIGHT: 2,
     };
 
     // Available cannons
@@ -34,7 +35,7 @@ class PlayerData {
     this.cannonsLoaded = 0;
 
     this.autoSelectTokenGeneration = true;
-    this.selectedTokenGeneration = Direction.FORWARD;
+    this.selectedToken = Direction.FORWARD;
   }
 
   sendSocketMessage(eventName, eventObj) {
@@ -50,6 +51,9 @@ class PlayerData {
     this.socket.emit(eventName, eventObj);
   }
 
+  /**
+   * Sends server's data to the client on movement and cannon tokens
+   */
   updateClientTokens() {
     this.sendSocketMessage("updateTokens", {
       moves: this.tokens,
@@ -57,7 +61,31 @@ class PlayerData {
     });
   }
 
-  generateMove() {}
+  /**
+   * Sends data to the client with the current selected token
+   */
+  updateClientSelectedToken() {
+    this.sendSocketMessage("updateSelectedToken", this.selectedToken);
+  }
+
+  generateMove() {
+    // Possible edge case scenario
+    if (this.selectedToken === Direction.STALL) {
+      this.selectedToken = Direction.FORWARD;
+      console.error(
+        `Selected Token for player ${this.playerName} was set to STALL, setting to FORWARD for now but fix if this message pops up.`
+      );
+    }
+
+    this.tokens[this.selectedToken] += 1;
+
+    if (this.autoSelectTokenGeneration) {
+      // Find the token name with the smallest amount of tokens and set it as the selected token
+      this.selectedToken = findSmallestNumber(this.tokens);
+      // Update selected token to client
+      this.updateClientSelectedToken();
+    }
+  }
 
   addCannons(amount) {
     if (
