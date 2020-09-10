@@ -39,7 +39,7 @@ class MoveGenerator {
       this.moveGenerationPercentage -= Math.floor(
         this.moveGenerationPercentage
       );
-      // Move generated
+      this.player.generateMove();
       // Update tokens
       this.player.updateClientTokens();
     }
