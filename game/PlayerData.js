@@ -3,6 +3,7 @@ const PlayerShip = require("./PlayerShip");
 const game = require("./game");
 const { findSmallestNumber } = require("./util");
 const Direction = require("./Direction");
+const MoveGenerator = require("./moves/MoveGenerator");
 
 class PlayerData {
   /**
@@ -53,6 +54,12 @@ class PlayerData {
 
     this.autoSelectTokenGeneration = true;
     this.selectedToken = Direction.FORWARD;
+
+    this.moveGenerator = new MoveGenerator(this);
+  }
+
+  getMoveGenerator() {
+    return this.moveGenerator;
   }
 
   sendSocketMessage(eventName, eventObj) {

@@ -633,6 +633,8 @@ class Game {
       if (!pMoves || !pMoves[namedTurn]) continue;
 
       const ship = player.getShip();
+      if (!ship) continue;
+
       if (ship.sinking && numberedTurn > ship.sunkOnTurn) continue;
 
       const move = pMoves[namedTurn];
@@ -799,12 +801,21 @@ class Game {
   }
 
   onGameTick() {
+    this.updateGenerators();
+
     this.turnTick++;
     // send the current turn tick to all the clients
     this.io.in(this.gameId).emit("gameTick", this.turnTick);
     if (this.turnTick === this.turnTime) {
       this.onGameTurn();
       this.turnTick = 0;
+    }
+  }
+
+  updateGenerators() {
+    for (let playerName in this.players) {
+      const player = this.getPlayer(playerName);
+      player.getMoveGenerator().update();
     }
   }
 
