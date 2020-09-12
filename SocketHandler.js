@@ -5,6 +5,7 @@ const ShipType = require("./game/ShipType");
 const util = require("./game/util");
 const Move = require("./game/moves/Move");
 const Direction = require("./game/Direction");
+const { move } = require("./routes/maps-router");
 
 function getGameData(game) {
   const gameData = {
@@ -127,12 +128,12 @@ class SocketHandler {
         switch (side) {
           case "ATTACKER":
             if (game.isDefender(playerName)) game.removeDefender(playerName);
-            game.addAttacker(playerName);
+            game.addAttacker(playerName, socket);
 
             break;
           case "DEFENDER":
             if (game.isAttacker(playerName)) game.removeAttacker(playerName);
-            game.addDefender(playerName);
+            game.addDefender(playerName, socket);
             break;
           case "UNDECIDED":
           default:
@@ -208,26 +209,12 @@ class SocketHandler {
         }
 
         const { moveNumber, direction, leftGuns, rightGuns } = moveData;
+        const playerMoves = player.getMoves();
 
-        const move = new Move(Direction[direction], playerName);
+        if (leftGuns) playerMoves.setGuns(moveNumber, "left", leftGuns);
+        if (rightGuns) playerMoves.setGuns(moveNumber, "right", rightGuns);
 
-        if (leftGuns) move.setLeftGuns(leftGuns);
-        if (rightGuns) move.setRightGuns(rightGuns);
-
-        switch (moveNumber) {
-          case 1:
-            player.setFirstMove(move);
-            break;
-          case 2:
-            player.setSecondMove(move);
-            break;
-          case 3:
-            player.setThirdMove(move);
-            break;
-          case 4:
-            player.setFourthMove(move);
-            break;
-        }
+        playerMoves.setMove(direction, moveNumber);
 
         this.handleActionUpdates(player, (activeTurns) => {
           this.io.to(gameId).emit("updatePlayerActions", {

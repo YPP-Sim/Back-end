@@ -48,6 +48,12 @@ const ioMock = {
   },
 };
 
+const socketEmitMock = jest.fn(mockEmit);
+
+const socketMock = {
+  emit: socketEmitMock,
+};
+
 let testGame;
 describe("Game", () => {
   beforeEach(() => {
@@ -70,14 +76,28 @@ describe("Game", () => {
 
   describe("common functions", () => {
     it("adds ship", () => {
-      testGame.addShip("testShip", ShipType.WAR_FRIG, 1, 2, "DEFENDER");
+      testGame.addShip(
+        "testShip",
+        ShipType.WAR_FRIG,
+        1,
+        2,
+        "DEFENDER",
+        socketMock
+      );
       expect(testGame.defenders["testShip"]).not.toBe(undefined);
       expect(testGame.getCell(1, 2).occupiedBy).toEqual("testShip");
       expect(testGame.getCell(1, 2).cell_id).toEqual(-1); // This is technically safe zone
     });
 
     it("gets ship by id", () => {
-      testGame.addShip("testShip", ShipType.WAR_FRIG, 1, 2, "DEFENDER");
+      testGame.addShip(
+        "testShip",
+        ShipType.WAR_FRIG,
+        1,
+        2,
+        "DEFENDER",
+        socketMock
+      );
       const ship = testGame.getShipById("testShip");
       expect(ship).not.toBe(undefined);
     });
@@ -91,7 +111,14 @@ describe("Game", () => {
     });
 
     it("moveClaim forward", () => {
-      testGame.addShip("testShip", ShipType.WAR_FRIG, 1, 2, "DEFENDER");
+      testGame.addShip(
+        "testShip",
+        ShipType.WAR_FRIG,
+        1,
+        2,
+        "DEFENDER",
+        socketMock
+      );
       testGame.getShipById("testShip").setOrientation(Orientation.SOUTH);
 
       const move = new Move(Direction.FORWARD, "testShip");
@@ -103,7 +130,14 @@ describe("Game", () => {
     });
 
     it("moveClaim left", () => {
-      testGame.addShip("testShip", ShipType.WAR_FRIG, 1, 2, "DEFENDER");
+      testGame.addShip(
+        "testShip",
+        ShipType.WAR_FRIG,
+        1,
+        2,
+        "DEFENDER",
+        socketMock
+      );
       testGame.getShipById("testShip").setOrientation(Orientation.SOUTH);
 
       const move = new Move(Direction.LEFT, "testShip");
@@ -118,7 +152,14 @@ describe("Game", () => {
     });
 
     it("moveClaim right", () => {
-      testGame.addShip("testShip", ShipType.WAR_FRIG, 1, 2, "DEFENDER");
+      testGame.addShip(
+        "testShip",
+        ShipType.WAR_FRIG,
+        1,
+        2,
+        "DEFENDER",
+        socketMock
+      );
       testGame.getShipById("testShip").setOrientation(Orientation.SOUTH);
 
       const move = new Move(Direction.RIGHT, "testShip");
@@ -139,8 +180,22 @@ describe("Game", () => {
     });
 
     it("onGameTurn", () => {
-      testGame.addShip("ship1", ShipType.WAR_FRIG, 0, 4, "DEFENDER");
-      testGame.addShip("ship2", ShipType.WAR_FRIG, 1, 4, "ATTACKER");
+      testGame.addShip(
+        "ship1",
+        ShipType.WAR_FRIG,
+        0,
+        4,
+        "DEFENDER",
+        socketMock
+      );
+      testGame.addShip(
+        "ship2",
+        ShipType.WAR_FRIG,
+        1,
+        4,
+        "ATTACKER",
+        socketMock
+      );
 
       const player1 = testGame.getPlayer("ship1");
       const player2 = testGame.getPlayer("ship2");
@@ -219,8 +274,22 @@ describe("Game", () => {
     let ship1;
     let ship2;
     beforeEach(() => {
-      ship1 = testGame.addShip("ship1", ShipType.WAR_FRIG, 15, 3, "DEFENDER");
-      ship2 = testGame.addShip("ship2", ShipType.WAR_FRIG, 15, 5, "DEFENDER");
+      ship1 = testGame.addShip(
+        "ship1",
+        ShipType.WAR_FRIG,
+        15,
+        3,
+        "DEFENDER",
+        socketMock
+      );
+      ship2 = testGame.addShip(
+        "ship2",
+        ShipType.WAR_FRIG,
+        15,
+        5,
+        "DEFENDER",
+        socketMock
+      );
 
       ship1.setOrientation(Orientation.SOUTH);
       ship2.setOrientation(Orientation.NORTH);
@@ -228,23 +297,23 @@ describe("Game", () => {
 
     it("forward movement", () => {
       const ship1Moves = new PlayerMoves("ship1");
-      ship1Moves.firstMove = new Move(Direction.FORWARD, "ship1");
+      ship1Moves.setFirstMove(Direction.FORWARD);
 
       const ship2Moves = new PlayerMoves("ship2");
-      ship2Moves.firstMove = new Move(Direction.FORWARD, "ship2");
+      ship2Moves.setFirstMove(Direction.FORWARD);
 
       //Claim cells from moves.
-      testGame.moveClaim(ship1Moves.firstMove, ship1Moves.shipId);
-      testGame.moveClaim(ship2Moves.firstMove, ship2Moves.shipId);
+      testGame.moveClaim(ship1Moves.move1, ship1Moves.shipId);
+      testGame.moveClaim(ship2Moves.move1, ship2Moves.shipId);
       //Handle claim conflicts
-      testGame._handleClaims([ship1Moves, ship2Moves], "firstMove");
+      testGame._handleClaims([ship1Moves, ship2Moves], "move1");
 
       //Expect ram damage to be taken
       expect(ship1.damage).toBe(ship2.shipType.ramDamage);
       expect(ship2.damage).toBe(ship1.shipType.ramDamage);
 
-      expect(ship1Moves.firstMove.cancelledMovement).toBe(true);
-      expect(ship2Moves.firstMove.cancelledMovement).toBe(true);
+      expect(ship1Moves.move1.cancelledMovement).toBe(true);
+      expect(ship2Moves.move1.cancelledMovement).toBe(true);
     });
 
     it("forward border collision", () => {
@@ -390,7 +459,14 @@ describe("Game", () => {
     let ship1;
     let ship2;
     beforeEach(() => {
-      ship1 = testGame.addShip("testShip", ShipType.WAR_FRIG, 6, 0, "DEFENDER");
+      ship1 = testGame.addShip(
+        "testShip",
+        ShipType.WAR_FRIG,
+        6,
+        0,
+        "DEFENDER",
+        socketMock
+      );
       ship1.setOrientation(Orientation.SOUTH);
 
       jest.clearAllMocks();
@@ -437,7 +513,14 @@ describe("Game", () => {
         ship1Moves.setFirstMove(Direction.FORWARD);
         ship1Moves.setSecondMove(Direction.LEFT);
 
-        ship2 = testGame.addShip("ship2", ShipType.WAR_FRIG, 8, 0, "DEFENDER");
+        ship2 = testGame.addShip(
+          "ship2",
+          ShipType.WAR_FRIG,
+          8,
+          0,
+          "DEFENDER",
+          socketMock
+        );
         ship2.setOrientation(Orientation.SOUTH);
         const ship2Moves = new PlayerMoves("ship2");
         ship2Moves.setFirstMove(Direction.FORWARD);
@@ -459,8 +542,22 @@ describe("Game", () => {
   describe("Full turn interactions", () => {
     beforeEach(() => {
       // Add ships
-      testGame.addShip("ship1", ShipType.WAR_FRIG, 0, 6, "DEFENDER");
-      testGame.addShip("ship2", ShipType.WAR_FRIG, 1, 6, "ATTACKER");
+      testGame.addShip(
+        "ship1",
+        ShipType.WAR_FRIG,
+        0,
+        6,
+        "DEFENDER",
+        socketMock
+      );
+      testGame.addShip(
+        "ship2",
+        ShipType.WAR_FRIG,
+        1,
+        6,
+        "ATTACKER",
+        socketMock
+      );
 
       testGame.getShipById("ship1").setOrientation(Orientation.SOUTH);
       testGame.getShipById("ship2").setOrientation(Orientation.SOUTH);
@@ -506,8 +603,8 @@ describe("Game", () => {
     let defenderPlayer;
     beforeEach(() => {
       // Add players
-      testGame.addAttacker("attacker1");
-      testGame.addDefender("defender1");
+      testGame.addAttacker("attacker1", socketMock);
+      testGame.addDefender("defender1", socketMock);
 
       attackerPlayer = testGame.getPlayer("attacker1");
       defenderPlayer = testGame.getPlayer("defender1");
@@ -554,8 +651,8 @@ describe("Game", () => {
     let player2;
     beforeEach(() => {
       // Add player
-      testGame.addAttacker("attacker1");
-      testGame.addDefender("defender1");
+      testGame.addAttacker("attacker1", socketMock);
+      testGame.addDefender("defender1", socketMock);
 
       player = testGame.getPlayer("attacker1");
       player2 = testGame.getPlayer("defender1");
@@ -578,6 +675,7 @@ describe("Game", () => {
     afterEach(() => {
       testGame.removePlayer("attacker1");
       testGame.removePlayer("defender1");
+      jest.clearAllMocks();
     });
 
     describe("rock collisions", () => {

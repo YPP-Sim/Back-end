@@ -120,16 +120,15 @@ class Game {
    * @param {string} teamType
    * @returns {PlayerShip} the ship that we're adding
    */
-  addShip(id, shipType, x, y, teamType) {
+  addShip(id, shipType, x, y, teamType, socket) {
     const playerShip = new PlayerShip(id, shipType, teamType, this);
     const cell = this.map[y][x];
     cell.occupiedBy = id;
     playerShip.boardX = x;
     playerShip.boardY = y;
 
-    if (!this.players[id]) {
-      this.addPlayer(id);
-    }
+    if (!this.players[id]) this.addPlayer(id, socket);
+
     this.players[id].ship = playerShip;
 
     if (teamType === "ATTACKER") {
@@ -173,10 +172,10 @@ class Game {
     return this.players[playerName];
   }
 
-  addAttacker(playerName) {
+  addAttacker(playerName, socket) {
     if (!this.attackers[playerName]) {
       if (!this.getPlayer(playerName)) {
-        this.addPlayer(playerName);
+        this.addPlayer(playerName, socket);
       }
       this.attackers[playerName] = this.getPlayer(playerName);
       if (this.attackers[playerName].ship)
@@ -200,10 +199,10 @@ class Game {
     if (this.attackers[playerName]) delete this.attackers[playerName];
   }
 
-  addDefender(playerName) {
+  addDefender(playerName, socket) {
     if (!this.defenders[playerName]) {
       if (!this.getPlayer(playerName)) {
-        this.addPlayer(playerName);
+        this.addPlayer(playerName, socket);
       }
       this.defenders[playerName] = this.getPlayer(playerName);
       if (this.defenders[playerName].ship)
@@ -619,10 +618,10 @@ class Game {
       turn_4_shots: [],
       turn_4_sinks: [],
     };
-    this._loadTurn(playerMovements, 1, "firstMove");
-    this._loadTurn(playerMovements, 2, "secondMove");
-    this._loadTurn(playerMovements, 3, "thirdMove");
-    this._loadTurn(playerMovements, 4, "fourthMove");
+    this._loadTurn(playerMovements, 1, "move1");
+    this._loadTurn(playerMovements, 2, "move2");
+    this._loadTurn(playerMovements, 3, "move3");
+    this._loadTurn(playerMovements, 4, "move4");
     return playerMovements;
   }
 
@@ -681,17 +680,17 @@ class Game {
   }
 
   _fillShotData(playerMovements) {
-    this._fillShotDataPerTurn(playerMovements, 1, "firstMove");
-    this._fillShotDataPerTurn(playerMovements, 2, "secondMove");
-    this._fillShotDataPerTurn(playerMovements, 3, "thirdMove");
-    this._fillShotDataPerTurn(playerMovements, 4, "fourthMove");
+    this._fillShotDataPerTurn(playerMovements, 1, "move1");
+    this._fillShotDataPerTurn(playerMovements, 2, "move2");
+    this._fillShotDataPerTurn(playerMovements, 3, "move3");
+    this._fillShotDataPerTurn(playerMovements, 4, "move4");
   }
 
   _fillWindData(playerMovements) {
-    this._fillWindDataPerTurn(playerMovements, 1, "firstMove");
-    this._fillWindDataPerTurn(playerMovements, 2, "secondMove");
-    this._fillWindDataPerTurn(playerMovements, 3, "thirdMove");
-    this._fillWindDataPerTurn(playerMovements, 4, "fourthMove");
+    this._fillWindDataPerTurn(playerMovements, 1, "move1");
+    this._fillWindDataPerTurn(playerMovements, 2, "move2");
+    this._fillWindDataPerTurn(playerMovements, 3, "move3");
+    this._fillWindDataPerTurn(playerMovements, 4, "move4");
   }
 
   _fillWindDataPerTurn(playerMovements, numberedTurn, namedTurn) {
@@ -837,10 +836,10 @@ class Game {
       this.executeCannonShots(turn, playerMoves, numberedTurn);
     };
 
-    executeClaimsAndMove("firstMove", 1);
-    executeClaimsAndMove("secondMove", 2);
-    executeClaimsAndMove("thirdMove", 3);
-    executeClaimsAndMove("fourthMove", 4);
+    executeClaimsAndMove("move1", 1);
+    executeClaimsAndMove("move2", 2);
+    executeClaimsAndMove("move3", 3);
+    executeClaimsAndMove("move4", 4);
   }
 
   _handleWinds(turn) {

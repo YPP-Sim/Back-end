@@ -7,46 +7,69 @@ class PlayerMoves {
    * @param {String} shipId
    * @param {Array.<Move>} moves
    */
-  constructor(shipId, moves = [null, null, null, null]) {
+  constructor(shipId, moves = [null, null, null, null], onPlayMove) {
     this.moveArray = moves;
     this.shipId = shipId;
 
-    this.firstMove = moves[0];
-    this.secondMove = moves[1];
-    this.thirdMove = moves[2];
-    this.fourthMove = moves[3];
+    this.move1 = moves[0];
+    this.move2 = moves[1];
+    this.move3 = moves[2];
+    this.move4 = moves[3];
+
+    this.onPlayMove = onPlayMove;
+  }
+
+  setMove(dir, index) {
+    // Save previous direction
+    const prevMove = this["move" + index];
+    let prevDir = null;
+    if (prevMove) prevDir = prevMove.getDirection();
+
+    // Update data on server
+    if (!this["move" + index])
+      this["move" + index] = new Move(dir, this.shipId);
+    else this["move" + index].setDirection(dir);
+
+    // Execute callback for sending client updates.
+    if (typeof this.onPlayMove === "function")
+      this.onPlayMove(prevDir, dir, index);
+    return prevDir;
   }
 
   /**
    * Set's the first move of the player move turn
    * @param {Direction} move
+   * @returns The previous move direction that dir had overriden
    */
   setFirstMove(dir) {
-    this.firstMove = new Move(dir, this.shipId);
+    return this.setMove(dir, 1);
   }
 
   /**
    * Set's the second move of the player move turn
    * @param {Direction} move
+   * @returns The previous move direction that dir had overriden
    */
   setSecondMove(dir) {
-    this.secondMove = new Move(dir, this.shipId);
+    return this.setMove(dir, 2);
   }
 
   /**
    * Set's the third move of the player move turn
    * @param {Direction} move
+   * @returns The previous move direction that dir had overriden
    */
   setThirdMove(dir) {
-    this.thirdMove = new Move(dir, this.shipId);
+    return this.setMove(dir, 3);
   }
 
   /**
    * Set's the fourth move of the player move turn
    * @param {Direction} move
+   * @returns The previous move direction that dir had overriden
    */
   setFourthMove(dir) {
-    this.fourthMove = new Move(dir, this.shipId);
+    return this.setMove(dir, 4);
   }
 
   getActiveTurnAmount() {
@@ -65,10 +88,10 @@ class PlayerMoves {
       }
     }
 
-    incrementOnActiveTurn(this.firstMove);
-    incrementOnActiveTurn(this.secondMove);
-    incrementOnActiveTurn(this.thirdMove);
-    incrementOnActiveTurn(this.fourthMove);
+    incrementOnActiveTurn(this.move1);
+    incrementOnActiveTurn(this.move2);
+    incrementOnActiveTurn(this.move3);
+    incrementOnActiveTurn(this.move4);
 
     return count;
   }
@@ -83,16 +106,16 @@ class PlayerMoves {
     let move;
     switch (turnNumber) {
       case 1:
-        move = this.checkAndCreate("firstMove");
+        move = this.checkAndCreate("move1");
         break;
       case 2:
-        move = this.checkAndCreate("secondMove");
+        move = this.checkAndCreate("move2");
         break;
       case 3:
-        move = this.checkAndCreate("thirdMove");
+        move = this.checkAndCreate("move3");
         break;
       case 4:
-        move = this.checkAndCreate("fourthMove");
+        move = this.checkAndCreate("move4");
         break;
       default:
         return;
@@ -102,10 +125,10 @@ class PlayerMoves {
   }
 
   clear() {
-    this.firstMove = null;
-    this.secondMove = null;
-    this.thirdMove = null;
-    this.fourthMove = null;
+    this.move1 = null;
+    this.move2 = null;
+    this.move3 = null;
+    this.move4 = null;
   }
 
   getShipId() {

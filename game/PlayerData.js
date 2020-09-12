@@ -16,11 +16,6 @@ class PlayerData {
     this.playerName = playerName;
     this.ship = ship;
     this.game = game;
-    // Ship hand moves
-    this.moves = new PlayerMoves(playerName);
-
-    // Socket to send specific client commands to.
-    this.socket = socket;
 
     // Available moves
     this.tokens = {
@@ -28,6 +23,28 @@ class PlayerData {
       FORWARD: 4,
       RIGHT: 2,
     };
+
+    const onPlayMove = (fromDirection, toDirection, index) => {
+      // If we replaced the previous token (fromDirection), add it back to the available tokens
+      if (fromDirection) this.tokens[fromDirection] += 1;
+
+      // Subtract one from the available tokens
+      this.tokens[toDirection] -= 1;
+
+      // Update client
+      this.sendSocketMessage("playMove", { direction: toDirection, index });
+      this.updateClientTokens(true, false);
+    };
+
+    // Ship hand moves
+    this.moves = new PlayerMoves(
+      playerName,
+      [null, null, null, null],
+      onPlayMove
+    );
+
+    // Socket to send specific client commands to.
+    this.socket = socket;
 
     // Available cannons
     this.cannons = 0;
@@ -53,12 +70,17 @@ class PlayerData {
 
   /**
    * Sends server's data to the client on movement and cannon tokens
+   * can either use it as updateClientTokens() or optional parameters to update Moves and Cannons
+   * like so: updateClientTokens(true, false) would update moves but not include cannons
+   * @param updateMoves includes move tokens in the update
+   * @param updateCannons includes cannon tokens in the update
    */
-  updateClientTokens() {
-    this.sendSocketMessage("updateTokens", {
-      moves: this.tokens,
-      cannons: this.cannons,
-    });
+  updateClientTokens(updateMoves = true, updateCannons = true) {
+    const updateObj = {};
+    if (updateMoves) updateObj.moves = this.tokens;
+    if (updateCannons) updateObj.cannons = this.cannons;
+
+    this.sendSocketMessage("updateTokens", updateObj);
   }
 
   /**
@@ -117,19 +139,19 @@ class PlayerData {
   // Same is moves.set#####(move)
   // Just some more helpful sugar coating
   setFirstMove(move) {
-    this.moves.firstMove = move;
+    this.moves.move1 = move;
   }
 
   setSecondMove(move) {
-    this.moves.secondMove = move;
+    this.moves.move2 = move;
   }
 
   setThirdMove(move) {
-    this.moves.thirdMove = move;
+    this.moves.move3 = move;
   }
 
   setFourthMove(move) {
-    this.moves.fourthMove = move;
+    this.moves.move4 = move;
   }
 
   getSide(game) {

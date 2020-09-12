@@ -27,6 +27,10 @@ class Move {
     this.leftHit = false;
   }
 
+  setDirection(dir) {
+    this.direction = dir;
+  }
+
   getDirection() {
     return this.direction;
   }
