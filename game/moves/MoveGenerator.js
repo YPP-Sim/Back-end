@@ -16,6 +16,8 @@ class MoveGenerator {
   }
 
   update() {
+    if (!this.player.getShip()) return;
+
     if (
       this.player.getCannons() + this.player.getCannonsLoaded() <
       this.player.getShip().shipType.maxCannons
