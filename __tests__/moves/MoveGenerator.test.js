@@ -33,7 +33,7 @@ const testSocket = {
 
 describe("token generation", () => {
   let playerData;
-  let moveGenerator;
+  let mGenerator;
 
   beforeEach(() => {
     const pShip = new PlayerShip(
@@ -43,7 +43,7 @@ describe("token generation", () => {
       dummyGame
     );
     playerData = new PlayerData("testPlayer", testSocket, dummyGame, pShip);
-    moveGenerator = new MoveGenerator(playerData);
+    mGenerator = new MoveGenerator(playerData);
   });
 
   afterEach(() => {
@@ -55,7 +55,7 @@ describe("token generation", () => {
 
     expect(playerData.tokens.FORWARD).toBe(4);
     expect(playerData.tokens.LEFT).toBe(2);
-    for (let i = 0; i < updateCount; i++) moveGenerator.update();
+    for (let i = 0; i < updateCount; i++) mGenerator.update();
     expect(playerData.tokens.FORWARD).toBe(5);
     expect(playerData.tokens.LEFT).toBe(3);
     expect(playerData.getCannons()).toBe(14);
@@ -63,7 +63,7 @@ describe("token generation", () => {
 
   it("sends updates to client", () => {
     const updateCount = 3;
-    for (let i = 0; i < updateCount; i++) moveGenerator.update();
+    for (let i = 0; i < updateCount; i++) mGenerator.update();
 
     expect(jestEmitMock.mock.calls[0][0]).toBe("updateTokens");
     const eventData = jestEmitMock.mock.calls[0][1];

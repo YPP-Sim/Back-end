@@ -41,7 +41,8 @@ class PlayerData {
     this.moves = new PlayerMoves(
       playerName,
       [null, null, null, null],
-      onPlayMove
+      onPlayMove,
+      this
     );
 
     // Socket to send specific client commands to.
@@ -86,6 +87,7 @@ class PlayerData {
     const updateObj = {};
     if (updateMoves) updateObj.moves = this.tokens;
     if (updateCannons) updateObj.cannons = this.cannons;
+    if (this.cannons <= 0) updateObj.cannons = -1; // Problem with socket io, sending a regular zero will send a 1 instead (don't know why) so sending -1 as a representation for 0.
 
     this.sendSocketMessage("updateTokens", updateObj);
   }
@@ -122,7 +124,12 @@ class PlayerData {
       this.getShip().shipType.maxCannnons
     )
       this.cannons = this.getShip().shipType.maxCannnons - this.cannonsLoaded;
+    else if (this.cannons + amount < 0) this.cannons = 0;
     else this.cannons += amount;
+  }
+
+  addCannonsLoaded(amount) {
+    this.cannonsLoaded += amount;
   }
 
   startMovementGeneration() {}

@@ -577,7 +577,7 @@ describe("Game", () => {
       player1.getShip().damage = 40;
 
       player1.getMoves().setFourthMove(Direction.FORWARD);
-
+      player2.addCannons(24);
       player2.getMoves().setGuns(1, "right", [true, true]);
       player2.getMoves().setGuns(2, "right", [true, true]);
       player2.getMoves().setGuns(3, "right", [true, true]);

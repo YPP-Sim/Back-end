@@ -7,7 +7,12 @@ class PlayerMoves {
    * @param {String} shipId
    * @param {Array.<Move>} moves
    */
-  constructor(shipId, moves = [null, null, null, null], onPlayMove) {
+  constructor(
+    shipId,
+    moves = [null, null, null, null],
+    onPlayMove,
+    playerData
+  ) {
     this.moveArray = moves;
     this.shipId = shipId;
 
@@ -15,7 +20,7 @@ class PlayerMoves {
     this.move2 = moves[1];
     this.move3 = moves[2];
     this.move4 = moves[3];
-
+    this.playerData = playerData;
     this.onPlayMove = onPlayMove;
   }
 
@@ -121,7 +126,32 @@ class PlayerMoves {
         return;
     }
     side = side.toLowerCase();
-    move[side + "Guns"] = gunData;
+
+    const prevGuns = move[side + "Guns"];
+
+    let prevGunsAmount = 0;
+    let currentGunsAmount = 0;
+
+    for (let gun of prevGuns) if (gun) prevGunsAmount++;
+    for (let gun of gunData) if (gun) currentGunsAmount++;
+    const deltaGuns = currentGunsAmount - prevGunsAmount;
+
+    // For old tests
+    if (!this.playerData) {
+      move[side + "Guns"] = gunData;
+      return;
+    }
+
+    const oppositeDelta = deltaGuns * -1;
+
+    if (this.playerData.getCannons() + oppositeDelta >= 0) {
+      move[side + "Guns"] = gunData;
+
+      this.playerData.addCannons(oppositeDelta);
+      this.playerData.addCannonsLoaded(deltaGuns);
+
+      this.playerData.updateClientTokens(false, true);
+    }
   }
 
   clear() {
@@ -129,6 +159,7 @@ class PlayerMoves {
     this.move2 = null;
     this.move3 = null;
     this.move4 = null;
+    if (this.playerData) this.playerData.cannonsLoaded = 0;
   }
 
   getShipId() {

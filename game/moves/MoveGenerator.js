@@ -2,13 +2,8 @@
  * Code inspired by BenBeri's implementation
  * located here: https://github.com/BenBeri/Obsidio-Server/blob/master/src/com/benberi/cadesim/server/model/player/domain/MoveGenerator.java
  */
-const PlayerData = require("../PlayerData");
-
+// const PlayerData = require("../PlayerData");
 class MoveGenerator {
-  /**
-   *
-   * @param {PlayerData} playerData
-   */
   constructor(playerData) {
     this.player = playerData;
     this.cannonGenerationPercentage = 0;
@@ -43,7 +38,7 @@ class MoveGenerator {
       );
       this.player.generateMove();
       // Update tokens
-      this.player.updateClientTokens();
+      this.player.updateClientTokens(true, false);
     }
   }
 
@@ -58,7 +53,7 @@ class MoveGenerator {
         this.cannonGenerationPercentage
       );
       this.player.addCannons(1);
-      this.player.updateClientTokens();
+      this.player.updateClientTokens(false, true);
     }
   }
 }
