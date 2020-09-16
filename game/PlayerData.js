@@ -76,6 +76,17 @@ class PlayerData {
     this.socket.emit(eventName, eventObj);
   }
 
+  setAutoSelectTokenGeneration(autoSelect = true) {
+    this.autoSelectTokenGeneration = autoSelect;
+    // Send confirmation packet
+    this.sendSocketMessage("updateAutoSelect", this.autoSelectTokenGeneration);
+  }
+
+  setSelectedToken(selectedToken) {
+    this.selectedToken = selectedToken;
+    this.sendSocketMessage("updateSelectedToken", this.selectedToken);
+  }
+
   /**
    * Sends server's data to the client on movement and cannon tokens
    * can either use it as updateClientTokens() or optional parameters to update Moves and Cannons
@@ -92,13 +103,6 @@ class PlayerData {
     this.sendSocketMessage("updateTokens", updateObj);
   }
 
-  /**
-   * Sends data to the client with the current selected token
-   */
-  updateClientSelectedToken() {
-    this.sendSocketMessage("updateSelectedToken", this.selectedToken);
-  }
-
   generateMove() {
     // Possible edge case scenario
     if (this.selectedToken === Direction.STALL) {
@@ -112,9 +116,9 @@ class PlayerData {
 
     if (this.autoSelectTokenGeneration) {
       // Find the token name with the smallest amount of tokens and set it as the selected token
-      this.selectedToken = findSmallestNumber(this.tokens);
+      const toSelectedToken = findSmallestNumber(this.tokens);
       // Update selected token to client
-      this.updateClientSelectedToken();
+      this.setSelectedToken(toSelectedToken);
     }
   }
 

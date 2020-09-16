@@ -32,6 +32,26 @@ function getGameData(game) {
   return gameData;
 }
 
+function validateGameAndPlayer(gameId, playerName, socket) {
+  const game = gameHandler.getGame(gameId);
+
+  if (!game) {
+    socket.emit("gameError", `Game ${gameId} does not exist`);
+    return { failed: true };
+  }
+
+  const player = game.getPlayer(playerName);
+  if (!player || !player.getShip()) {
+    socket.emit(
+      "gameError",
+      "Player does not exist in the game or does not have a ship yet"
+    );
+    return { failed: true };
+  }
+
+  return { game, player, failed: false };
+}
+
 class SocketHandler {
   constructor(io) {
     this.io = io;
@@ -144,11 +164,14 @@ class SocketHandler {
 
       socket.on("playerChangeShip", ({ playerName, gameId, shipType }) => {
         const game = gameHandler.getGame(gameId);
+
         if (!game) {
-          socket.emit("gameError", `Game ${gameId} does not exist!`);
+          socket.emit("gameError", `Game ${gameId} does not exist`);
           return;
         }
+
         const player = game.getPlayer(playerName);
+
         const side = player.getSide(game);
         if (!player.ship) {
           player.ship = new PlayerShip(
@@ -186,7 +209,6 @@ class SocketHandler {
         }
 
         game.gameStatus = GameStatus.INGAME;
-
         game.start();
 
         const startingData = getGameData(game);
@@ -195,18 +217,12 @@ class SocketHandler {
       });
 
       socket.on("setMove", ({ gameId, playerName, moveData }) => {
-        const game = gameHandler.getGame(gameId);
-
-        if (!game) {
-          socket.emit("gameError", `Game ${gameId} does not exist!`);
-          return;
-        }
-
-        const player = game.getPlayer(playerName);
-        if (!player) {
-          socket.emit("gameError", `Player ${playerName} does not exist!`);
-          return;
-        }
+        const { player, failed } = validateGameAndPlayer(
+          gameId,
+          playerName,
+          socket
+        );
+        if (failed) return;
 
         const { moveNumber, direction, leftGuns, rightGuns } = moveData;
         const playerMoves = player.getMoves();
@@ -227,25 +243,12 @@ class SocketHandler {
       socket.on(
         "setGuns",
         ({ gameId, playerName, numberedTurn, side, gunData }) => {
-          const game = gameHandler.getGame(gameId);
-
-          if (!game) {
-            socket.emit(
-              "gameError",
-              `Game ${gameId} does not exist for setting guns`
-            );
-            return;
-          }
-
-          const player = game.getPlayer(playerName);
-          if (!player || !player.getShip()) {
-            socket.emit(
-              "gameError",
-              "Player does not exist in the game or does not have a ship yet"
-            );
-            return;
-          }
-
+          const { player, failed } = validateGameAndPlayer(
+            gameId,
+            playerName,
+            socket
+          );
+          if (failed) return;
           player.moves.setGuns(numberedTurn, side, gunData);
           this.handleActionUpdates(player, (activeTurns) => {
             this.io.to(gameId).emit("updatePlayerActions", {
@@ -253,6 +256,30 @@ class SocketHandler {
               turnAmount: activeTurns,
             });
           });
+        }
+      );
+
+      socket.on("autoSelectUpdate", ({ gameId, playerName, autoBool }) => {
+        const { player, failed } = validateGameAndPlayer(
+          gameId,
+          playerName,
+          socket
+        );
+        if (failed) return;
+        player.setAutoSelectTokenGeneration(autoBool);
+      });
+
+      socket.on(
+        "updateSelectedToken",
+        ({ gameId, playerName, selectedToken }) => {
+          const { player, failed } = validateGameAndPlayer(
+            gameId,
+            playerName,
+            socket
+          );
+          if (failed) return;
+
+          player.setSelectedToken(selectedToken);
         }
       );
 
