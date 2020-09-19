@@ -83,6 +83,11 @@ class PlayerShip {
     }
   }
 
+  repairShip(amount) {
+    this.damage -= amount;
+    if (this.damage < 0) this.damage = 0;
+  }
+
   _checkSink() {
     return this.damage >= this.shipType.maxDamage;
   }

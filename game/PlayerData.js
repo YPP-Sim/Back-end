@@ -5,6 +5,7 @@ const { findSmallestNumber } = require("./util");
 const Direction = require("./Direction");
 const MoveGenerator = require("./moves/MoveGenerator");
 const BilgeGenerator = require("./generation/BilgeGenerator");
+const RepairGenerator = require("./generation/RepairGenerator");
 
 class PlayerData {
   /**
@@ -59,6 +60,7 @@ class PlayerData {
 
     this.moveGenerator = new MoveGenerator(this);
     this.bilgeGenerator = new BilgeGenerator(this);
+    this.repairGenerator = new RepairGenerator(this);
   }
 
   getMoveGenerator() {
@@ -67,6 +69,10 @@ class PlayerData {
 
   getBilgeGenerator() {
     return this.bilgeGenerator;
+  }
+
+  getRepairGenerator() {
+    return this.repairGenerator;
   }
 
   sendSocketMessage(eventName, eventObj) {
