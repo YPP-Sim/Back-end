@@ -292,10 +292,9 @@ class SocketHandler {
           game.getPlayer(playerName) &&
           game.getPlayer(playerName).getShip()
         ) {
-          const { bilge, damage } = game
-            .getPlayer(playerName)
-            .getShip()
-            .getShipStats();
+          const ship = game.getPlayer(playerName).getShip();
+          const damage = ship.getDamagePercentage();
+          const bilge = ship.getBilgePercentage();
           socket.emit("updateShipStats", { bilge, damage });
         } else {
           socket.emit(

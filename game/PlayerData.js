@@ -83,10 +83,9 @@ class PlayerData {
   }
 
   updateShipStats(updateDamage = true, updateBilge = true) {
-    const { bilge, damage } = this.getShip().getShipStats();
     const eventObj = {};
-    if (updateBilge) eventObj.bilge = bilge;
-    if (updateDamage) eventObj.damage = damage;
+    if (updateBilge) eventObj.bilge = this.getShip().getBilgePercentage();
+    if (updateDamage) eventObj.damage = this.getShip().getDamagePercentage();
 
     this.sendSocketMessage("updateShipStats", eventObj);
   }
