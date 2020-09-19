@@ -815,6 +815,7 @@ class Game {
   updateGenerators() {
     for (let playerName in this.players) {
       const player = this.getPlayer(playerName);
+      player.getBilgeGenerator().update();
       player.getMoveGenerator().update();
     }
   }

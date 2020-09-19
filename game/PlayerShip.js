@@ -42,7 +42,7 @@ class PlayerShip {
   }
 
   getBilgePercentage() {
-    return this.bilge;
+    return this.bilge / 100;
   }
 
   getDamagePercentage() {
@@ -51,6 +51,12 @@ class PlayerShip {
 
   ramRocks() {
     this.damageShip(this.shipType.rockDamage);
+  }
+
+  addBilge(amount) {
+    if (amount + this.bilge > 100) this.bilge = 100;
+    else if (amount + this.bilge < 0) this.bilge = 0;
+    else this.bilge += amount;
   }
 
   /**

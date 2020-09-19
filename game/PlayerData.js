@@ -4,6 +4,7 @@ const game = require("./game");
 const { findSmallestNumber } = require("./util");
 const Direction = require("./Direction");
 const MoveGenerator = require("./moves/MoveGenerator");
+const BilgeGenerator = require("./generation/BilgeGenerator");
 
 class PlayerData {
   /**
@@ -57,10 +58,15 @@ class PlayerData {
     this.selectedToken = Direction.FORWARD;
 
     this.moveGenerator = new MoveGenerator(this);
+    this.bilgeGenerator = new BilgeGenerator(this);
   }
 
   getMoveGenerator() {
     return this.moveGenerator;
+  }
+
+  getBilgeGenerator() {
+    return this.bilgeGenerator;
   }
 
   sendSocketMessage(eventName, eventObj) {
@@ -74,6 +80,15 @@ class PlayerData {
     }
 
     this.socket.emit(eventName, eventObj);
+  }
+
+  updateShipStats(updateDamage = true, updateBilge = true) {
+    const { bilge, damage } = this.getShip().getShipStats();
+    const eventObj = {};
+    if (updateBilge) eventObj.bilge = bilge;
+    if (updateDamage) eventObj.damage = damage;
+
+    this.sendSocketMessage("updateShipStats", eventObj);
   }
 
   setAutoSelectTokenGeneration(autoSelect = true) {
@@ -135,8 +150,6 @@ class PlayerData {
   addCannonsLoaded(amount) {
     this.cannonsLoaded += amount;
   }
-
-  startMovementGeneration() {}
 
   getTokens() {
     return this.tokens;
