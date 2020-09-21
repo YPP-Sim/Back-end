@@ -1145,6 +1145,10 @@ class Game {
       this.setRandomSpawn(def.getShip(), false);
     }
   }
+
+  hasPassword() {
+    return this.password && this.password.trim().length > 0;
+  }
 }
 function getUnoccupiedRowCells(row, map) {
   const rowCells = map[row].map((cell, index) => {

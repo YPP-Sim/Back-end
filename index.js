@@ -2,6 +2,8 @@ module.exports = {
   getSocketIO,
 };
 
+const dotenv = require("dotenv");
+if (dotenv) dotenv.config();
 const express = require("express");
 const cors = require("cors");
 const app = express();
@@ -35,4 +37,9 @@ app.get("/", (req, res) => {
 // --- Server start/listen
 http.listen(port, () => {
   console.log(`Listening on port: ${port}`);
+
+  if (!process.env.JWT_KEY)
+    console.warn(
+      "JWT Key not found, please set a JWT_KEY environment variable"
+    );
 });

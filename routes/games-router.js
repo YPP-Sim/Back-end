@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const JobberQuality = require("../game/JobberQuality");
-
+const jwt = require("jsonwebtoken");
 const { getAllGames, getGame, createGame } = require("../games-handler");
 const { readMapFromFile } = require("../game/util");
 
@@ -34,24 +34,30 @@ router.post("/create-game", async (req, res) => {
     gameOwner,
   } = req.body;
   if (!id) {
-    res.status(401).json({ message: "Must specify an id for the game" });
+    res.status(400).json({ message: "Must specify an id for the game" });
+    return;
+  }
+
+  // If there already is a game with that id
+  if (getGame(id)) {
+    res.status(409).json({ message: "Game with that id already exists" });
     return;
   }
 
   if (!mapName) {
     res
-      .status(401)
+      .status(400)
       .json({ message: "Must specify mapName that the game will be using" });
     return;
   }
 
   if (!maxPlayers) {
-    res.status(401).json({ message: "Must specify maxPlayers field" });
+    res.status(400).json({ message: "Must specify maxPlayers field" });
     return;
   }
 
   if (!("locked" in req.body)) {
-    res.status(401).json({
+    res.status(400).json({
       message:
         "Must specify locked field, if the game is locked or not (using password)",
     });
@@ -78,6 +84,46 @@ router.post("/create-game", async (req, res) => {
     console.error(err);
     res.status(500).json({ err });
   }
+});
+
+router.post("/join-game-request", (req, res) => {
+  const { gameId, requestedPlayerName, password } = req.body;
+  if (!gameId || !requestedPlayerName) {
+    res
+      .status(400)
+      .json({ message: "gameId and requestedPlayerName fields are required" });
+    return;
+  }
+  const game = getGame(gameId);
+  if (game.getPlayer(requestedPlayerName)) {
+    // A user with the requested player name already exists...
+    res
+      .status(400)
+      .json({ message: "Player name is already taken in this game" });
+    return;
+  }
+
+  if (game.hasPassword()) {
+    if (!password) {
+      res.status(400).json({ message: "Password is required" });
+      return;
+    }
+    if (game.password !== password) {
+      res.status(400).json({ message: "Invalid/Wrong password" });
+      return;
+    }
+  }
+  // Create JWT token and send it.
+  jwt.sign(
+    { gameId, playerName: requestedPlayerName },
+    process.env.JWT_KEY,
+    (err, token) => {
+      if (err) {
+        console.log("Error: ", err);
+        res.status(500).json({ message: "Server error, check logs" });
+      } else res.status(200).json({ token });
+    }
+  );
 });
 
 router.put("/start-game/:gameId", (req, res) => {

@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const jwt = require("jsonwebtoken");
 const Move = require("./moves/Move");
 const WindType = require("./WindType");
 const Orientation = require("./Orientation");
@@ -234,6 +235,18 @@ function isActionableDirection(direction) {
   }
 }
 
+function verifyToken(token) {
+  return new Promise((resolve, reject) => {
+    jwt.verify(token, process.env.JWT_KEY, (err, decoded) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(decoded);
+      }
+    });
+  });
+}
+
 module.exports = {
   getFreshMapGrid,
   getFlagLocationsList,
@@ -247,4 +260,5 @@ module.exports = {
   addSafeZone,
   isActionableDirection,
   defaultMap,
+  verifyToken,
 };

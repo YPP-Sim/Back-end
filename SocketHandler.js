@@ -2,6 +2,7 @@ const gameHandler = require("./games-handler");
 const PlayerShip = require("./game/PlayerShip");
 const GameStatus = require("./game/GameStatus");
 const ShipType = require("./game/ShipType");
+const jwt = require("jsonwebtoken");
 const util = require("./game/util");
 const Move = require("./game/moves/Move");
 const Direction = require("./game/Direction");
@@ -74,7 +75,33 @@ class SocketHandler {
 
   registerEvents() {
     this.io.on("connection", (socket) => {
-      socket.on("joinGame", ({ gameId, playerName }) => {
+      socket.on("joinGame", async ({ gameId, playerName, token }) => {
+        // Verify the token the player is sending
+        if (typeof token === "undefined" || token === null) {
+          socket.emit("gameError", `Missing token for validity of player`);
+          return;
+        }
+
+        let decoded;
+        try {
+          decoded = await util.verifyToken(token);
+        } catch (err) {
+          console.log(
+            `Error trying to verify user token. GameID: ${gameId}, playerName: ${playerName}, reason: `,
+            err
+          );
+        }
+
+        console.log("Decoded token: ", decoded);
+
+        if (decoded.gameId !== gameId || decoded.playerName !== playerName) {
+          socket.emit(
+            "gameError",
+            `token is validated but does not match the game being joined`
+          );
+          return;
+        }
+
         // Pair the socket with a player
         this.playerSockets[socket.id] = { playerName, gameId };
         const game = gameHandler.getGame(gameId);
