@@ -100,6 +100,10 @@ class PlayerShip {
     return this.orientation;
   }
 
+  isInSafeZone() {
+    return this.game.getCell(this.boardX, this.boardY).cell_id === -1;
+  }
+
   /**
    *
    * @param {Orientation} orientation

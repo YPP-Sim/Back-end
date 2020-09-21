@@ -545,7 +545,10 @@ class Game {
       for (let playerName in this.players) {
         const player = this.getPlayerById(playerName);
         const ship = player.getShip();
+
+        // Edge cases to skip
         if (!ship) continue;
+        if (ship.isInSafeZone()) continue; // Don't contest if the ship is in a safezone
 
         const influenceRadius = ship.shipType.influenceDiameter / 2;
 
