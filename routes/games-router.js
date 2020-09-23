@@ -97,19 +97,17 @@ router.post("/join-game-request", (req, res) => {
   const game = getGame(gameId);
   if (game.getPlayer(requestedPlayerName)) {
     // A user with the requested player name already exists...
-    res
-      .status(400)
-      .json({ message: "Player name is already taken in this game" });
+    res.status(400).json({ usernameError: "User name already in use" });
     return;
   }
 
   if (game.hasPassword()) {
     if (!password) {
-      res.status(400).json({ message: "Password is required" });
+      res.status(400).json({ passwordError: "Password is required" });
       return;
     }
     if (game.password !== password) {
-      res.status(400).json({ message: "Invalid/Wrong password" });
+      res.status(400).json({ passwordError: "Password is incorrect" });
       return;
     }
   }

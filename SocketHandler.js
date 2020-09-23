@@ -92,8 +92,6 @@ class SocketHandler {
           );
         }
 
-        console.log("Decoded token: ", decoded);
-
         if (decoded.gameId !== gameId || decoded.playerName !== playerName) {
           socket.emit(
             "gameError",
