@@ -4,6 +4,7 @@
 
 | Name                          | ID  |
 | ----------------------------- | --- |
+| Ocean Tile (N/A)              | -2  |
 | Safe Zone                     | -1  |
 | Normal Cell                   | 0   |
 | North Wind                    | 1   |
