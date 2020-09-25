@@ -199,14 +199,16 @@ class SocketHandler {
 
         const side = player.getSide(game);
         if (!player.ship) {
-          player.ship = new PlayerShip(
+          const ship = new PlayerShip(
             playerName,
             ShipType[shipType],
             side,
             game
           );
+          player.setShip(ship);
         } else {
           player.ship.shipType = ShipType[shipType];
+          player.getMoves().setStallToken(player.ship.shipType.stallToken);
         }
 
         this.io.to(gameId).emit("gameData", getGameData(game));

@@ -44,7 +44,8 @@ class PlayerData {
       playerName,
       [null, null, null, null],
       onPlayMove,
-      this
+      this,
+      false
     );
 
     // Socket to send specific client commands to.
@@ -61,6 +62,11 @@ class PlayerData {
     this.moveGenerator = new MoveGenerator(this);
     this.bilgeGenerator = new BilgeGenerator(this);
     this.repairGenerator = new RepairGenerator(this);
+  }
+
+  setShip(ship) {
+    this.ship = ship;
+    this.getMoves().setStallToken(ship.shipType.stallToken);
   }
 
   getMoveGenerator() {

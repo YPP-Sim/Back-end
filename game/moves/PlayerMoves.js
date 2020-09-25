@@ -157,6 +157,10 @@ class PlayerMoves {
     }
   }
 
+  setStallToken(bool) {
+    this.stallToken = bool;
+  }
+
   _clearCheckStall(moveIndex) {
     if (
       this["move" + moveIndex] &&
