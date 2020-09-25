@@ -329,6 +329,19 @@ class SocketHandler {
         }
       });
 
+      socket.on("requestShipMoves", ({ playerName, gameId }) => {
+        const game = gameHandler.getGame(gameId);
+        if (!game) return;
+        const player = game.getPlayer(playerName);
+        if (player && player.getShip()) player.updateShipMoves();
+        else {
+          socket.emit(
+            "gameError",
+            `player ${playerName} does not exist or does not yet have a ship`
+          );
+        }
+      });
+
       socket.on("message", (data) => {
         console.log("message: ", data);
       });

@@ -96,6 +96,16 @@ class PlayerData {
     this.sendSocketMessage("updateShipStats", eventObj);
   }
 
+  updateShipMoves() {
+    for (let i = 1; i <= 4; i++) {
+      const move = this.getMoves()["move" + i];
+      let direction = null;
+      if (move) direction = move.direction;
+
+      this.sendSocketMessage("playMove", { index: i, direction });
+    }
+  }
+
   setAutoSelectTokenGeneration(autoSelect = true) {
     this.autoSelectTokenGeneration = autoSelect;
     // Send confirmation packet

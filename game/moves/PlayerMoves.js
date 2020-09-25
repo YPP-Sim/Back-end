@@ -11,15 +11,18 @@ class PlayerMoves {
     shipId,
     moves = [null, null, null, null],
     onPlayMove,
-    playerData
+    playerData,
+    stallToken = true
   ) {
     this.moveArray = moves;
     this.shipId = shipId;
 
+    this.stallToken = stallToken;
+
     this.move1 = moves[0];
     this.move2 = moves[1];
     this.move3 = moves[2];
-    this.move4 = moves[3];
+    this.move4 = stallToken ? new Move(Direction.STALL, shipId) : moves[3];
     this.playerData = playerData;
     this.onPlayMove = onPlayMove;
   }
@@ -154,11 +157,20 @@ class PlayerMoves {
     }
   }
 
+  _clearCheckStall(moveIndex) {
+    if (
+      this["move" + moveIndex] &&
+      this["move" + moveIndex].direction === Direction.STALL
+    )
+      return new Move(Direction.STALL, this.shipId);
+    else return null;
+  }
+
   clear() {
-    this.move1 = null;
-    this.move2 = null;
-    this.move3 = null;
-    this.move4 = null;
+    this.move1 = this._clearCheckStall(1);
+    this.move2 = this._clearCheckStall(2);
+    this.move3 = this._clearCheckStall(3);
+    this.move4 = this._clearCheckStall(4);
     if (this.playerData) this.playerData.cannonsLoaded = 0;
   }
 

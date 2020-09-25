@@ -280,6 +280,7 @@ class Game {
     if (!moveObject) return;
     const { direction } = moveObject;
     if (!direction) return;
+    if (direction === Direction.STALL) return;
     const ship = this.getShipById(id);
     if (!ship) return;
     if (ship.sinking) return;

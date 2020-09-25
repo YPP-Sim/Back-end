@@ -31,6 +31,11 @@ class Move {
     this.direction = dir;
   }
 
+  clearGuns() {
+    this.setRightGuns([false, false]);
+    this.setLeftGuns([false, false]);
+  }
+
   getDirection() {
     return this.direction;
   }
