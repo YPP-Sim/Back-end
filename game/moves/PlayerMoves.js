@@ -159,6 +159,8 @@ class PlayerMoves {
 
   setStallToken(bool) {
     this.stallToken = bool;
+    if (this.stallToken) this.move4 = new Move(Direction.STALL, this.shipId);
+    else this.move4 = new Move(null, this.shipId);
   }
 
   _clearCheckStall(moveIndex) {
