@@ -53,6 +53,17 @@ function validateGameAndPlayer(gameId, playerName, socket) {
   return { game, player, failed: false };
 }
 
+function removePlayer(game, io, playerName, gameId) {
+  game.removePlayer(playerName);
+  io.in(gameId).emit("gameMessage", `${playerName} left the game`);
+  io.in(gameId).emit("gameData", getGameData(game));
+
+  const playerLength = Object.keys(game.players).length;
+  if (playerLength <= 0) {
+    gameHandler.removeGame(game.gameId);
+  }
+}
+
 class SocketHandler {
   constructor(io) {
     this.io = io;
@@ -139,9 +150,7 @@ class SocketHandler {
           return;
         }
 
-        game.removePlayer(playerName);
-        this.io.in(gameId).emit("gameMessage", `${playerName} left the game`);
-        this.io.in(gameId).emit("gameData", getGameData(game));
+        removePlayer(game, this.io, playerName, gameId);
       });
 
       socket.on("disconnect", () => {
@@ -158,9 +167,8 @@ class SocketHandler {
             );
             return;
           }
-          game.removePlayer(playerName);
-          this.io.in(gameId).emit("gameMessage", `${playerName} left the game`);
-          this.io.in(gameId).emit("gameData", getGameData(game));
+
+          removePlayer(game, this.io, playerName, gameId);
         }
       });
 

@@ -37,6 +37,10 @@ function createGame(
   games[id] = newGame;
 }
 
+function removeGame(id) {
+  if (games[id]) delete games[id];
+}
+
 /**
  * @param {string} id
  *
@@ -58,5 +62,6 @@ module.exports = {
   createGame,
   getAllGames,
   getGame,
+  removeGame,
   getAllGameIds,
 };
