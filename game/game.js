@@ -105,11 +105,32 @@ class Game {
 
     this.sinking = [];
 
+    const onFinish = () => {
+      this.sendPacket("gameFinished", this.getEndGameData());
+    };
     // Timer
-    this.gameTimer = new Timer(60 * 15, (currentTime) => {
-      // Update clients of time remaining
-      this.io.to(this.gameId).emit("gameTime", currentTime);
-    });
+    this.gameTimer = new Timer(
+      60 * 15,
+      (currentTime) => {
+        // Update clients of time remaining
+        this.sendPacket("gameTime", currentTime);
+      },
+      onFinish
+    );
+  }
+
+  sendPacket(eventName, eventObj) {
+    this.io.to(this.gameId).emit(eventName, eventObj);
+  }
+
+  getEndGameData() {
+    const data = {};
+    if (this.attackerScore > this.defenderScore) data.winners = "Attackers";
+    else if (this.attackerScore < this.defenderScore)
+      data.winners = "Defenders";
+    else if (this.attackerScore === this.defenderScore) data.winners = "TIE";
+
+    return data;
   }
 
   /**
@@ -578,7 +599,6 @@ class Game {
    */
   awardPoints() {
     if (this.gameTimer.isFinished()) return;
-
     for (let flag of this.flags) {
       // No points awarded as both teams are contesting current flag
       if (flag.attackersContesting && flag.defendersContesting) continue;

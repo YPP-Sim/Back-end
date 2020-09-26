@@ -3,17 +3,19 @@ class Timer {
    * @param {number} initialTime the initial time set in seconds
    * @param {function onTick(currentTime)} onTick function that will be called everytime the timer ticks.
    */
-  constructor(initialTime, onTick = null) {
+  constructor(initialTime, onTick = null, onFinish = null) {
     this.initialTime = initialTime;
     this.currentTime = initialTime;
-    this.isFinished = false;
+    this.finished = false;
     this.onTick = onTick;
+    this.onFinish = onFinish;
   }
 
   start() {
     this.timerId = setInterval(() => {
       if (this.currentTime <= 0) {
-        this.isFinished = true;
+        this.finished = true;
+        if (this.onFinish) this.onFinish();
         this.stop();
         return;
       }
@@ -32,7 +34,7 @@ class Timer {
   }
 
   isFinished() {
-    return this.isFinished;
+    return this.finished;
   }
 }
 
