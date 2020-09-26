@@ -38,7 +38,10 @@ function createGame(
 }
 
 function removeGame(id) {
-  if (games[id]) delete games[id];
+  if (games[id]) {
+    games[id].stop();
+    delete games[id];
+  }
 }
 
 /**

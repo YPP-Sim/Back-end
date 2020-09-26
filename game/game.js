@@ -1131,6 +1131,7 @@ class Game {
   }
 
   stop() {
+    this.gameTimer.stop();
     clearInterval(this.gameIntervalId);
     this.gameStatus = GameStatus.ENDED;
   }
