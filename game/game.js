@@ -573,8 +573,12 @@ class Game {
   /**
    * Will Award teams their points dependent on the flags that they are contesting currently AND
    * send out updates to all clients connected.
+   *
+   * will NOT award points if the timer is finished.
    */
   awardPoints() {
+    if (this.gameTimer.isFinished()) return;
+
     for (let flag of this.flags) {
       // No points awarded as both teams are contesting current flag
       if (flag.attackersContesting && flag.defendersContesting) continue;
