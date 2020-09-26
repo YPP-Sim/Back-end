@@ -13,8 +13,8 @@ const PlayerShip = require("../game/PlayerShip");
 let logMockEmits = false;
 
 const testMap = [
-  [1, 0, 1, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0],
-  [0, 1, 1, 2, 3, 4, 0, 0, 0, 15, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0],
+  [1, 0, 1, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 7, 8],
+  [0, 1, 1, 2, 3, 4, 0, 0, 0, 15, 0, 15, 0, 0, 0, 0, 0, 0, 6, 5],
   [0, 0, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [15, 15, 15, 0, 11, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -476,7 +476,6 @@ describe("Game", () => {
       it("north wind push", () => {
         testGame.setShipPosition(ship1.shipId, 1, 4);
         testGame.onGameTurn();
-
         expect(jestEmitMock.mock.calls[0][0]).toBe("gameTurn");
 
         const { turn_1_winds } = jestEmitMock.mock.calls[0][1].playerMovements;
@@ -487,6 +486,37 @@ describe("Game", () => {
 
         expect(turn_1_winds.length).toBe(1);
         expect(turn_1_winds[0]).toStrictEqual(compareObj);
+
+        expect(ship1.boardX).toBe(1);
+        expect(ship1.boardY).toBe(3);
+      });
+
+      it("Constant cycle whirlpool standing still no movements", () => {
+        testGame.setShipPosition(ship1.shipId, 18, 4);
+        ship1.setOrientation(Orientation.WEST);
+        testGame.onGameTurn();
+        expect(jestEmitMock.mock.calls[0][0]).toBe("gameTurn");
+
+        const {
+          turn_1_winds,
+          turn_2_winds,
+          turn_3_winds,
+          turn_4_winds,
+        } = jestEmitMock.mock.calls[0][1].playerMovements;
+        const compareObj1 = {
+          playerName: "testShip",
+          windType: {
+            type: "WHIRLWIND_CLOCKWISE_SW",
+            cancelledMovement: false,
+          },
+        };
+        expect(turn_1_winds.length).toBe(1);
+        expect(turn_1_winds[0]).toStrictEqual(compareObj1);
+        expect(turn_2_winds[0].windType.type).toBe("WHIRLWIND_CLOCKWISE_NE");
+        expect(turn_3_winds[0].windType.type).toBe("WHIRLWIND_CLOCKWISE_SW");
+        expect(turn_4_winds[0].windType.type).toBe("WHIRLWIND_CLOCKWISE_NE");
+        expect(ship1.boardX).toBe(18);
+        expect(ship1.boardY).toBe(4);
       });
     });
 

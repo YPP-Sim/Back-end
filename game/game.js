@@ -105,6 +105,8 @@ class Game {
 
     this.sinking = [];
 
+    this.logDebug = false;
+
     const onFinish = () => {
       this.sendPacket("gameFinished", this.getEndGameData());
     };
@@ -955,9 +957,9 @@ class Game {
     if (!move.windTypeMovement) return;
 
     if (move.windTypeMovement.cancelledMovement) return;
-
     const windType = WindType[move.windTypeMovement.type];
     let direction = windType.direction;
+    if (this.logDebug) console.log("Doing wind movement, type: ", windType);
 
     const toCell1X = ship.boardX + direction.xDir;
     const toCell1Y = ship.boardY + direction.yDir;
@@ -968,12 +970,13 @@ class Game {
     currentCell.occupiedBy = ship.shipId;
     ship.boardX = toCell1X;
     ship.boardY = toCell1Y;
+    if (this.logDebug) console.log("toCellX: ", toCell1X, "Y: ", toCell1Y);
 
     prevCell = currentCell;
     if (windType.turn_direction && !move.windTypeMovement.cancelledTurnal) {
       direction = windType.turn_direction;
-      const toCell2X = ship.boardX + direction.xDir;
-      const toCell2Y = ship.boardY + direction.yDir;
+      const toCell2X = ship.boardX + direction.x;
+      const toCell2Y = ship.boardY + direction.y;
 
       currentCell = this.getCell(toCell2X, toCell2Y);
       currentCell.occupiedBy = ship.shipId;
@@ -997,7 +1000,7 @@ class Game {
       let move = player.getMoves()[turn];
 
       if (!move) {
-        move = new Move(Direction.STALL, shipId);
+        move = new Move(null, shipId);
         player.getMoves()[turn] = move;
       }
 
