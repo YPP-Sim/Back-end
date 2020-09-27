@@ -959,7 +959,6 @@ class Game {
     if (move.windTypeMovement.cancelledMovement) return;
     const windType = WindType[move.windTypeMovement.type];
     let direction = windType.direction;
-    if (this.logDebug) console.log("Doing wind movement, type: ", windType);
 
     const toCell1X = ship.boardX + direction.xDir;
     const toCell1Y = ship.boardY + direction.yDir;
@@ -970,20 +969,27 @@ class Game {
     currentCell.occupiedBy = ship.shipId;
     ship.boardX = toCell1X;
     ship.boardY = toCell1Y;
-    if (this.logDebug) console.log("toCellX: ", toCell1X, "Y: ", toCell1Y);
 
     prevCell = currentCell;
-    if (windType.turn_direction && !move.windTypeMovement.cancelledTurnal) {
-      direction = windType.turn_direction;
-      const toCell2X = ship.boardX + direction.x;
-      const toCell2Y = ship.boardY + direction.y;
 
-      currentCell = this.getCell(toCell2X, toCell2Y);
-      currentCell.occupiedBy = ship.shipId;
-      prevCell.occupiedBy = null;
+    if (windType.turn_direction) {
+      // Change orientation
+      const side = windType.clockwise ? "right" : "left";
+      const toOrientationName = ship.getOrientation()[side].orientation;
+      ship.setOrientation(Orientation[toOrientationName]);
 
-      ship.boardX = toCell2X;
-      ship.boardY = toCell2Y;
+      if (!move.windTypeMovement.cancelledTurnal) {
+        direction = windType.turn_direction;
+        const toCell2X = ship.boardX + direction.x;
+        const toCell2Y = ship.boardY + direction.y;
+
+        currentCell = this.getCell(toCell2X, toCell2Y);
+        currentCell.occupiedBy = ship.shipId;
+        prevCell.occupiedBy = null;
+
+        ship.boardX = toCell2X;
+        ship.boardY = toCell2Y;
+      }
     }
   }
 

@@ -6,10 +6,12 @@ module.exports = {
     left: {
       x: -1,
       y: 0,
+      orientation: "WEST",
     },
     right: {
       x: 1,
       y: 0,
+      orientation: "EAST",
     },
   },
   SOUTH: {
@@ -19,10 +21,12 @@ module.exports = {
     left: {
       x: 1,
       y: 0,
+      orientation: "EAST",
     },
     right: {
       x: -1,
       y: 0,
+      orientation: "WEST",
     },
   },
   WEST: {
@@ -32,10 +36,12 @@ module.exports = {
     left: {
       x: 0,
       y: 1,
+      orientation: "SOUTH",
     },
     right: {
       x: 0,
       y: -1,
+      orientation: "NORTH",
     },
   },
   EAST: {
@@ -45,10 +51,12 @@ module.exports = {
     left: {
       x: 0,
       y: -1,
+      orientation: "NORTH",
     },
     right: {
       x: 0,
       y: 1,
+      orientation: "SOUTH",
     },
   },
 };
