@@ -1032,6 +1032,7 @@ class Game {
 
       if (!this.canMove(toX1, toY1)) {
         move.cancelledMovement = true;
+        ship.ramRocks();
         return;
       }
 
@@ -1046,6 +1047,7 @@ class Game {
 
         if (!this.canMove(toX2, toY2)) {
           move.cancelledTurnal = true;
+          ship.ramRocks();
           return;
         }
 
