@@ -117,6 +117,22 @@ function isRock(cell_id) {
     case 14:
     case 15:
     case 16:
+    case 20:
+    case 21:
+    case 22:
+    case 23:
+      return true;
+    default:
+      return false;
+  }
+}
+
+function isSmallRock(cell_id) {
+  switch (cell_id) {
+    case 20:
+    case 21:
+    case 22:
+    case 23:
       return true;
     default:
       return false;
@@ -259,6 +275,7 @@ module.exports = {
   getAllAvailableMaps,
   addSafeZone,
   isActionableDirection,
+  isSmallRock,
   defaultMap,
   verifyToken,
 };

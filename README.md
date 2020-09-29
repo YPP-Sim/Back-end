@@ -26,3 +26,7 @@
 | 1-Point Flag                  | 17  |
 | 2-Point Flag                  | 18  |
 | 3-Point Flag                  | 19  |
+| Small Rocks 1                 | 20  |
+| Small Rocks 2                 | 21  |
+| Small Rocks 3                 | 22  |
+| Small Rocks 4                 | 23  |

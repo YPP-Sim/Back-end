@@ -941,6 +941,14 @@ class Game {
       this._handleCellClaimWithPrio(secondCell, 2, move, true, true);
   }
 
+  canMove(toX, toY) {
+    const cell = this.getCell(toX, toY);
+    if (isRock(cell.cell_id)) return false;
+    if (this.isOutOfBounds(toX, toY)) return false;
+
+    return true;
+  }
+
   _windMove(ship, turn) {
     if (ship.sinking) return;
 
@@ -1021,6 +1029,12 @@ class Game {
       const toY1 = boardY + windType.direction.yDir;
 
       const toCell1 = this.getCell(toX1, toY1);
+
+      if (!this.canMove(toX1, toY1)) {
+        move.cancelledMovement = true;
+        return;
+      }
+
       toCell1.claiming.push({ id: shipId, claimedPriority: 1 });
       move.claimedCells.push(toCell1);
       this.claimedToClear.push(toCell1);
@@ -1029,6 +1043,11 @@ class Game {
       if (windType.turnDirection) {
         const toX2 = toX1 + windType.turnDirection.x;
         const toY2 = toY1 + windType.turnDirection.y;
+
+        if (!this.canMove(toX2, toY2)) {
+          move.cancelledTurnal = true;
+          return;
+        }
 
         const toCell2 = this.getCell(toX2, toY2);
         toCell2.claiming.push({ id: shipId, claimedPriority: 2 });
