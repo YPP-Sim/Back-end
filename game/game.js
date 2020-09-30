@@ -808,7 +808,7 @@ class Game {
         };
 
         this.io.in(this.gameId).emit("shipPositionChange", eventObj);
-        this.getPlayer(ship.shipId).updateShipStats(true, true);
+        this.getPlayer(ship.shipId).sendSocketMessage("playerSunk", {});
       }, 5000 + 3000 * ship.sunkOnTurn);
     }
 
