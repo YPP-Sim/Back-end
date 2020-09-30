@@ -882,8 +882,35 @@ describe("Game", () => {
         player.ship.setPosition(6, 5);
         player.ship.setOrientation(Orientation.EAST);
         player2.ship.setPosition(7, 5);
-
         player.getMoves().setFirstMove(Direction.FORWARD);
+        testGame.onGameTurn();
+        expect(jestEmitMock.mock.calls[0][0]).toBe("gameTurn");
+
+        const gameEmitData = jestEmitMock.mock.calls[0][1];
+        const { turn_1 } = gameEmitData.playerMovements;
+
+        expect(turn_1.length).toBe(1);
+
+        const compareObj = {
+          playerName: player.playerName,
+          direction: "FORWARD",
+          cancelledTurnal: false,
+          cancelledMovement: true,
+        };
+
+        expect(turn_1[0]).toStrictEqual(compareObj);
+        expect(player.getShip().damage).toEqual(
+          player.getShip().shipType.ramDamage
+        );
+      });
+
+      it("ship move FORWARD collides into other stationary ship while shooting - Bug Fix", () => {
+        player.ship.setPosition(6, 5);
+        player.ship.setOrientation(Orientation.EAST);
+        player2.ship.setPosition(7, 5);
+        player2.ship.setOrientation(Orientation.SOUTH);
+        player.getMoves().setFirstMove(Direction.FORWARD);
+        player2.getMoves().setGuns(1, "right", [true, true]);
         testGame.onGameTurn();
         expect(jestEmitMock.mock.calls[0][0]).toBe("gameTurn");
 

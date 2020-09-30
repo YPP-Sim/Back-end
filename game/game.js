@@ -349,7 +349,12 @@ class Game {
     if (!ship) return;
     if (ship.sinking) return;
 
-    if (!moveObj || moveObj.direction === Direction.STALL || ship.sinking) {
+    if (
+      !moveObj ||
+      moveObj.direction === Direction.STALL ||
+      moveObj.direction === null ||
+      ship.sinking
+    ) {
       const stationaryCell = this.getCell(ship.boardX, ship.boardY);
 
       stationaryCell.claiming.push({ id: shipId, claimedPriority: 1 });
@@ -803,6 +808,7 @@ class Game {
         };
 
         this.io.in(this.gameId).emit("shipPositionChange", eventObj);
+        this.getPlayer(ship.shipId).updateShipStats(true, true);
       }, 5000 + 3000 * ship.sunkOnTurn);
     }
 
