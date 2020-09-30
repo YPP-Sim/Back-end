@@ -847,6 +847,7 @@ class Game {
       const player = this.getPlayer(playerName);
       player.getBilgeGenerator().update();
       player.getMoveGenerator().update();
+      player.getRepairGenerator().update();
     }
   }
 
