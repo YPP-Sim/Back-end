@@ -49,8 +49,8 @@ class PlayerShip {
     return this.damage / this.shipType.maxDamage;
   }
 
-  ramRocks() {
-    this.damageShip(this.shipType.rockDamage);
+  ramRocks(turn) {
+    this.damageShip(this.shipType.rockDamage, turn);
   }
 
   addBilge(amount) {

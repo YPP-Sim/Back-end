@@ -344,7 +344,7 @@ class Game {
   /**
    * @param {Move} moveObj
    */
-  moveClaim(moveObj, shipId) {
+  moveClaim(moveObj, shipId, numberedTurn) {
     const ship = this.getShipById(shipId);
     if (!ship) return;
     if (ship.sinking) return;
@@ -363,7 +363,7 @@ class Game {
 
     // Check for border/out of map collision
     if (this.isOutOfBounds(frontX, frontY)) {
-      ship.ramRocks();
+      ship.ramRocks(numberedTurn);
       moveObj.cancelledMovement = true;
       return;
     }
@@ -371,7 +371,7 @@ class Game {
     const frontCell = this.getCell(frontX, frontY);
 
     if (isRock(frontCell.cell_id)) {
-      ship.ramRocks();
+      ship.ramRocks(numberedTurn);
       moveObj.cancelledMovement = true;
       return;
     }
@@ -401,18 +401,18 @@ class Game {
     switch (direction) {
       case Direction.LEFT:
       case Direction.RIGHT:
-        this._turnClaim(ship, frontX, frontY, direction, moveObj);
+        this._turnClaim(ship, frontX, frontY, direction, moveObj, numberedTurn);
         break;
     }
   }
 
-  _turnClaim(ship, frontX, frontY, dir, moveObj) {
+  _turnClaim(ship, frontX, frontY, dir, moveObj, numberedTurn) {
     dir = dir.toLowerCase();
     const turnX = frontX + ship.getOrientation()[dir].x;
     const turnY = frontY + ship.getOrientation()[dir].y;
 
     if (this.isOutOfBounds(turnX, turnY)) {
-      ship.ramRocks();
+      ship.ramRocks(numberedTurn);
       moveObj.cancelledTurnal = true;
       return;
     }
@@ -420,7 +420,7 @@ class Game {
     const turnedCell = this.getCell(turnX, turnY);
 
     if (isRock(turnedCell.cell_id)) {
-      ship.ramRocks();
+      ship.ramRocks(numberedTurn);
       moveObj.cancelledTurnal = true;
       return;
     }
@@ -859,7 +859,7 @@ class Game {
     const executeClaimsAndMove = (turn, numberedTurn) => {
       // Get and calculate claims
       for (let pMove of playerMoves) {
-        this.moveClaim(pMove[turn], pMove.shipId);
+        this.moveClaim(pMove[turn], pMove.shipId, numberedTurn);
       }
 
       // Handle claims
@@ -873,7 +873,7 @@ class Game {
       }
 
       // Handle wind moves after ship movement
-      this._handleWinds(turn);
+      this._handleWinds(turn, numberedTurn);
 
       // Fire the cannons
       this.executeCannonShots(turn, playerMoves, numberedTurn);
@@ -885,13 +885,13 @@ class Game {
     executeClaimsAndMove("move4", 4);
   }
 
-  _handleWinds(turn) {
+  _handleWinds(turn, numberedTurn) {
     // Claim cells that the winds push the ships into
     for (let player of this.getPlayerList()) {
       const ship = player.getShip();
       if (!ship) continue;
 
-      this._windClaim(ship, turn);
+      this._windClaim(ship, turn, numberedTurn);
     }
 
     // Consume the claims, and move ships, handle collisions/etc.
@@ -1002,7 +1002,7 @@ class Game {
     }
   }
 
-  _windClaim(ship, turn) {
+  _windClaim(ship, turn, numberedTurn) {
     const { boardX, boardY, shipId, sinking } = ship;
     const cell = this.getCell(boardX, boardY);
     if (sinking) return;
@@ -1033,7 +1033,7 @@ class Game {
 
       if (!this.canMove(toX1, toY1)) {
         move.cancelledMovement = true;
-        ship.ramRocks();
+        ship.ramRocks(numberedTurn);
         return;
       }
 
@@ -1048,7 +1048,7 @@ class Game {
 
         if (!this.canMove(toX2, toY2)) {
           move.cancelledTurnal = true;
-          ship.ramRocks();
+          ship.ramRocks(numberedTurn);
           return;
         }
 
