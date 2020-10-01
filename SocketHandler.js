@@ -318,6 +318,17 @@ class SocketHandler {
         }
       );
 
+      socket.on("shipDisengage", ({ gameId, playerName }) => {
+        const { player, failed } = validateGameAndPlayer(
+          gameId,
+          playerName,
+          socket
+        );
+        if (failed) return;
+
+        player.disengage();
+      });
+
       socket.on("requestShipStats", ({ playerName, gameId }) => {
         const game = gameHandler.getGame(gameId);
         if (!game) {

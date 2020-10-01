@@ -94,6 +94,24 @@ class PlayerData {
     this.socket.emit(eventName, eventObj);
   }
 
+  /**
+   * The player will simulate a side swap/reposition if they are in the safezone.
+   */
+  disengage() {
+    if (this.ship && this.ship.isInSafeZone()) {
+      // Spawn ocean-side (attacker side)
+      this.game.setRandomSpawn(this.ship, true);
+      const eventObj = {
+        shipId: this.playerName,
+        boardX: this.ship.boardX,
+        boardY: this.ship.boardY,
+        orientation: this.ship.getOrientation().name,
+      };
+
+      this.game.sendPacket("shipPositionChange", eventObj);
+    }
+  }
+
   updateShipStats(updateDamage = true, updateBilge = true) {
     const eventObj = {};
     if (updateBilge) eventObj.bilge = this.getShip().getBilgePercentage();
