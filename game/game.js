@@ -1174,6 +1174,7 @@ class Game {
   }
 
   setRandomSpawn(ship, attackingSide = true) {
+    if (!ship) return;
     let rowCount = 0;
     const toOrientation = attackingSide ? Orientation.NORTH : Orientation.SOUTH;
 

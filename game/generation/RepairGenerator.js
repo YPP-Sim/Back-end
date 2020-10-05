@@ -7,6 +7,7 @@ class RepairGenerator {
 
   update() {
     const ship = this.playerData.getShip();
+    if (!ship) return;
     const jobberQuality = this.playerData.game.jobberQuality;
     if (ship.getDamagePercentage() > 0) {
       const rate = jobberQuality.fixRate / TURN_TIME;

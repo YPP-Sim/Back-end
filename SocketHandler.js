@@ -111,14 +111,14 @@ class SocketHandler {
           return;
         }
 
-        // Pair the socket with a player
-        this.playerSockets[socket.id] = { playerName, gameId };
         const game = gameHandler.getGame(gameId);
         if (!game) {
           socket.emit("gameError", `Game '${gameId}' does not exist!`);
           return;
         }
 
+        // Pair the socket with a player
+        this.playerSockets[socket.id] = { playerName, gameId };
         game.addPlayer(playerName, socket);
 
         if (socket.room) socket.leave(socket.room);
@@ -138,7 +138,47 @@ class SocketHandler {
           .emit("gameMessage", `${playerName} has joined the game`);
 
         this.io.to(gameId).emit("gameData", getGameData(game));
+
+        // Send packet back saying they first joined but it's in the middle of a game, so must prompt
+        // for ship/side selection
+        socket.emit("requestShipConfig", { gameId });
       });
+
+      socket.on(
+        "playerJoinConfig",
+        ({ gameId, playerName, chosenShipType, chosenSide }) => {
+          const game = gameHandler.getGame(gameId);
+
+          if (!game) {
+            socket.emit("gameError", `Game of id ${gameId} does not exist`);
+            return;
+          }
+          const ship = new PlayerShip(
+            playerName,
+            ShipType[chosenShipType],
+            chosenSide,
+            game
+          );
+          game.addPlayer(playerName, socket, ship);
+
+          if (chosenSide === "ATTACKER") game.addAttacker(playerName, socket);
+          else game.addDefender(playerName, socket);
+
+          game.setRandomSpawn(ship, chosenSide === "ATTACKER");
+          socket.emit("updateGameData", getGameData(game));
+          game.sendPacket("addShip", {
+            shipId: ship.shipId,
+            type: chosenShipType,
+            boardX: ship.boardX,
+            boardY: ship.boardY,
+            orientation: ship.getOrientation().name,
+            side: chosenSide,
+          });
+          const player = game.getPlayer(playerName);
+          player.getMoves().setStallToken(player.ship.shipType.stallToken);
+          player.updateShipMoves();
+        }
+      );
 
       socket.on("leaveGame", ({ gameId, playerName }) => {
         socket.leave(gameId);
