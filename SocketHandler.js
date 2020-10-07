@@ -141,7 +141,8 @@ class SocketHandler {
 
         // Send packet back saying they first joined but it's in the middle of a game, so must prompt
         // for ship/side selection
-        socket.emit("requestShipConfig", { gameId });
+        if (game.getStatus() === GameStatus.INGAME)
+          socket.emit("requestShipConfig", { gameId, set: true });
       });
 
       socket.on(
@@ -177,6 +178,7 @@ class SocketHandler {
           const player = game.getPlayer(playerName);
           player.getMoves().setStallToken(player.ship.shipType.stallToken);
           player.updateShipMoves();
+          player.sendSocketMessage("requestShipConfig", { gameId, set: false });
         }
       );
 
