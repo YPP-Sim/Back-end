@@ -14,6 +14,8 @@ const SocketHandler = require("./SocketHandler");
 const gamesRouter = require("./routes/games-router");
 const mapRouter = require("./routes/maps-router");
 
+const package = require("./package.json");
+
 const port = process.env.PORT || 4000;
 
 const socketHandler = new SocketHandler(io);
@@ -39,6 +41,7 @@ app.get("/", (req, res) => {
 // --- Server start/listen
 http.listen(port, () => {
   console.log(`Listening on port: ${port}`);
+  console.log(`Server version: ${package.version}`);
 
   if (!process.env.JWT_KEY)
     console.warn(

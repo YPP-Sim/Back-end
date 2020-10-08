@@ -1,6 +1,6 @@
 {
   "name": "ypp-sim-server",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -8,7 +8,7 @@
     "devStart": "nodemon index.js",
     "test": "jest --watch"
   },
-  "author": "",
+  "author": "Mark Artishuk",
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
