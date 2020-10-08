@@ -1,9 +1,10 @@
 module.exports = {
   getSocketIO,
 };
-
-const dotenv = require("dotenv");
-if (dotenv) dotenv.config();
+if (process.env.NODE_ENV !== "production") {
+  const dotenv = require("dotenv");
+  if (dotenv) dotenv.config();
+}
 const express = require("express");
 const cors = require("cors");
 const app = express();
