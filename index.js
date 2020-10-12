@@ -36,7 +36,11 @@ app.use("/maps", mapRouter);
 app.get("/", (req, res) => {
   res
     .status(200)
-    .json({ message: "Works!", environment: process.env.NODE_ENV });
+    .json({
+      message: "Works!",
+      environment: process.env.NODE_ENV,
+      version: package.version,
+    });
 });
 
 // --- Server start/listen
