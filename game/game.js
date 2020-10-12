@@ -181,9 +181,25 @@ class Game {
   }
 
   removePlayer(playerName) {
+    const player = this.getPlayer(playerName);
+
+    // Remove the player's ship from the game board
+    const ship = player.getShip();
+    if (ship) {
+      const bX = ship.boardX;
+      const bY = ship.boardY;
+
+      const occupiedCell = this.getCell(bX, bY);
+      occupiedCell.occupiedBy = null;
+    }
+
+    // Remove references
     if (this.players[playerName]) delete this.players[playerName];
     this.removeAttacker(playerName);
     this.removeDefender(playerName);
+
+    // Send packet to all players to notify the player leaving.
+    this.sendPacket("playerLeave", { playerName });
   }
 
   /**
