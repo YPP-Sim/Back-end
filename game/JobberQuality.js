@@ -12,10 +12,10 @@ module.exports = {
   ELITE: {
     name: "Elite",
     fixRate: 1,
-    bilgeFixRate: 7,
-    minDamageForBilgePercent: 50,
-    movesPerTurn: 2.4,
-    cannonsPerTurn: 17,
-    fullBilgeMoveRate: 0.3,
+    bilgeFixRate: 6,
+    minDamageForBilgePercent: 45,
+    movesPerTurn: 2.2,
+    cannonsPerTurn: 12,
+    fullBilgeMoveRate: 0.17,
   },
 };
