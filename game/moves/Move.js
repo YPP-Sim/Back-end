@@ -25,6 +25,9 @@ class Move {
     this.rightGunEnd = 3;
     this.rightHit = false;
     this.leftHit = false;
+
+    // Will get set when trying to calculate guns but the ship is sinking (to not allow guns to shoot if sinking)
+    this.cancelledGuns = false;
   }
 
   setDirection(dir) {

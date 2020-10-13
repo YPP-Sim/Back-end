@@ -717,7 +717,12 @@ class Game {
         leftGunEnd,
         leftHit,
         rightHit,
+        cancelledGuns,
       } = move;
+
+      // Don't send gun data if the guns are cancelled (due to sinking)
+      if (cancelledGuns) continue;
+
       if (move.rightGuns[0] || move.leftGuns[0]) {
         playerMovements["turn_" + numberedTurn + "_shots"].push({
           playerName,
@@ -1114,6 +1119,11 @@ class Game {
   _calculateCannonSide(cannonSide, move, ship, numberedTurn) {
     // Shoot if there are guns on that side
     if (!move) return;
+    if (ship.sinking) {
+      move.cancelledGuns = true;
+      return;
+    }
+
     if (move[cannonSide + "Guns"][0]) {
       // Detect if there are any ships in range
       for (let i = 0; i < this.cannonRange; i++) {
