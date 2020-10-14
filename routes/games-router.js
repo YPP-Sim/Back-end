@@ -95,6 +95,12 @@ router.post("/join-game-request", (req, res) => {
     return;
   }
   const game = getGame(gameId);
+
+  if (!game) {
+    res.status(404).json({ message: `The game '${gameId}' was not found!` });
+    return;
+  }
+
   if (game.getPlayer(requestedPlayerName)) {
     // A user with the requested player name already exists...
     res.status(400).json({ usernameError: "User name already in use" });
