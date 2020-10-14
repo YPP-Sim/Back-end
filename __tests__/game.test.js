@@ -528,7 +528,7 @@ describe("Game", () => {
     describe("executes moves and in order", () => {
       let ship1Moves;
       beforeEach(() => {
-        ship1Moves = new PlayerMoves("testShip");
+        ship1Moves = testGame.getPlayer(ship1.shipId).moves;
       });
       it("Free movement", () => {
         ship1Moves.setFirstMove(Direction.FORWARD);
@@ -557,7 +557,7 @@ describe("Game", () => {
           socketMock
         );
         ship2.setOrientation(Orientation.SOUTH);
-        const ship2Moves = new PlayerMoves("ship2");
+        const ship2Moves = testGame.getPlayer(ship2.shipId).moves;
         ship2Moves.setFirstMove(Direction.FORWARD);
         ship2Moves.setSecondMove(Direction.RIGHT);
 

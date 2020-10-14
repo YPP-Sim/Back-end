@@ -53,11 +53,11 @@ describe("token generation", () => {
   it("generates movement and cannon tokens", () => {
     const updateCount = 30;
 
-    expect(playerData.tokens.FORWARD).toBe(4);
-    expect(playerData.tokens.LEFT).toBe(2);
+    expect(playerData.tokens.FORWARD.amount).toBe(4);
+    expect(playerData.tokens.LEFT.amount).toBe(2);
     for (let i = 0; i < updateCount; i++) mGenerator.update();
-    expect(playerData.tokens.FORWARD).toBe(5);
-    expect(playerData.tokens.LEFT).toBe(2);
+    expect(playerData.tokens.FORWARD.amount).toBe(5);
+    expect(playerData.tokens.LEFT.amount).toBe(2);
     expect(playerData.getCannons()).toBe(10);
   });
 
