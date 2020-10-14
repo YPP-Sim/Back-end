@@ -792,12 +792,18 @@ class Game {
       allPMoves.push(this.players[playerName].moves);
 
     this.executeMoves(allPMoves);
+
     const playerMovements = this.getAllPlayerMovements();
     this._fillWindData(playerMovements);
     this._fillShotData(playerMovements);
     this._fillSinkData(playerMovements);
 
     this.checkFlags();
+
+    for (let playerName in this.players) {
+      const player = this.getPlayer(playerName);
+      player.decrementDustTimes();
+    }
 
     const playerData = this.getAllPlayerPositions();
     this.io
@@ -904,6 +910,13 @@ class Game {
 
       // Fire the cannons
       this.executeCannonShots(turn, playerMoves, numberedTurn);
+
+      // handle move token dust
+      for (let pMove of playerMoves) {
+        if (!pMove[turn]) continue;
+        const pData = pMove.playerData;
+        pData.removeMoveDust(pMove[turn].getDirection());
+      }
     };
 
     executeClaimsAndMove("move1", 1);

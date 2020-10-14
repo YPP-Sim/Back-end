@@ -1,7 +1,7 @@
 const PlayerMoves = require("./moves/PlayerMoves");
 const PlayerShip = require("./PlayerShip");
 const game = require("./game");
-const { findSmallestNumber } = require("./util");
+const { findSmallestToken } = require("./util");
 const Direction = require("./Direction");
 const MoveGenerator = require("./moves/MoveGenerator");
 const BilgeGenerator = require("./generation/BilgeGenerator");
@@ -22,17 +22,26 @@ class PlayerData {
 
     // Available moves
     this.tokens = {
-      FORWARD: 4,
-      LEFT: 2,
-      RIGHT: 2,
+      FORWARD: {
+        amount: 4,
+        dustTimes: [5, 5, 5, 5],
+      },
+      LEFT: {
+        amount: 2,
+        dustTimes: [5, 5],
+      },
+      RIGHT: {
+        amount: 2,
+        dustTimes: [5, 5],
+      },
     };
 
     const onPlayMove = (fromDirection, toDirection, index) => {
       // If we replaced the previous token (fromDirection), add it back to the available tokens
-      if (fromDirection) this.tokens[fromDirection] += 1;
+      if (fromDirection) this.tokens[fromDirection].amount += 1;
 
       // Subtract one from the available tokens
-      this.tokens[toDirection] -= 1;
+      if (this.tokens[toDirection]) this.tokens[toDirection].amount -= 1;
 
       // Update client
       this.sendSocketMessage("playMove", { direction: toDirection, index });
@@ -137,7 +146,7 @@ class PlayerData {
 
     if (this.autoSelectTokenGeneration) {
       // set new selected token now that auto has kicked in.
-      const toSelectedToken = findSmallestNumber(this.tokens);
+      const toSelectedToken = findSmallestToken(this.tokens);
       this.setSelectedToken(toSelectedToken);
     }
   }
@@ -145,6 +154,48 @@ class PlayerData {
   setSelectedToken(selectedToken) {
     this.selectedToken = selectedToken;
     this.sendSocketMessage("updateSelectedToken", this.selectedToken);
+  }
+
+  removeMoveDust(direction) {
+    if (!direction) return;
+    if (
+      direction !== Direction.FORWARD &&
+      direction !== Direction.LEFT &&
+      direction !== Direction.RIGHT
+    )
+      return;
+
+    const token = this.getTokens()[direction];
+    token.dustTimes.shift();
+  }
+
+  /**
+   * Decrements all of the dust times for all tokens.
+   * Will also update client tokens if ANY token had dusted.
+   */
+  decrementDustTimes() {
+    let changed = false;
+    for (let tokenName in this.getTokens()) {
+      const token = this.getTokens()[tokenName];
+      for (let i = 0; i < token.dustTimes.length; i++) {
+        let dustTime = token.dustTimes[i];
+        dustTime -= 1;
+
+        if (dustTime <= 0) {
+          if (token.amount > 0) token.amount -= 1;
+          changed = true;
+        }
+
+        token.dustTimes[i] = dustTime;
+      }
+
+      // Remove the dust time references
+      while (token.dustTimes.includes(0)) {
+        token.dustTimes.shift();
+      }
+    }
+
+    if (changed) this.updateClientTokens(true, false);
   }
 
   /**
@@ -172,11 +223,13 @@ class PlayerData {
       );
     }
 
-    this.tokens[this.selectedToken] += 1;
+    const token = this.tokens[this.selectedToken];
+    token.amount += 1;
+    token.dustTimes.push(5);
 
     if (this.autoSelectTokenGeneration) {
       // Find the token name with the smallest amount of tokens and set it as the selected token
-      const toSelectedToken = findSmallestNumber(this.tokens);
+      const toSelectedToken = findSmallestToken(this.tokens);
       // Update selected token to client
       this.setSelectedToken(toSelectedToken);
     }
