@@ -134,6 +134,12 @@ class PlayerData {
     this.autoSelectTokenGeneration = autoSelect;
     // Send confirmation packet
     this.sendSocketMessage("updateAutoSelect", this.autoSelectTokenGeneration);
+
+    if (this.autoSelectTokenGeneration) {
+      // set new selected token now that auto has kicked in.
+      const toSelectedToken = findSmallestNumber(this.tokens);
+      this.setSelectedToken(toSelectedToken);
+    }
   }
 
   setSelectedToken(selectedToken) {
