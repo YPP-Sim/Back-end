@@ -41,6 +41,11 @@ const jestEmitMock = jest.fn(mockEmit);
 
 const ioMock = {
   emit: jestEmitMock,
+  to: () => {
+    return {
+      emit: jestEmitMock,
+    };
+  },
   in: () => {
     return {
       emit: jestEmitMock,
@@ -542,12 +547,12 @@ describe("Game", () => {
       it("Ship vs Ship proper movement and ram collision", () => {
         ship1Moves.setFirstMove(Direction.FORWARD);
         ship1Moves.setSecondMove(Direction.LEFT);
-
+        testGame.setShipPosition(ship1.shipId, 6, 3);
         ship2 = testGame.addShip(
           "ship2",
           ShipType.WAR_FRIG,
           8,
-          0,
+          3,
           "DEFENDER",
           socketMock
         );
@@ -558,12 +563,13 @@ describe("Game", () => {
 
         testGame.executeMoves([ship1Moves, ship2Moves]);
         expect(ship1.boardX).toBe(6);
-        expect(ship1.boardY).toBe(2);
+        expect(ship1.boardY).toBe(5);
+
         expect(ship1.damage).toBe(ship2.shipType.ramDamage);
         expect(ship1.getOrientation()).toBe(Orientation.EAST);
         expect(ship2.getOrientation()).toBe(Orientation.WEST);
         expect(ship2.boardX).toBe(8);
-        expect(ship2.boardY).toBe(2);
+        expect(ship2.boardY).toBe(5);
         expect(ship2.damage).toBe(ship1.shipType.ramDamage);
       });
     });

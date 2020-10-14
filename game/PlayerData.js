@@ -22,8 +22,8 @@ class PlayerData {
 
     // Available moves
     this.tokens = {
-      LEFT: 2,
       FORWARD: 4,
+      LEFT: 2,
       RIGHT: 2,
     };
 

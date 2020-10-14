@@ -57,7 +57,7 @@ describe("bilge generation", () => {
 
   it("generates bilge when min damage IS met", () => {
     expect(playerData.getShip().getBilgePercentage()).toBe(0);
-    expect(playerData.getShip().damageShip(26, 1));
+    playerData.getShip().damage = 26;
     const updateCount = 35;
     for (let i = 0; i < updateCount; i++) bilgeGenerator.update();
 

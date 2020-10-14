@@ -57,8 +57,8 @@ describe("token generation", () => {
     expect(playerData.tokens.LEFT).toBe(2);
     for (let i = 0; i < updateCount; i++) mGenerator.update();
     expect(playerData.tokens.FORWARD).toBe(5);
-    expect(playerData.tokens.LEFT).toBe(3);
-    expect(playerData.getCannons()).toBe(14);
+    expect(playerData.tokens.LEFT).toBe(2);
+    expect(playerData.getCannons()).toBe(10);
   });
 
   it("sends updates to client", () => {

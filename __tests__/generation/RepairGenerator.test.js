@@ -50,7 +50,7 @@ describe("damage repair generation", () => {
   });
 
   it("appropriately repairs ship if damaged", () => {
-    playerData.getShip().damageShip(25, 1);
+    playerData.getShip().damage = 25;
     expect(playerData.getShip().damage).toBe(25);
     repairGenerator.update();
     expect(playerData.getShip().damage).toBeLessThan(25);
