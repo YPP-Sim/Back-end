@@ -12,7 +12,6 @@ const app = express();
 const http = require("http").createServer(app);
 const io = require("socket.io")(http);
 const SocketHandler = require("./SocketHandler");
-const mongoose = require("mongoose");
 
 //Routes
 const gamesRouter = require("./routes/games-router");
