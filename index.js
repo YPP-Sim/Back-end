@@ -23,7 +23,7 @@ const SocketHandler = require("./SocketHandler");
 const mongoose = require("mongoose");
 
 mongoose
-  .connect("mongodb://mongo:27017/ypp-sim", {
+  .connect(process.env.DB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
