@@ -3,9 +3,10 @@ services:
   node:
     container_name: ypp-sim
     restart: always
+    build: .
     image: artishy/ypp-sim-server:latest
     env_file:
-      - .env
+      - dockercompose.env
     ports:
       - "4000:4000"
     links:

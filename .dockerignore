@@ -4,5 +4,6 @@ Dockerfile
 .dockerignore
 .env
 docker-compose.yml
+dockercompose.env
 README.md
 /data
