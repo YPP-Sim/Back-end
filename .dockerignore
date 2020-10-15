@@ -3,4 +3,6 @@ src/npm-debug.log
 Dockerfile
 .dockerignore
 .env
+docker-compose.yml
 README.md
+/data

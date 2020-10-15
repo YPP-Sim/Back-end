@@ -1,9 +1,17 @@
 module.exports = {
   getSocketIO,
 };
+// Load environment variables through dotenv
 if (process.env.NODE_ENV !== "production") {
-  const dotenv = require("dotenv");
-  if (dotenv) dotenv.config();
+  try {
+    const dotenv = require("dotenv");
+    if (dotenv) {
+      dotenv.config();
+      console.log("Loaded environment variables using dotenv");
+    }
+  } catch (err) {
+    console.log("dotenv package not installed, skipping dotenv way...");
+  }
 }
 const express = require("express");
 const cors = require("cors");
@@ -12,8 +20,20 @@ const http = require("http").createServer(app);
 const io = require("socket.io")(http);
 const SocketHandler = require("./SocketHandler");
 
+const mongoose = require("mongoose");
+
+mongoose
+  .connect("mongodb://mongo:27017/ypp-sim", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.log(err));
+
+//Routes
 const gamesRouter = require("./routes/games-router");
 const mapRouter = require("./routes/maps-router");
+const authRouter = require("./routes/auth-router");
 
 const package = require("./package.json");
 
@@ -32,15 +52,14 @@ app.use(cors());
 // --- Routes
 app.use("/games", gamesRouter);
 app.use("/maps", mapRouter);
+app.use(authRouter);
 
 app.get("/", (req, res) => {
-  res
-    .status(200)
-    .json({
-      message: "Works!",
-      environment: process.env.NODE_ENV,
-      version: package.version,
-    });
+  res.status(200).json({
+    message: "Works!",
+    environment: process.env.NODE_ENV,
+    version: package.version,
+  });
 });
 
 // --- Server start/listen
