@@ -1,34 +1,18 @@
 module.exports = {
   getSocketIO,
 };
-// Load environment variables through dotenv
-if (process.env.NODE_ENV !== "production") {
-  try {
-    const dotenv = require("dotenv");
-    if (dotenv) {
-      dotenv.config();
-      console.log("Loaded environment variables using dotenv");
-    }
-  } catch (err) {
-    console.log("dotenv package not installed, skipping dotenv way...");
-  }
-}
+// Init
+require("./helpers/init_dotenv");
+require("./helpers/init_mongodb");
+require("./helpers/init_redis");
+
 const express = require("express");
 const cors = require("cors");
 const app = express();
 const http = require("http").createServer(app);
 const io = require("socket.io")(http);
 const SocketHandler = require("./SocketHandler");
-
 const mongoose = require("mongoose");
-
-mongoose
-  .connect(process.env.DB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.log(err));
 
 //Routes
 const gamesRouter = require("./routes/games-router");
