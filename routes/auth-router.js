@@ -3,6 +3,12 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const User = require("../models/User");
 const { body, validationResult } = require("express-validator");
+const {
+  signAccessToken,
+  signRefreshToken,
+  verifyRefreshToken,
+  invalidateRefreshToken,
+} = require("../helpers/jwt_helper");
 
 router.post(
   "/login",
@@ -20,7 +26,7 @@ router.post(
     User.find({ username })
       .then((docs) => {
         if (docs.length === 0) {
-          res.status(404).json({ message: "User does not exist" });
+          res.status(404).json({ usernameError: "Invalid username" });
           return;
         }
         const user = docs[0];
@@ -28,13 +34,26 @@ router.post(
       })
       .then((result) => {
         if (!result) {
-          res.status(400).json({ message: "Invalid password" });
+          res.status(400).json({ passwordError: "Invalid password" });
           return;
         }
 
         // Create access/refresh tokens
 
-        res.status(200).json({ message: "Successful login" });
+        signAccessToken(username)
+          .then((token) => {
+            signRefreshToken(username).then((refreshToken) => {
+              res.status(200).json({
+                message: "Successful login",
+                accessToken: token,
+                refreshToken,
+              });
+            });
+          })
+          .catch((err) => {
+            console.log(err.message);
+            res.status(500).json({ err: err.message });
+          });
       })
       .catch((err) => {
         console.log(err.message);
@@ -107,8 +126,64 @@ router.post(
   }
 );
 
-router.post("/refresh", (req, res) => {
-  res.status(200).json({ msg: "Not available yet" });
+router.post("/logout", body("refreshToken").exists(), async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { refreshToken } = req.body;
+
+  try {
+    const username = await verifyRefreshToken(refreshToken);
+    invalidateRefreshToken(username);
+    res.status(200).json({ msg: "Successfully logged out on server" });
+  } catch (err) {
+    res.status(400).json({ error: err });
+  }
+});
+
+router.post(
+  "/refresh",
+  [body("refreshToken").notEmpty().isString()],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const { refreshToken } = req.body;
+    try {
+      const username = await verifyRefreshToken(refreshToken);
+
+      const accessToken = await signAccessToken(username);
+      const newRefToken = await signRefreshToken(username);
+
+      res.status(200).json({ accessToken, refreshToken: newRefToken });
+    } catch (err) {
+      res.status(401).json({ error: "Could not verify refresh token" });
+    }
+  }
+);
+
+router.post("/validate-refresh-token", async (req, res) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    res
+      .status(400)
+      .json({ error: "refreshToken is a required field for this endpoint" });
+    return;
+  }
+
+  let valid = false;
+  try {
+    await verifyRefreshToken(refreshToken);
+    valid = true;
+  } catch (err) {
+    valid = false;
+  }
+
+  res.status(200).json({ valid });
 });
 
 module.exports = router;

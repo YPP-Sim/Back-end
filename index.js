@@ -17,6 +17,7 @@ const SocketHandler = require("./SocketHandler");
 const gamesRouter = require("./routes/games-router");
 const mapRouter = require("./routes/maps-router");
 const authRouter = require("./routes/auth-router");
+const userRouter = require("./routes/user-router");
 
 const package = require("./package.json");
 
@@ -35,7 +36,8 @@ app.use(cors());
 // --- Routes
 app.use("/games", gamesRouter);
 app.use("/maps", mapRouter);
-app.use(authRouter);
+app.use("/user", userRouter);
+app.use("/auth", authRouter);
 
 app.get("/", (req, res) => {
   res.status(200).json({
