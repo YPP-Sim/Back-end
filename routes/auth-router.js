@@ -90,19 +90,19 @@ router.post(
     }
     const { username, password, email } = req.body;
 
-    User.count({ username })
+    User.countDocuments({ username })
       .then((count) => {
         if (count > 0) {
           // exists
-          res.status(400).json({ error: "Username already exists" });
-          return;
+          res.status(400).json({ usernameError: "Username already exists" });
+          return Promise.reject("Username already exists");
         }
         return User.count({ email });
       })
       .then((count) => {
         if (count > 0) {
-          res.status(400).json({ error: "Email is already in use" });
-          return;
+          res.status(400).json({ emailError: "Email is already in use" });
+          return Promise.reject("Email already exists");
         }
 
         return bcrypt.hash(password, 6);
@@ -120,8 +120,7 @@ router.post(
         res.status(200).json({ msg: "Success" });
       })
       .catch((err) => {
-        console.log(err.message);
-        res.status(500).json({ error: err.message });
+        if (!res.headersSent) res.status(500).json({ error: err });
       });
   }
 );
