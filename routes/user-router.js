@@ -20,4 +20,32 @@ router.get("/details", verifyToken, (req, res) => {
       res.status(500).json({ err });
     });
 });
+
+router.put("/update", verifyToken, (req, res) => {
+  const { email, password } = req.body;
+  User.find({ username: req.username })
+    .then((docs) => {
+      if (docs.length === 0)
+        return Promise.reject({
+          statusCode: 404,
+          message: "Could not find user by that id",
+        });
+
+      const userDoc = docs[0];
+      if (email) userDoc.email = email;
+      if (password) userDoc.password = password;
+
+      return userDoc.save();
+    })
+    .then(() => {
+      res.status(200).json({ message: "Successfully updated user" });
+    })
+    .catch((err) => {
+      if (err.statusCode) {
+        res.status(err.statusCode).json({ error: err.message });
+      } else {
+        res.status(500).json({ error: err });
+      }
+    });
+});
 module.exports = router;
