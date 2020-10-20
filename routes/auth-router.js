@@ -98,7 +98,7 @@ router.post(
           res.status(400).json({ usernameError: "Username already exists" });
           return Promise.reject("Username already exists");
         }
-        return User.count({ email });
+        return User.countDocuments({ email });
       })
       .then((count) => {
         if (count > 0) {
