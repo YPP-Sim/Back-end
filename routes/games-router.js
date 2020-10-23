@@ -4,6 +4,7 @@ const JobberQuality = require("../game/JobberQuality");
 const jwt = require("jsonwebtoken");
 const { getAllGames, getGame, createGame } = require("../games-handler");
 const { readMapFromFile } = require("../game/util");
+const Map = require("../models/Map");
 
 router.get("/game-list", (req, res) => {
   const gameArray = [];
@@ -68,10 +69,18 @@ router.post("/create-game", async (req, res) => {
   if (!jobberQuality) jobberQuality = "ELITE";
 
   try {
-    const map = await readMapFromFile(mapName);
+    const maps = await Map.find({ title: mapName });
+
+    if (maps.length === 0) {
+      res.status(404).json({ message: "Could not find map by that name" });
+      return;
+    }
+
+    const selectedMap = maps[0];
+
     createGame(
       id,
-      map,
+      selectedMap.layout,
       JobberQuality[jobberQuality],
       mapName,
       maxPlayers,

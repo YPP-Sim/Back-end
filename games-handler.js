@@ -1,4 +1,5 @@
 const { getSocketIO } = require("./index");
+const Map = require("./models/Map");
 
 const Game = require("./game/game");
 const JobberQuality = require("./game/JobberQuality");
@@ -10,7 +11,7 @@ const games = {};
  * @param { Array.<Array.<number>>} map The map the game will be using
  * @param { JobberQuality } jobberQuality The quality of jobbers that everyone will get by default
  */
-function createGame(
+async function createGame(
   id,
   map,
   jobberQuality,
@@ -21,20 +22,23 @@ function createGame(
   gameOwner
 ) {
   if (games[id]) throw `Game with id '${id}' already exists`;
+  try {
+    const newGame = new Game(
+      map,
+      jobberQuality,
+      id,
+      getSocketIO().sockets.in(id.toString()),
+      mapName,
+      maxPlayers,
+      locked,
+      password,
+      gameOwner
+    );
 
-  const newGame = new Game(
-    map,
-    jobberQuality,
-    id,
-    getSocketIO().sockets.in(id.toString()),
-    mapName,
-    maxPlayers,
-    locked,
-    password,
-    gameOwner
-  );
-
-  games[id] = newGame;
+    games[id] = newGame;
+  } catch (err) {
+    console.log("Could not load map: ", err);
+  }
 }
 
 function removeGame(id) {

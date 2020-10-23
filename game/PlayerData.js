@@ -37,8 +37,9 @@ class PlayerData {
     };
 
     const onPlayMove = (fromDirection, toDirection, index) => {
-      // If we replaced the previous token (fromDirection), add it back to the available tokens
-      if (fromDirection) this.tokens[fromDirection].amount += 1;
+      // If we replaced the previous token (fromDirection), add it
+      if (fromDirection && fromDirection !== "STALL")
+        this.tokens[fromDirection].amount += 1;
 
       // Subtract one from the available tokens
       if (this.tokens[toDirection]) this.tokens[toDirection].amount -= 1;
