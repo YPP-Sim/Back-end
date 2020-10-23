@@ -40,7 +40,6 @@ router.post(
         }
 
         // Create access/refresh tokens
-
         signAccessToken(username)
           .then((token) => {
             signRefreshToken(username).then((refreshToken) => {
@@ -58,7 +57,7 @@ router.post(
       })
       .catch((err) => {
         console.log(err.message);
-        res.status(500).json({ error: err.message });
+        if (!res.headersSent) res.status(500).json({ error: err.message });
       });
   }
 );
