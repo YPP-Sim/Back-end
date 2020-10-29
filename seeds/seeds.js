@@ -10,7 +10,6 @@ const mapSeeds = [
 let system_user_id = null;
 
 async function runSeeds() {
-  console.log("Dropping Map collection...");
   console.log("--Starting to run seeds--");
 
   // Create system user first
