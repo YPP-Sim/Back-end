@@ -8,6 +8,7 @@ const { addSafeZone } = require("../game/util");
 
 const { getAllAvailableMaps } = require("../game/util");
 
+// Legacy code route. Use /dbmaps routes until it's safe to remove/edit this route
 router.get("/", (req, res) => {
   getAllAvailableMaps()
     .then((files) => {
@@ -69,7 +70,9 @@ router.post("/", verifyToken, async (req, res) => {
     await map.save();
     res.status(201).json({ message: "Map successfully created" });
   } catch (err) {
-    res.status(500).json({ error: err });
+    if (err.code && err.code === 11000)
+      res.status(400).json({ error: "Map name already taken" });
+    else res.status(500).json({ error: err });
   }
 });
 
