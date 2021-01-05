@@ -6,7 +6,7 @@ services:
     build: .
     image: artishy/ypp-sim-server:latest
     env_file:
-      - dockercompose.env
+      - docker-compose.env
     ports:
       - "4000:4000"
     links:

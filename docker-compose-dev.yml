@@ -1,0 +1,9 @@
+# Overrides/adds fields to node app for development use (Using nodemon for hot-reloading)
+version: "3"
+services:
+  node:
+    volumes:
+      - ./:/home/node/app/
+    command: >
+      bash -c "npm i -D
+      && npm run run:docker-dev"

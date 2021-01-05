@@ -6,6 +6,6 @@ Dockerfile
 .env
 __tests__
 docker-compose.yml
-dockercompose.env
+docker-compose.env
 README.md
 /data

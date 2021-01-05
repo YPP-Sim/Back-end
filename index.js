@@ -51,6 +51,7 @@ app.get("/", (req, res) => {
 http.listen(port, () => {
   console.log(`Listening on port: ${port}`);
   console.log(`Server version: ${package.version}`);
+  console.log("EDITED");
 
   if (!process.env.JWT_KEY)
     console.warn(
