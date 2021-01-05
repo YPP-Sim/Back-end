@@ -6,8 +6,10 @@
   "scripts": {
     "start": "node src/index.js",
     "start:dev": "nodemon src/index.js",
+    "start:docker": "docker-compose up -d",
     "start:docker-dev": "docker-compose -f docker-compose.yml -f docker-compose-dev.yml up -d && docker-compose logs -f node",
     "run:docker-dev": "nodemon -L src/index.js",
+    "docker:rebuild": "docker image rm artishy/ypp-sim-server:latest && npm run docker:build",
     "docker:build": "docker build -t artishy/ypp-sim-server:latest .",
     "test": "jest --watch"
   },

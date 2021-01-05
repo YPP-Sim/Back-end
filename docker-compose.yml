@@ -1,7 +1,7 @@
 version: "3"
 services:
   node:
-    container_name: ypp-sim
+    container_name: ypp-sim-server
     restart: always
     build: .
     image: artishy/ypp-sim-server:latest
@@ -13,7 +13,7 @@ services:
       - mongo
       - redis
   mongo:
-    container_name: mongo
+    container_name: ypp-sim-db
     restart: always
     image: mongo
     ports:
@@ -21,7 +21,7 @@ services:
     volumes:
       - ./data:/data/db
   redis:
-    container_name: redis
+    container_name: ypp-sim-cache
     restart: always
     image: redis
     ports:
