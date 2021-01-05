@@ -2,7 +2,6 @@ module.exports = {
   getSocketIO,
 };
 // Init
-require("./helpers/init_dotenv");
 require("./helpers/init_mongodb");
 require("./helpers/init_redis");
 
@@ -19,7 +18,7 @@ const mapRouter = require("./routes/maps-router");
 const authRouter = require("./routes/auth-router");
 const userRouter = require("./routes/user-router");
 
-const package = require("./package.json");
+const package = require("../package.json");
 
 const port = process.env.PORT || 4000;
 
@@ -51,8 +50,6 @@ app.get("/", (req, res) => {
 http.listen(port, () => {
   console.log(`Listening on port: ${port}`);
   console.log(`Server version: ${package.version}`);
-  console.log("EDITED");
-
   if (!process.env.JWT_KEY)
     console.warn(
       "JWT Key not found, please set a JWT_KEY environment variable"
