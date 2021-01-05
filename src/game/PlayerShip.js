@@ -71,7 +71,6 @@ class PlayerShip {
   damageShip(amount, turn) {
     if (this.sinking) return;
     if (this.isInSafeZone()) return;
-
     let total = this.damage + amount;
 
     if (this.total > amount) this.total = amount;
